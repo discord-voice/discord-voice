@@ -1,0 +1,24 @@
+{
+  "name": "discord-voice",
+  "version": "0.0.1-dev",
+  "description": "A complete framework to facilitate the tracking of user voice time using discord.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lebyy/discord-voice.git"
+  },
+  "author": "",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Lebyy/discord-voice/issues"
+  },
+  "homepage": "https://github.com/Lebyy/discord-voice#readme",
+  "dependencies": {
+    "discord-logs": "^1.9.0",
+    "discord.js": "^12.5.1",
+    "mongoose": "^5.12.0"
+  }
+}
