@@ -25,4 +25,5 @@ jobs:
         with:
           personal_token: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_dir: ./docs
+          publish_branch: master
           cname: discord-voice.js.org
