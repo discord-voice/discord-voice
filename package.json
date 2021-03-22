@@ -1,8 +1,9 @@
 {
   "name": "discord-voice",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A complete framework to facilitate the tracking of user voice time using discord.js",
   "main": "index.js",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lebyy/discord-voice.git"
@@ -43,5 +44,13 @@
   "dependencies": {
     "discord-logs": "^1.9.0",
     "mongoose": "^5.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.5",
+    "discord.js": "^12.5.1",
+    "eslint": "^7.6.0",
+    "jsdoc": "^3.6.4",
+    "jsdoc-skyceil": "Androz2091/jsdoc-skyceil",
+    "typescript": "^4.0.2"
   }
 }

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const MessageSchema = new mongoose.Schema({
+const VoiceSchema = new mongoose.Schema({
   userID: { type: String },
   guildID: { type: String },
 	joinTime: { type: Number, default: 0 },
@@ -8,4 +8,4 @@ const MessageSchema = new mongoose.Schema({
   lastUpdated: { type: Date, default: new Date() }
 });
 
-module.exports = mongoose.model('Messages', MessageSchema);
+module.exports = mongoose.model('Voice', VoiceSchema);

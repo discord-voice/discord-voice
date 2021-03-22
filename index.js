@@ -30,7 +30,7 @@ class DiscordVoice {
 	 * @static
 	 * @param {string} [userId] - Discord user id.
 	 * @param {string} [guildId] - Discord guild id.
-	 * @return {objcet} - The user data object.
+	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
 	static async createUser(userId, guildId) {
@@ -54,7 +54,7 @@ class DiscordVoice {
 	 * @static
 	 * @param {string} [userId] - Discord user id.
 	 * @param {string} [guildId] - Discord guild id.
-	 * @return {objcet} - The user data object.
+	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
 	static async deleteUser(userId, guildId) {
@@ -79,7 +79,7 @@ class DiscordVoice {
 	 * @param {boolean} [trackbots=false] - Wheter to track bot's voice activity.
 	 * @param {boolean} [trackallchannels=true] - Wheter to track all the voice channels.
 	 * @param {string} [channelID] - If trackallchannels is false the function will check activity for only the specified channelid.
-	 * @return {objcet} - The user data object. 
+	 * @return {object} - The user data object. 
 	 * @memberof DiscordVoice
 	 */
 	static async start(client, trackbots = false, trackallchannels = true, channelID) {
@@ -157,7 +157,7 @@ class DiscordVoice {
 	 * @param {string} [userId] - Discord user id.
 	 * @param {string} [guildId] - Discord guild id.
 	 * @param {number} [voicetime] - Amount of voice time in ms to set.
-	 * @return {objcet} - The user data object.
+	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
 	static async setVoiceTime(userId, guildId, voicetime) {
@@ -179,8 +179,8 @@ class DiscordVoice {
 	 * @static
 	 * @param {string} [userId] - Discord user id.
 	 * @param {string} [guildId] - Discord guild id.
-	 * @param {boolean} [fetchPosition=false] - Wheter to fetch the users position.
-	 * @return {objcet} - The user data object.
+	 * @param {boolean} [fetchPosition=false] - Whether to fetch the users position.
+	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
 	static async fetch(userId, guildId, fetchPosition = false) {
@@ -210,7 +210,7 @@ class DiscordVoice {
 	 * @param {string} [userId] - Discord user id.
 	 * @param {string} [guildId] - Discord guild id.
 	 * @param {number} [voicetime] - Amount of voice time in ms to add.
-	 * @return {objcet} - The user data object.
+	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
 	static async addVoiceTime(userId, guildId, voicetime) {
@@ -233,7 +233,7 @@ class DiscordVoice {
 	 * @param {string} [userId] - Discord user id.
 	 * @param {string} [guildId] - Discord guild id.
 	 * @param {number} [voicetime] - Amount of voice time in ms to subtract.
-	 * @return {objcet} - The user data object.
+	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
 	static async subtractVoiceTime(userId, guildId, voicetime) {
@@ -274,7 +274,7 @@ class DiscordVoice {
 	 * @static
 	 * @param {Discord.Client} [client] - Your Discord.CLient.
 	 * @param {array} [leaderboard] - The output from 'fetchLeaderboard' function.
-	 * @param {boolean} [fetchUsers=false] - Wheter to fetch each users position.
+	 * @param {boolean} [fetchUsers=false] - whether to fetch each users position.
 	 * @return {Array} - The leaderboard array.
 	 * @memberof DiscordVoice
 	 */
