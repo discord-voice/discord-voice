@@ -1,5 +1,7 @@
 .replit
 package-lock.json
 test.js
-docs/
 node_modules/
+.github/
+docs/
+scripts/
