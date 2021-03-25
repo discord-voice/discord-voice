@@ -17,6 +17,12 @@ You can update to a newer version to receive updates using npm.
 npm update discord-voice
 ```
 
+# Changelog
+- **25 March 2021** (v1.0.2) - `WARNING! This update contains some breaking changes in the way start functions works.`
+1. Added the system of blacklisting users.
+2. Added the system of minimum users in a voice channel.
+3. Added the resetGuild function.
+
 # Setting Up
 First things first, we include the module into the project.
 ```js
@@ -93,11 +99,11 @@ Voice.deleteUser(<UserID - String>, <GuildID - String>);
 ```
 Promise<Object>
 ```
-**Start**
+**start**
 
-It starts tracking the voice activity of the user's in the configured channel or all voice channels, in that guild. It creates a new user, if there is no entry for that user. 
+It starts tracking the voice activity of the user's in the configured channel or all voice channels, you can also supply the min limit of users required in channel for it to start counting (0 = unlimited), in that guild. It creates a new user, if there is no entry for that user. 
 ```js
-Voice.start(<Client - Discord.js Client>, <trackbots - boolean, disabled by default>, <trackallchannels - boolean, enabled by default>, <channelID - String>);
+Voice.start(<Client - Discord.js Client>, <trackbots - boolean, disabled by default>, <trackallchannels - boolean, enabled by default>, <userlimit - number, 0 by default>, <channelID - String>);
 ```
 - Output:
 ```
@@ -143,6 +149,16 @@ Voice.subtractVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer
 ```
 Promise<Boolean/Object>
 ```
+**resetGuild**
+
+It deletes the entire guild's data.
+```js
+Voice.resetGuild(<GuildID - String>);
+```
+- Output:
+```
+Promise<Boolean/Object>
+```
 **fetchLeaderboard**
 
 It gets a specified amount of entries from the database, ordered from higgest to lowest within the specified limit of entries.
@@ -162,6 +178,26 @@ Voice.computeLeaderboard(<Client - Discord.js Client>, <Leaderboard - fetchLeade
 - Output:
 ```
 Promise<Array [Objects]>
+```
+**blacklist**
+
+It will blacklist the user which will make it not count their voice time.
+```js
+Voice.blacklist(<UserID - String>, <GuildID - String>);
+```
+- Output:
+```
+Promise<Boolean/Object>
+```
+**unblacklist**
+
+It will un-blacklist the user which will make it count their voice time.
+```js
+Voice.blacklist(<UserID - String>, <GuildID - String>);
+```
+- Output:
+```
+Promise<Boolean/Object>
 ```
 
 # Enjoying Discord-Voice?

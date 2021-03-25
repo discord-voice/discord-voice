@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Voice = require("./models/voice.js");
-var mongoUrl;
 const logs = require('discord-logs');
+let mongoUrl;
 /**
  *
  *
@@ -18,6 +18,8 @@ class DiscordVoice {
 	 */
 	static async setURL(dbUrl) {
 		if (!dbUrl) throw new TypeError("A database url was not provided.");
+		if(mongoUrl) throw new TypeError("A database url was already configured.");
+		mongoUrl = dbUrl;
 		return mongoose.connect(dbUrl, {
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
@@ -70,25 +72,6 @@ class DiscordVoice {
 			guildID: guildId
 		}).catch(e => console.log(`Failed to delete user: ${e}`));
 		return user;
-	}
-	/**
-	 *
-	 *
-	 * @static
-	 * @param {string} guildId - Discord guild id.
-	 * @return {boolean} - Return's true if success.
-	 * @memberof DiscordVoice
-	 */
-	static async resetGuild(guildId) {
-		if (!guildId) throw new TypeError("A guild id was not provided.");
-		const guild = await Voice.findOne({
-			guildID: guildId
-		});
-		if (!guild) return false;
-		await Voice.findOneAndDelete({
-			guildID: guildId
-		}).catch(e => console.log(`Failed to delete user: ${e}`));
-		return true;
 	}
 	/**
 	 *
@@ -292,6 +275,25 @@ class DiscordVoice {
 	 *
 	 * @static
 	 * @param {string} guildId - Discord guild id.
+	 * @return {boolean} - Return's true if success.
+	 * @memberof DiscordVoice
+	 */
+	static async resetGuild(guildId) {
+		if (!guildId) throw new TypeError("A guild id was not provided.");
+		const guild = await Voice.findOne({
+			guildID: guildId
+		});
+		if (!guild) return false;
+		await Voice.findOneAndDelete({
+			guildID: guildId
+		}).catch(e => console.log(`Failed to reset guild: ${e}`));
+		return true;
+	}
+	/**
+	 *
+	 *
+	 * @static
+	 * @param {string} guildId - Discord guild id.
 	 * @param {number} limit - Amount of maximum enteries to return.
 	 * @return {Array} - The leaderboard array.
 	 * @memberof DiscordVoice
@@ -386,6 +388,7 @@ class DiscordVoice {
 			guildID: guildId
     });
 		if (!user) return false;
+		if(!user.isBlacklisted) return false;
 		user.isBlacklisted = false
 		user.save().catch(e => console.log(`Failed to remove user from blacklist: ${e}`));
 		return user;
