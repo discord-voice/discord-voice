@@ -12,7 +12,7 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [dbUrl] - A valid mongo database URI.
+	 * @param {string} dbUrl - A valid mongo database URI.
 	 * @return {Promise} - The mongoose connection promise.
 	 * @memberof DiscordVoice
 	 */
@@ -28,8 +28,8 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
@@ -52,8 +52,8 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
@@ -75,7 +75,7 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {Discord.Client} [client] - The Discord Client.
+	 * @param {Discord.Client} client - The Discord Client.
 	 * @param {boolean} [trackbots=false] - Wheter to track bot's voice activity.
 	 * @param {boolean} [trackallchannels=true] - Wheter to track all the voice channels.
 	 * @param {number} [userlimit = 0] - Track when only the voice-channel member count has reached the specified number, 0 = unlimited.
@@ -173,9 +173,9 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
-	 * @param {number} [voicetime] - Amount of voice time in ms to set.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
+	 * @param {number} voicetime - Amount of voice time in ms to set.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
@@ -196,8 +196,8 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
 	 * @param {boolean} [fetchPosition=false] - Whether to fetch the users position.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
@@ -226,9 +226,9 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
-	 * @param {number} [voicetime] - Amount of voice time in ms to add.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
+	 * @param {number} voicetime - Amount of voice time in ms to add.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
@@ -249,9 +249,9 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
-	 * @param {number} [voicetime] - Amount of voice time in ms to subtract.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
+	 * @param {number} voicetime - Amount of voice time in ms to subtract.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
@@ -272,8 +272,8 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [guildId] - Discord guild id.
-	 * @param {number} [limit] - Amount of maximum enteries to return.
+	 * @param {string} guildId - Discord guild id.
+	 * @param {number} limit - Amount of maximum enteries to return.
 	 * @return {Array} - The leaderboard array.
 	 * @memberof DiscordVoice
 	 */
@@ -291,8 +291,8 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {Discord.Client} [client] - Your Discord.CLient.
-	 * @param {array} [leaderboard] - The output from 'fetchLeaderboard' function.
+	 * @param {Discord.Client} client - Your Discord.CLient.
+	 * @param {array} leaderboard - The output from 'fetchLeaderboard' function.
 	 * @param {boolean} [fetchUsers=false] - whether to fetch each users position.
 	 * @return {Array} - The leaderboard array.
 	 * @memberof DiscordVoice
@@ -333,8 +333,8 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
@@ -354,8 +354,8 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
-	 * @param {string} [userId] - Discord user id.
-	 * @param {string} [guildId] - Discord guild id.
+	 * @param {string} userId - Discord user id.
+	 * @param {string} guildId - Discord guild id.
 	 * @return {object} - The user data object.
 	 * @memberof DiscordVoice
 	 */
