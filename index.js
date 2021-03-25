@@ -78,11 +78,12 @@ class DiscordVoice {
 	 * @param {Discord.Client} [client] - The Discord Client.
 	 * @param {boolean} [trackbots=false] - Wheter to track bot's voice activity.
 	 * @param {boolean} [trackallchannels=true] - Wheter to track all the voice channels.
+	 * @param {number} [userlimit = 0] - Track when only the voice-channel member count has reached the specified number, 0 = unlimited.
 	 * @param {string} [channelID] - If trackallchannels is false the function will check activity for only the specified channelid.
 	 * @return {object} - The user data object. 
 	 * @memberof DiscordVoice
 	 */
-	static async start(client, trackbots = false, trackallchannels = true, channelID) {
+	static async start(client, trackbots = false, trackallchannels = true, userlimit = 0, channelID) {
 		if (!client) throw new TypeError("A client was not provided.");
 		if (!trackallchannels && !channelID) throw new TypeError("A channel ID was not provided.");
 		logs(client);
@@ -94,6 +95,9 @@ class DiscordVoice {
 			});
 			if (!trackallchannels) {
 				if (channel.id === channelID) {
+				if (userlimit != 0) {
+				if(channel.members.size < userlimit) return;
+				}
 					if (!user) {
 						const newUser = new Voice({
 							userID: member.user.id,
@@ -103,12 +107,16 @@ class DiscordVoice {
 						await newUser.save().catch(e => console.log(`Failed to save new user.`));
 						return user;
 					}
+					if(user.isBlacklisted) return;
 					user.joinTime = Date.now();
 				  await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
 				  return user;
 				}
 			}
 			if (trackallchannels) {
+				if (userlimit != 0) {
+				if(channel.members.size < userlimit) return;
+				}
 				if (!user) {
 					const newUser = new Voice({
 						userID: member.user.id,
@@ -118,6 +126,7 @@ class DiscordVoice {
 					await newUser.save().catch(e => console.log(`Failed to save new user.`));
 					return user;
 				}
+				if(user.isBlacklisted) return;
 				user.joinTime = Date.now();
 				await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
 				return user;
@@ -129,21 +138,31 @@ class DiscordVoice {
 				guildID: member.guild.id
 			});
 			if (!trackallchannels) {
+				if (userlimit != 0) {
+				if(channel.members.size < userlimit) return;
+				}
 				if (channel.id === channelID) {
 					if (user) {
+						if(user.isBlacklisted) return;
 						let time = (Date.now() - user.joinTime)
 						let finaltime = +time + +user.voiceTime
 						user.voiceTime = finaltime
+						user.joinTime = 0
 						await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
 						return user;
 					}
 				}
 			}
 			if (trackallchannels) {
+				if (userlimit != 0) {
+				if(channel.members.size < userlimit) return;
+				}
 				if (user) {
+					if(user.isBlacklisted) return;
 					let time = (Date.now() - user.joinTime)
 					let finaltime = +time + +user.voiceTime
 					user.voiceTime = finaltime
+					user.joinTime = 0
 					await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
 					return user;
 				}
@@ -309,6 +328,48 @@ class DiscordVoice {
 			}));
 		}
 		return computedArray;
+	}
+	/**
+	 *
+	 *
+	 * @static
+	 * @param {string} [userId] - Discord user id.
+	 * @param {string} [guildId] - Discord guild id.
+	 * @return {object} - The user data object.
+	 * @memberof DiscordVoice
+	 */
+	static async blacklist(userId, guildId) {
+		if (!userId) throw new TypeError("An user id was not provided.");
+		if (!guildId) throw new TypeError("A guild id was not provided.");
+    const user = await Voice.findOne({
+			userID: userId,
+			guildID: guildId
+    });
+		if (!user) return false;
+		user.isBlacklisted = true
+		user.save().catch(e => console.log(`Failed to add user to blacklist: ${e}`));
+		return user;
+	}
+	/**
+	 *
+	 *
+	 * @static
+	 * @param {string} [userId] - Discord user id.
+	 * @param {string} [guildId] - Discord guild id.
+	 * @return {object} - The user data object.
+	 * @memberof DiscordVoice
+	 */
+	static async unblacklist(userId, guildId) {
+		if (!userId) throw new TypeError("An user id was not provided.");
+		if (!guildId) throw new TypeError("A guild id was not provided.");
+    const user = await Voice.findOne({
+			userID: userId,
+			guildID: guildId
+    });
+		if (!user) return false;
+		user.isBlacklisted = false
+		user.save().catch(e => console.log(`Failed to remove user from blacklist: ${e}`));
+		return user;
 	}
 }
 module.exports = DiscordVoice;
