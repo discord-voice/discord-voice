@@ -75,6 +75,25 @@ class DiscordVoice {
 	 *
 	 *
 	 * @static
+	 * @param {string} guildId - Discord guild id.
+	 * @return {boolean} - Return's true if success.
+	 * @memberof DiscordVoice
+	 */
+	static async resetGuild(guildId) {
+		if (!guildId) throw new TypeError("A guild id was not provided.");
+		const guild = await Voice.findOne({
+			guildID: guildId
+		});
+		if (!guild) return false;
+		await Voice.findOneAndDelete({
+			guildID: guildId
+		}).catch(e => console.log(`Failed to delete user: ${e}`));
+		return true;
+	}
+	/**
+	 *
+	 *
+	 * @static
 	 * @param {Discord.Client} client - The Discord Client.
 	 * @param {boolean} [trackbots=false] - Wheter to track bot's voice activity.
 	 * @param {boolean} [trackallchannels=true] - Wheter to track all the voice channels.
