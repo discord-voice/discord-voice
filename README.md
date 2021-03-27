@@ -200,6 +200,24 @@ Voice.blacklist(<UserID - String>, <GuildID - String>);
 Promise<Boolean/Object>
 ```
 
+**Stream or cam role giver**
+
+It will give a specific role to a member if he is streaming or in cam
+```js
+Voice.roleGiver(<Client - Discord.js Client>, <Enable - Boolean>, <Options - Object>);
+```
+- Options example:
+```js
+ stream : {
+            enable : true,
+            roleId: '807314663439859772'
+        },
+        cam: {
+            enable: true,
+            roleId: "804762548581695559"
+        }
+```
+
 # Enjoying Discord-Voice?
 Consider donating: https://www.buymeacoffee.com/lebyydev
 Thanks 😊

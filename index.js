@@ -170,9 +170,6 @@ class DiscordVoice {
 				}
 			}
 		});
-		client.on("voiceStateUpdated", async (oldState, newState) => {
-			console.log(oldState)
-		})
 	}
 	/**
 	 *
