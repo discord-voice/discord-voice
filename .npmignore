@@ -4,3 +4,6 @@ test.js
 node_modules/
 .github/
 docs/
+scripts/
+.jsdoc.json
+tsconfig.json
