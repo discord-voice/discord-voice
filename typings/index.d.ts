@@ -3,6 +3,7 @@ import {
         Client
        } from 'discord.js';
 import * as Mongoose from "mongoose";
+
 export = DiscordVoice;
 /**
  *
@@ -15,7 +16,7 @@ class DiscordVoice {
      *
      * @static
      * @param {String} dbUrl - A valid mongo database URI.
-     * @return {Promise} - The mongoose connection promise.
+     * @return {Promise<mongoose.Connection>} - The mongoose connection promise.
      * @memberof DiscordVoice
      * @example
      * Voice.setURL("mongodb://..."); // You only need to do this ONCE per process.
@@ -192,6 +193,30 @@ class DiscordVoice {
      * Voice.trackallchannels(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackallchannels.
      */
     static trackallchannels(guildId: string, data: boolean): Promise<any>;
+    /**
+     *
+     *
+     * @static
+     * @param {String} guildId - Discord guild id.
+     * @param {Boolean} data - If true it will track the users voice time who are muted aswell, if false it won't count the member's who are not muted.
+     * @return {Promise<Object>} - It will return the config data-object.
+     * @memberof DiscordVoice
+     * @example
+     * Voice.trackMute(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackMute.
+     */
+    static trackMute(guildId: string, data: boolean): Promise<any>;
+    /**
+     *
+     *
+     * @static
+     * @param {String} guildId - Discord guild id.
+     * @param {Boolean} data - If true it will track the users voice time who are deafen aswell, if false it won't count the member's who are not deafen.
+     * @return {Promise<Object>} - It will return the config data-object.
+     * @memberof DiscordVoice
+     * @example
+     * Voice.trackDeaf(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackDeaf.
+     */
+    static trackDeaf(guildId: string, data: boolean): Promise<any>;
     /**
      *
      *

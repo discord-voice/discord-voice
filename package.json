@@ -1,10 +1,10 @@
 {
 		"name": "discord-voice",
 		"files": [
-    "models/",
-    "typings/",
-    "index.js"
-    ],
+				"models/",
+				"typings/",
+				"index.js"
+		],
 		"scripts": {
 				"gpr": "node scripts/gpr.js"
 		},

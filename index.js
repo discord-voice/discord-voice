@@ -92,7 +92,6 @@ class DiscordVoice {
 	 */
 	static async start(client) {
 		if (!client) throw new TypeError("A client was not provided.");
-		if (!trackallchannels && !channelID) throw new TypeError("A channel ID was not provided.");
 		logs(client);
 		client.on("voiceChannelJoin", async (member, channel) => {
 			let config;
@@ -105,11 +104,16 @@ class DiscordVoice {
 			trackbots: false,
 			trackallchannels: true,
 			userlimit: 0,
-			channelID: []
+			channelID: [],
+			trackMute: true,
+	    trackDeaf: true,
+			isEnabled: true
 			});
 			}
 			if(!config.isEnabled) return;
 			if(!config.trackbots) if (member.bot) return;
+			if(!config.trackMute) if(member.voice.selfMute || member.voice.serverMute) return;
+			if(!config.trackDeaf) if(member.voice.selfDeaf || member.voice.serverDeaf) return;
 			const user = await Voice.findOne({
 				userID: member.user.id,
 				guildID: member.guild.id
@@ -165,6 +169,8 @@ class DiscordVoice {
 			trackallchannels: true,
 			userlimit: 0,
 			channelID: [],
+			trackMute: true,
+	    trackDeaf: true,
 			isEnabled: true
 			});
 			}
@@ -178,6 +184,7 @@ class DiscordVoice {
 				if (channel.id === config.channelID) {
 					if (user) {
 						if(user.isBlacklisted) return;
+						if(user.joinTime == 0) return;
 						let time = (Date.now() - user.joinTime)
 						let finaltime = +time + +user.voiceTime
 						user.voiceTime = finaltime
@@ -190,6 +197,7 @@ class DiscordVoice {
 			if (config.trackallchannels) {
 				if (user) {
 					if(user.isBlacklisted) return;
+					if(user.joinTime == 0) return;
 					let time = (Date.now() - user.joinTime)
 					let finaltime = +time + +user.voiceTime
 					user.voiceTime = finaltime
@@ -464,7 +472,7 @@ class DiscordVoice {
 	 */
 	static async trackbots(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
-		if (data != false || data != true) throw new TypeError("The data provided should have been either true or false.");
+		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
     const config = await VoiceConfig.findOne({
 			guildID: guildId
     });
@@ -475,6 +483,8 @@ class DiscordVoice {
 		trackallchannels: true,
 		userlimit: 0,
 		channelID: [],
+		trackMute: true,
+	  trackDeaf: true,
 		isEnabled: true
 		});
 		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
@@ -497,7 +507,7 @@ class DiscordVoice {
 	 */
 	static async trackallchannels(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
-		if (data != false || data != true) throw new TypeError("The data provided should have been either true or false.");
+		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
     const config = await VoiceConfig.findOne({
 			guildID: guildId
     });
@@ -508,12 +518,84 @@ class DiscordVoice {
 		trackallchannels: data,
 		userlimit: 0,
 		channelID: [],
+		trackMute: true,
+	  trackDeaf: true,
 		isEnabled: true
 		});
 		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
 		return newConfig;
 		}
 		config.trackallchannels = data
+		config.save().catch(e => console.log(`Failed to update config: ${e}`));
+		return config;
+	}
+	/**
+	 *
+	 *
+	 * @static
+	 * @param {String} guildId - Discord guild id.
+	 * @param {Boolean} data - If true it will track the users voice time who are muted aswell, if false it won't count the member's who are not muted.
+	 * @return {Promise<Object>} - It will return the config data-object.
+	 * @memberof DiscordVoice
+	 * @example
+	 * Voice.trackMute(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackMute.
+	 */
+	static async trackMute(guildId, data) {
+		if (!guildId) throw new TypeError("A guild id was not provided.");
+		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
+    const config = await VoiceConfig.findOne({
+			guildID: guildId
+    });
+		if (!config) {
+		const newConfig = new VoiceConfig({
+		guildID: guildId,
+		trackbots: false,
+		trackallchannels: data,
+		userlimit: 0,
+		channelID: [],
+		trackMute: data,
+	  trackDeaf: true,
+		isEnabled: true
+		});
+		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
+		return newConfig;
+		}
+		config.trackMute = data
+		config.save().catch(e => console.log(`Failed to update config: ${e}`));
+		return config;
+	}
+	/**
+	 *
+	 *
+	 * @static
+	 * @param {String} guildId - Discord guild id.
+	 * @param {Boolean} data - If true it will track the users voice time who are deafen aswell, if false it won't count the member's who are not deafen.
+	 * @return {Promise<Object>} - It will return the config data-object.
+	 * @memberof DiscordVoice
+	 * @example
+	 * Voice.trackDeaf(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackDeaf.
+	 */
+	static async trackDeaf(guildId, data) {
+		if (!guildId) throw new TypeError("A guild id was not provided.");
+		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
+    const config = await VoiceConfig.findOne({
+			guildID: guildId
+    });
+		if (!config) {
+		const newConfig = new VoiceConfig({
+		guildID: guildId,
+		trackbots: false,
+		trackallchannels: data,
+		userlimit: 0,
+		channelID: [],
+		trackMute: true,
+	  trackDeaf: data,
+		isEnabled: true
+		});
+		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
+		return newConfig;
+		}
+		config.trackDeaf = data
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -541,6 +623,8 @@ class DiscordVoice {
 		trackallchannels: true,
 		userlimit: data,
 		channelID: [],
+		trackMute: true,
+	  trackDeaf: true,
 		isEnabled: true
 		});
 		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
@@ -574,6 +658,8 @@ class DiscordVoice {
 		trackallchannels: true,
 		userlimit: 0,
 		channelID: [`${data}`],
+		trackMute: true,
+	  trackDeaf: true,
 		isEnabled: true
 		});
 		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
@@ -624,9 +710,9 @@ class DiscordVoice {
 	 */
 	static async toggle(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
-		if (data != false || data != true) throw new TypeError("The data provided should have been either true or false.");
 		if(data == "on") data = true
 		if(data == "off") data = false
+		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
     const config = await VoiceConfig.findOne({
 			guildID: guildId
     });
@@ -637,6 +723,8 @@ class DiscordVoice {
 		trackallchannels: true,
 		userlimit: 0,
 		channelID: [],
+		trackMute: true,
+	  trackDeaf: true,
 		isEnabled: data
 		});
 		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
