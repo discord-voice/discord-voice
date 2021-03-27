@@ -18,7 +18,7 @@ class DiscordVoice {
 	 */
 	static async setURL(dbUrl) {
 		if (!dbUrl) throw new TypeError("A database url was not provided.");
-		if(mongoUrl) throw new TypeError("A database url was already configured.");
+		if (mongoUrl) throw new TypeError("A database url was already configured.");
 		mongoUrl = dbUrl;
 		return mongoose.connect(dbUrl, {
 			useNewUrlParser: true,
@@ -90,16 +90,16 @@ class DiscordVoice {
 		if (!trackallchannels && !channelID) throw new TypeError("A channel ID was not provided.");
 		logs(client);
 		client.on("voiceChannelJoin", async (member, channel) => {
-			if(!trackbots) if (member.bot) return;
+			if (!trackbots) if (member.bot) return;
 			const user = await Voice.findOne({
 				userID: member.user.id,
 				guildID: member.guild.id
 			});
 			if (!trackallchannels) {
 				if (channel.id === channelID) {
-				if (userlimit != 0) {
-				if(channel.members.size < userlimit) return;
-				}
+					if (userlimit != 0) {
+						if (channel.members.size < userlimit) return;
+					}
 					if (!user) {
 						const newUser = new Voice({
 							userID: member.user.id,
@@ -109,15 +109,15 @@ class DiscordVoice {
 						await newUser.save().catch(e => console.log(`Failed to save new user.`));
 						return user;
 					}
-					if(user.isBlacklisted) return;
+					if (user.isBlacklisted) return;
 					user.joinTime = Date.now();
-				  await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
-				  return user;
+					await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
+					return user;
 				}
 			}
 			if (trackallchannels) {
 				if (userlimit != 0) {
-				if(channel.members.size < userlimit) return;
+					if (channel.members.size < userlimit) return;
 				}
 				if (!user) {
 					const newUser = new Voice({
@@ -128,7 +128,7 @@ class DiscordVoice {
 					await newUser.save().catch(e => console.log(`Failed to save new user.`));
 					return user;
 				}
-				if(user.isBlacklisted) return;
+				if (user.isBlacklisted) return;
 				user.joinTime = Date.now();
 				await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
 				return user;
@@ -141,11 +141,11 @@ class DiscordVoice {
 			});
 			if (!trackallchannels) {
 				if (userlimit != 0) {
-				if(channel.members.size < userlimit) return;
+					if (channel.members.size < userlimit) return;
 				}
 				if (channel.id === channelID) {
 					if (user) {
-						if(user.isBlacklisted) return;
+						if (user.isBlacklisted) return;
 						let time = (Date.now() - user.joinTime)
 						let finaltime = +time + +user.voiceTime
 						user.voiceTime = finaltime
@@ -157,10 +157,10 @@ class DiscordVoice {
 			}
 			if (trackallchannels) {
 				if (userlimit != 0) {
-				if(channel.members.size < userlimit) return;
+					if (channel.members.size < userlimit) return;
 				}
 				if (user) {
-					if(user.isBlacklisted) return;
+					if (user.isBlacklisted) return;
 					let time = (Date.now() - user.joinTime)
 					let finaltime = +time + +user.voiceTime
 					user.voiceTime = finaltime
@@ -170,6 +170,9 @@ class DiscordVoice {
 				}
 			}
 		});
+		client.on("voiceStateUpdated", async (oldState, newState) => {
+			console.log(oldState)
+		})
 	}
 	/**
 	 *
@@ -362,10 +365,10 @@ class DiscordVoice {
 	static async blacklist(userId, guildId) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
-    const user = await Voice.findOne({
+		const user = await Voice.findOne({
 			userID: userId,
 			guildID: guildId
-    });
+		});
 		if (!user) return false;
 		user.isBlacklisted = true
 		user.save().catch(e => console.log(`Failed to add user to blacklist: ${e}`));
@@ -383,15 +386,71 @@ class DiscordVoice {
 	static async unblacklist(userId, guildId) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
-    const user = await Voice.findOne({
+		const user = await Voice.findOne({
 			userID: userId,
 			guildID: guildId
-    });
+		});
 		if (!user) return false;
-		if(!user.isBlacklisted) return false;
+		if (!user.isBlacklisted) return false;
 		user.isBlacklisted = false
 		user.save().catch(e => console.log(`Failed to remove user from blacklist: ${e}`));
 		return user;
+	}
+	/**
+	 *
+	 *
+	 * @static
+	  * @param {Discord.Client} client - Your Discord.CLient.
+	 * @param {boolean} [enable=true] - Enable or disable 
+	 * @param {object} 
+	 * @example 
+	 * {
+	 *  stream : {enable: true, roleId: ""}
+	 *  cam : {enable: true, roleId: ""}
+	 * }
+	 */
+	static async roleGiver(client, enable = true, options) {
+		if (!client) throw new Error('Client was not found. Please enter Client as option');
+		if (!options) throw new Error('No options was provided. Please provide some options');
+		const streamRoleId = options.stream.roleId;
+		const camRoleId = options.cam.roleId;
+		if (!camRoleId) throw new Error('No correct cam roleId was provided');
+		if (!streamRoleId) throw new Error('No correct stream roleId was provided');
+
+		if (enable) {
+			client.on('voiceStateUpdate', (oldState, newState) => {
+				if (!newState) return;
+				const guild = oldState.guild;
+				const streamRole = guild.roles.cache.get(streamRoleId);
+				const camRole = guild.roles.cache.get(camRoleId);
+				if (!streamRole) throw new Error(`Stream role not found`);
+				if (!camRole) throw new Error(`Cam role not found`);
+				if (options.stream.enable) {
+					if (!oldState.streaming && newState.streaming) {
+						if (newState.member.roles.cache.has(streamRole.id)) return;
+						oldState.member.roles.add(streamRole, `Streaming role`);
+					}
+					// STREAMING STOP
+					if (oldState.streaming && !newState.streaming) {
+						if (!newState.member.roles.cache.has(streamRole.id)) return;
+						oldState.member.roles.remove(streamRole, `Streaming role`);
+					}
+				}
+				if (options.cam.enable) {
+					// CAM START
+					if (!oldState.selfVideo && newState.selfVideo) {
+						if (newState.member.roles.cache.has(camRole.id)) return;
+						oldState.member.roles.add(camRole, `Cam role`)
+					}
+					// CAM STOP
+
+					if (oldState.selfVideo && !newState.selfVideo) {
+						if (!newState.member.roles.cache.has(camRole.id)) return;
+						oldState.member.roles.remove(camRole, `Cam role`)
+					}
+				}
+			})
+		}
 	}
 }
 module.exports = DiscordVoice;
