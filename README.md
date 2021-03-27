@@ -204,7 +204,7 @@ Promise<Boolean/Object>
 
 It will give a specific role to a member if he is streaming or in cam
 ```js
-Voice.roleGiver(<Client - Discord.js Client>, <Enable - Boolean>, <Options - Object>);
+Voice.roleGiver(<Client - Discord.js Client>, <Enable - Boolean, enable by default>, <Options - Object>);
 ```
 - Options example:
 ```js
