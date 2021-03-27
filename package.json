@@ -1,12 +1,17 @@
 {
 		"name": "discord-voice",
+		"files": [
+    "models/",
+    "typings/",
+    "index.js"
+    ],
 		"scripts": {
 				"gpr": "node scripts/gpr.js"
 		},
 		"version": "1.0.3",
 		"description": "A complete framework to facilitate the tracking of user voice time using discord.js",
 		"main": "index.js",
-		"types": "index.d.ts",
+		"types": "typings/index.d.ts",
 		"repository": {
 				"type": "git",
 				"url": "git+https://github.com/Lebyy/discord-voice.git"
