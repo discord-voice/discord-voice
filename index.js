@@ -94,118 +94,22 @@ class DiscordVoice {
 		if (!client) throw new TypeError("A client was not provided.");
 		logs(client);
 		client.on("voiceChannelJoin", async (member, channel) => {
-			let config;
-			config = await VoiceConfig.findOne({
-			guildID: member.guild.id
-      });
-			if(!config){
-			config = new VoiceConfig({
-			guildID: member.guild.id,
-			trackbots: false,
-			trackallchannels: true,
-			userlimit: 0,
-			channelID: [],
-			trackMute: true,
-	    trackDeaf: true,
-			isEnabled: true
-			});
-			}
-			if(!config.isEnabled) return;
-			if(!config.trackbots) if (member.bot) return;
-			if(!config.trackMute) if(member.voice.selfMute || member.voice.serverMute) return;
-			if(!config.trackDeaf) if(member.voice.selfDeaf || member.voice.serverDeaf) return;
-			const user = await Voice.findOne({
-				userID: member.user.id,
-				guildID: member.guild.id
-			});
-			if (!config.trackallchannels) {
-				if (channel.id === config.channelID) {
-				if (config.userlimit != 0) {
-				if(channel.members.size < userlimit) return;
-				}
-					if (!user) {
-						const newUser = new Voice({
-							userID: member.user.id,
-							guildID: member.guild.id,
-							joinTime: Date.now()
-						});
-						await newUser.save().catch(e => console.log(`Failed to save new user.`));
-						return newUser;
-					}
-					if(user.isBlacklisted) return;
-					user.joinTime = Date.now();
-				  await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
-				  return user;
-				}
-			}
-			if (config.trackallchannels) {
-				if (config.userlimit != 0) {
-				if(channel.members.size < userlimit) return;
-				}
-				if (!user) {
-					const newUser = new Voice({
-						userID: member.user.id,
-						guildID: member.guild.id,
-						joinTime: Date.now()
-					});
-					await newUser.save().catch(e => console.log(`Failed to save new user.`));
-					return user;
-				}
-				if(user.isBlacklisted) return;
-				user.joinTime = Date.now();
-				await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
-				return user;
-			}
+				const event = require('./events/voiceChannelJoin.js').execute(client, member, channel, Voice, VoiceConfig)
+		});
+		client.on("voiceChannelMute", (member, muteType) => {
+				const event = require('./events/voiceChannelMute.js').execute(client, member, muteType, Voice, VoiceConfig)
+		});
+		client.on("voiceChannelUnmute", (member, oldMuteType) => {
+				const event = require('./events/voiceChannelUnmute.js').execute(client, member, oldMuteType, Voice, VoiceConfig)
+		});
+		client.on("voiceChannelDeaf", (member, deafType) => {
+				const event = require('./events/voiceChannelDeaf.js').execute(client, member, deafType, Voice, VoiceConfig)
+		});
+		client.on("voiceChannelUndeaf", (member, deafType) => {
+				const event = require('./events/voiceChannelUndeaf.js').execute(client, member, deafType, Voice, VoiceConfig)
 		});
 		client.on("voiceChannelLeave", async (member, channel) => {
-			let config;
-			config = await VoiceConfig.findOne({
-			guildID: member.guild.id
-      });
-			if(!config){
-			config = new VoiceConfig({
-			guildID: member.guild.id,
-			trackbots: false,
-			trackallchannels: true,
-			userlimit: 0,
-			channelID: [],
-			trackMute: true,
-	    trackDeaf: true,
-			isEnabled: true
-			});
-			}
-			if(!config.isEnabled) return;
-			if(!config.trackbots) if (member.bot) return;
-			let user = await Voice.findOne({
-				userID: member.user.id,
-				guildID: member.guild.id
-			});
-			if (!config.trackallchannels) {
-				if (channel.id === config.channelID) {
-					if (user) {
-						if(user.isBlacklisted) return;
-						if(user.joinTime == 0) return;
-						let time = (Date.now() - user.joinTime)
-						let finaltime = +time + +user.voiceTime
-						user.voiceTime = finaltime
-						user.joinTime = 0
-						await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
-						return user;
-					}
-				}
-			}
-			if (config.trackallchannels) {
-				if (user) {
-					if(user.isBlacklisted) return;
-					if(user.joinTime == 0) return;
-					let time = (Date.now() - user.joinTime)
-					let finaltime = +time + +user.voiceTime
-					user.voiceTime = finaltime
-					user.joinTime = 0
-					await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
-					return user;
-				}
-			}
+				const event = require('./events/voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig)
 		});
 	}
 	/**
@@ -550,7 +454,7 @@ class DiscordVoice {
 		const newConfig = new VoiceConfig({
 		guildID: guildId,
 		trackbots: false,
-		trackallchannels: data,
+		trackallchannels: true,
 		userlimit: 0,
 		channelID: [],
 		trackMute: data,
@@ -585,7 +489,7 @@ class DiscordVoice {
 		const newConfig = new VoiceConfig({
 		guildID: guildId,
 		trackbots: false,
-		trackallchannels: data,
+		trackallchannels: true,
 		userlimit: 0,
 		channelID: [],
 		trackMute: true,
@@ -747,7 +651,7 @@ class DiscordVoice {
 	static async fetchconfig(guildId) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
     const config = await VoiceConfig.findOne({
-			guildID: guildId
+		guildID: guildId
     });
 		if (!config) return false;
 		return config;
