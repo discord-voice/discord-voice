@@ -3,6 +3,12 @@ const Voice = require("./models/voice.js");
 const VoiceConfig = require("./models/voiceconfig.js");
 const logs = require('discord-logs');
 let mongoUrl;
+const handlevoiceChannelJoin = require('./handlers/voiceChannelJoin.js');
+const handlevoiceChannelLeave = require('./handlers/voiceChannelLeave.js');
+const handlevoiceChannelMute = require('./handlers/voiceChannelMute.js');
+const handlevoiceChannelUnmute = require('./handlers/voiceChannelUnmute.js');
+const handlevoiceChannelDeaf = require('./handlers/voiceChannelDeaf.js');
+const handlevoiceChannelUndeaf = require('./handlers/voiceChannelUndeaf.js');
 /**
  *
  *
@@ -94,22 +100,22 @@ class DiscordVoice {
 		if (!client) throw new TypeError("A client was not provided.");
 		logs(client);
 		client.on("voiceChannelJoin", async (member, channel) => {
-				const event = require('./events/voiceChannelJoin.js').execute(client, member, channel, Voice, VoiceConfig)
+				await handlevoiceChannelJoin(client, member, channel, Voice, VoiceConfig)
 		});
-		client.on("voiceChannelMute", (member, muteType) => {
-				const event = require('./events/voiceChannelMute.js').execute(client, member, muteType, Voice, VoiceConfig)
+		client.on("voiceChannelMute", async (member, muteType) => {
+				await handlevoiceChannelMute(client, member, muteType, Voice, VoiceConfig)
 		});
-		client.on("voiceChannelUnmute", (member, oldMuteType) => {
-				const event = require('./events/voiceChannelUnmute.js').execute(client, member, oldMuteType, Voice, VoiceConfig)
+		client.on("voiceChannelUnmute", async (member, oldMuteType) => {
+				await handlevoiceChannelUnmute(client, member, oldMuteType, Voice, VoiceConfig)
 		});
-		client.on("voiceChannelDeaf", (member, deafType) => {
-				const event = require('./events/voiceChannelDeaf.js').execute(client, member, deafType, Voice, VoiceConfig)
+		client.on("voiceChannelDeaf", async (member, deafType) => {
+				await handlevoiceChannelDeaf(client, member, deafType, Voice, VoiceConfig)
 		});
-		client.on("voiceChannelUndeaf", (member, deafType) => {
-				const event = require('./events/voiceChannelUndeaf.js').execute(client, member, deafType, Voice, VoiceConfig)
+		client.on("voiceChannelUndeaf", async (member, deafType) => {
+				await handlevoiceChannelUndeaf(client, member, deafType, Voice, VoiceConfig)
 		});
 		client.on("voiceChannelLeave", async (member, channel) => {
-				const event = require('./events/voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig)
+				await handlevoiceChannelLeave(client, member, channel, Voice, VoiceConfig)
 		});
 	}
 	/**

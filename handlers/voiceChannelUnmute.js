@@ -1,5 +1,4 @@
-module.exports = {
-  execute: async (client, member, muteType, Voice, VoiceConfig) => {
+async function handlevoiceChannelUnmute(client, member, oldMuteType, Voice, VoiceConfig) {
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -34,25 +33,19 @@ module.exports = {
       if (!config.trackallchannels) {
         if (config.channelID.includes(member.voice.channel.id)) {
           if (user.isBlacklisted) return;
-          if (user.joinTime == 0) return;
-          let time = (Date.now() - user.joinTime)
-          let finaltime = +time + +user.voiceTime
-          user.voiceTime = finaltime
-          user.joinTime = 0
-          await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
+          if (user.joinTime != 0) return;
+          user.joinTime = Date.now();
+          await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
           return user;
         }
       }
       if (config.trackallchannels) {
         if (user.isBlacklisted) return;
-        if (user.joinTime == 0) return;
-        let time = (Date.now() - user.joinTime)
-        let finaltime = +time + +user.voiceTime
-        user.voiceTime = finaltime
-        user.joinTime = 0
-        await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
+        if (user.joinTime != 0) return;
+        user.joinTime = Date.now();
+        await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
         return user;
       }
     }
   }
-}
+module.exports = handlevoiceChannelUnmute

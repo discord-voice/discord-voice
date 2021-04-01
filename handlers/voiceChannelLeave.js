@@ -1,5 +1,4 @@
-module.exports = {
-  execute: async (client, member, channel, Voice, VoiceConfig) => {
+async function handlevoiceChannelLeave(client, member, channel, Voice, VoiceConfig) {
 
     let config;
     config = await VoiceConfig.findOne({
@@ -50,5 +49,5 @@ module.exports = {
         return user;
       } else return;
     }
-  }
 }
+module.exports = handlevoiceChannelLeave

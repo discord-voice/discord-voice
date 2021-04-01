@@ -1,6 +1,4 @@
-module.exports = {
-  execute: async (client, member, channel, Voice, VoiceConfig) => {
-
+async function handlevoiceChannelJoin(client, member, channel, Voice, VoiceConfig){
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -75,5 +73,6 @@ module.exports = {
       await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
       return user;
     }
-  }
-}
+		}
+
+module.exports = handlevoiceChannelJoin
