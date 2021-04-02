@@ -1,4 +1,4 @@
-async function handlevoiceChannelJoin(client, member, channel, Voice, VoiceConfig){
+const voiceChannelJoin = async function(client, member, channel, Voice, VoiceConfig){
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -75,4 +75,4 @@ async function handlevoiceChannelJoin(client, member, channel, Voice, VoiceConfi
     }
 		}
 
-module.exports = handlevoiceChannelJoin
+module.exports = voiceChannelJoin

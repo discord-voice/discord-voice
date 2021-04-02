@@ -3,12 +3,7 @@ const Voice = require("./models/voice.js");
 const VoiceConfig = require("./models/voiceconfig.js");
 const logs = require('discord-logs');
 let mongoUrl;
-const handlevoiceChannelJoin = require('./handlers/voiceChannelJoin.js');
-const handlevoiceChannelLeave = require('./handlers/voiceChannelLeave.js');
-const handlevoiceChannelMute = require('./handlers/voiceChannelMute.js');
-const handlevoiceChannelUnmute = require('./handlers/voiceChannelUnmute.js');
-const handlevoiceChannelDeaf = require('./handlers/voiceChannelDeaf.js');
-const handlevoiceChannelUndeaf = require('./handlers/voiceChannelUndeaf.js');
+const handler = require('./handlerLoader.js');
 /**
  *
  *
@@ -100,22 +95,22 @@ class DiscordVoice {
 		if (!client) throw new TypeError("A client was not provided.");
 		logs(client);
 		client.on("voiceChannelJoin", async (member, channel) => {
-				await handlevoiceChannelJoin(client, member, channel, Voice, VoiceConfig)
+				await handler.handlevoiceChannelJoin(client, member, channel, Voice, VoiceConfig)
 		});
 		client.on("voiceChannelMute", async (member, muteType) => {
-				await handlevoiceChannelMute(client, member, muteType, Voice, VoiceConfig)
+				await handler.handlevoiceChannelMute(client, member, muteType, Voice, VoiceConfig)
 		});
 		client.on("voiceChannelUnmute", async (member, oldMuteType) => {
-				await handlevoiceChannelUnmute(client, member, oldMuteType, Voice, VoiceConfig)
+				await handler.handlevoiceChannelUnmute(client, member, oldMuteType, Voice, VoiceConfig)
 		});
 		client.on("voiceChannelDeaf", async (member, deafType) => {
-				await handlevoiceChannelDeaf(client, member, deafType, Voice, VoiceConfig)
+				await handler.handlevoiceChannelDeaf(client, member, deafType, Voice, VoiceConfig)
 		});
 		client.on("voiceChannelUndeaf", async (member, deafType) => {
-				await handlevoiceChannelUndeaf(client, member, deafType, Voice, VoiceConfig)
+				await handler.handlevoiceChannelUndeaf(client, member, deafType, Voice, VoiceConfig)
 		});
 		client.on("voiceChannelLeave", async (member, channel) => {
-				await handlevoiceChannelLeave(client, member, channel, Voice, VoiceConfig)
+				await handler.handlevoiceChannelLeave(client, member, channel, Voice, VoiceConfig)
 		});
 	}
 	/**
