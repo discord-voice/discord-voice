@@ -4,7 +4,7 @@
 				"models/",
 				"typings/",
 				"index.js",
-				"handlers",
+				"handlers/",
 				"handlerLoader.js"
 		],
 		"scripts": {
