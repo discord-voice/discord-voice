@@ -21,36 +21,55 @@ const voiceChannelDeaf = async function(client, member, deafType, Voice, VoiceCo
         userID: member.user.id,
         guildID: member.guild.id
       });
-      if (!user) {
-        user = new Voice({
-          userID: member.user.id,
-          guildID: member.guild.id,
-          voiceTime: 0,
-          joinTime: 0
-        });
-        await user.save().catch(e => console.log(`Failed to save new user.`));
-      }
       if (!config.trackallchannels) {
         if (config.channelID.includes(member.voice.channel.id)) {
+					if(user){
           if (user.isBlacklisted) return;
-          if (user.joinTime == 0) return;
-          let time = (Date.now() - user.joinTime)
-          let finaltime = +time + +user.voiceTime
-          user.voiceTime = finaltime
-          user.joinTime = 0
+					let jointime = user.joinTime[member.voice.channel.id]
+					if(!jointime) jointime = 0
+					let voicetime = user.voiceTime[member.voice.channel.id]
+					if(!voicetime) voicetime = 0
+          if (jointime == 0) return;
+          let time = (Date.now() - jointime)
+          let finaltime = +time + +voicetime
+          voicetime = finaltime
+          jointime = 0
+					user.voiceTime[member.voice.channel.id] = voicetime
+					user.joinTime[member.voice.channel.id] = jointime
+					let userobj = user.voiceTime
+					delete userobj.total;
+					let total = Object.values(userobj).reduce((a, b) => a + b, 0)
+					user.voiceTime['total'] = total
+          user.markModified('joinTime')
+					user.markModified('voiceTime')
           await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
           return user;
+					} else return;
         }
       }
       if (config.trackallchannels) {
-        if (user.isBlacklisted) return;
-        if (user.joinTime == 0) return;
-        let time = (Date.now() - user.joinTime)
-        let finaltime = +time + +user.voiceTime
-        user.voiceTime = finaltime
-        user.joinTime = 0
-        await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
-        return user;
+				  if(user){
+          if (user.isBlacklisted) return;
+					let jointime = user.joinTime[member.voice.channel.id]
+					if(!jointime) jointime = 0
+					let voicetime = user.voiceTime[member.voice.channel.id]
+					if(!voicetime) voicetime = 0
+          if (jointime == 0) return;
+          let time = (Date.now() - jointime)
+          let finaltime = +time + +voicetime
+          voicetime = finaltime
+          jointime = 0
+					user.voiceTime[member.voice.channel.id] = voicetime
+					user.joinTime[member.voice.channel.id] = jointime
+					let userobj = user.voiceTime
+					delete userobj.total;
+					let total = Object.values(userobj).reduce((a, b) => a + b, 0)
+					user.voiceTime['total'] = total
+          user.markModified('joinTime')
+					user.markModified('voiceTime')
+          await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
+          return user;
+					} else return;
       }
     }
   }

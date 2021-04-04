@@ -17,8 +17,7 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
       await config.save().catch(e => console.log(`Failed to save config: ${e}`));
     }
     if (!config.isEnabled) return;
-    if (!config.trackbots)
-      if (member.bot) return;
+    if (!config.trackbots) if (member.bot) return;
     if (!config.trackMute) {
       if (member.voice.selfMute || member.voice.serverMute) {
         const muteType = member.voice.selfMute ? 'self-muted' : 'server-muted';
@@ -44,13 +43,15 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
           const newUser = new Voice({
             userID: member.user.id,
             guildID: member.guild.id,
-            joinTime: Date.now()
+            joinTime: {},
           });
+					newUser.joinTime[channel.id] = Date.now()
           await newUser.save().catch(e => console.log(`Failed to save new user.`));
           return newUser;
         }
         if (user.isBlacklisted) return;
-        user.joinTime = Date.now();
+        user.joinTime[channel.id] = Date.now();
+				user.markModified('joinTime')
         await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
         return user;
       }
@@ -63,13 +64,15 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
         const newUser = new Voice({
           userID: member.user.id,
           guildID: member.guild.id,
-          joinTime: Date.now()
+					joinTime: {},
         });
+				newUser.joinTime[channel.id] = Date.now()
         await newUser.save().catch(e => console.log(`Failed to save new user.`));
-        return user;
+        return newUser;
       }
       if (user.isBlacklisted) return;
-      user.joinTime = Date.now();
+      user.joinTime[channel.id] = Date.now();
+			user.markModified('joinTime')
       await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
       return user;
     }
