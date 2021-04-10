@@ -40,11 +40,16 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
           if (channel.members.size < userlimit) return;
         }
         if (!user) {
-          user = new Voice({
-          userID: member.user.id,
-          guildID: member.guild.id,
-          joinTime: {}
-          });
+        user = {
+        userID: member.user.id,
+        guildID: member.guild.id,
+        joinTime: {},
+				voiceTime: {},
+        isBlacklisted: false,
+				lastUpdated: new Date()
+        }
+				user.joinTime[channel.id] = Date.now();
+				return await Voice.create(user);
         }
         if (user.isBlacklisted) return;
         user.joinTime[channel.id] = Date.now();
@@ -58,11 +63,16 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
         if (channel.members.size < userlimit) return;
       }
       if (!user) {
-        user = new Voice({
+        user = {
         userID: member.user.id,
         guildID: member.guild.id,
-				joinTime: {}
-        });
+        joinTime: {},
+				voiceTime: {},
+        isBlacklisted: false,
+				lastUpdated: new Date()
+        }
+				user.joinTime[channel.id] = Date.now();
+				return await Voice.create(user);
       }
       if (user.isBlacklisted) return;
       user.joinTime[channel.id] = Date.now();

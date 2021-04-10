@@ -239,10 +239,10 @@ class DiscordVoice {
 		if (!guild) return false;
 		await Voice.findOneAndDelete({
 			guildID: guildId
-		}).catch(e => console.log(`Failed to reset guild: ${e}`));
+		}).exec().catch(e => console.log(`Failed to reset guild: ${e}`));
 		await VoiceConfig.findOneAndDelete({
 			guildID: guildId
-		}).catch(e => console.log(`Failed to reset guild: ${e}`));
+		}).exec().catch(e => console.log(`Failed to reset guild: ${e}`));
 		return true;
 	}
 	/**

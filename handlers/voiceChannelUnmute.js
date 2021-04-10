@@ -24,12 +24,16 @@ const voiceChannelUnmute = async function(client, member, oldMuteType, Voice, Vo
       if (!config.trackallchannels) {
         if (config.channelID.includes(member.voice.channel.id)) {
 					if (!user) {
-          user = new Voice({
-          userID: member.user.id,
+          user = {
+       	  userID: member.user.id,
           guildID: member.guild.id,
-          voiceTime: {},
-          joinTime: {}
-          });
+          joinTime: {},
+				  voiceTime: {},
+          isBlacklisted: false,
+				  lastUpdated: new Date()
+          }
+				  user.joinTime[channel.id] = Date.now();
+			  	return await Voice.create(user);
           }
           if (user.isBlacklisted) return;
           if (user.joinTime[member.voice.channel.id] != 0) return;
@@ -41,12 +45,16 @@ const voiceChannelUnmute = async function(client, member, oldMuteType, Voice, Vo
       }
       if (config.trackallchannels) {
         if (!user) {
-        user = new Voice({
+        user = {
         userID: member.user.id,
         guildID: member.guild.id,
-        voiceTime: {},
-        joinTime: {}
-        });
+        joinTime: {},
+				voiceTime: {},
+        isBlacklisted: false,
+				lastUpdated: new Date()
+        }
+				user.joinTime[channel.id] = Date.now();
+				return await Voice.create(user);
         }
         if (user.isBlacklisted) return;
         if (user.joinTime[member.voice.channel.id] != 0) return;
