@@ -1,4 +1,5 @@
-const voiceChannelJoin = async function(client, member, channel, Voice, VoiceConfig){
+module.exports = {
+  execute: async(client, member, channel, Voice, VoiceConfig) => {
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -35,7 +36,6 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
       guildID: member.guild.id
     });
     if (!config.trackallchannels) {
-			console.log("Member Joined")
       if (config.channelID.includes(channel.id)) {
         if (config.userlimit != 0) {
           if (channel.members.size < userlimit) return;
@@ -60,7 +60,6 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
       }
     }
     if (config.trackallchannels) {
-			console.log("Member Joined")
       if (config.userlimit != 0) {
         if (channel.members.size < userlimit) return;
       }
@@ -83,5 +82,4 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
       return user;
     }
 		}
-
-module.exports = voiceChannelJoin
+}

@@ -96,22 +96,22 @@ class DiscordVoice {
 		if (!client) throw new TypeError("A client was not provided.");
 		logs(client);
 		client.on("voiceChannelJoin", async (member, channel) => {
-				await handler.handlevoiceChannelJoin(client, member, channel, Voice, VoiceConfig)
+				const event = require('./handlers/voiceChannelJoin.js').execute(client, member, channel, Voice, VoiceConfig);
 		});
 		client.on("voiceChannelMute", async (member, muteType) => {
-				await handler.handlevoiceChannelMute(client, member, muteType, Voice, VoiceConfig)
+				const event = require('./handlers/voiceChannelMute.js').execute(client, member, muteType, Voice, VoiceConfig);
 		});
 		client.on("voiceChannelUnmute", async (member, oldMuteType) => {
-				await handler.handlevoiceChannelUnmute(client, member, oldMuteType, Voice, VoiceConfig)
+				const event = require('./handlers/voiceChannelUnmute.js').execute(client, member, oldMuteType, Voice, VoiceConfig);
 		});
 		client.on("voiceChannelDeaf", async (member, deafType) => {
-				await handler.handlevoiceChannelDeaf(client, member, deafType, Voice, VoiceConfig)
+				const event = require('./handlers/voiceChannelDeaf.js').execute(client, member, deafType, Voice, VoiceConfig);
 		});
 		client.on("voiceChannelUndeaf", async (member, deafType) => {
-				await handler.handlevoiceChannelUndeaf(client, member, deafType, Voice, VoiceConfig)
+				const event = require('./handlers/voiceChannelUndeaf.js').execute(client, member, deafType, Voice, VoiceConfig);
 		});
 		client.on("voiceChannelLeave", async (member, channel) => {
-				await handler.handlevoiceChannelLeave(client, member, channel, Voice, VoiceConfig)
+				const event = require('./handlers/voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
 		});
 	}
 	/**

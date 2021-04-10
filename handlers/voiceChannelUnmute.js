@@ -1,5 +1,6 @@
-const voiceChannelUnmute = async function(client, member, oldMuteType, Voice, VoiceConfig) {
-    let config;
+module.exports = {
+  execute: async(client, member, oldMuteType, Voice, VoiceConfig) => {    
+		let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
     });
@@ -65,4 +66,4 @@ const voiceChannelUnmute = async function(client, member, oldMuteType, Voice, Vo
       }
     }
   }
-module.exports = voiceChannelUnmute
+}

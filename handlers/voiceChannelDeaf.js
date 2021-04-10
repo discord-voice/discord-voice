@@ -1,5 +1,6 @@
-const voiceChannelDeaf = async function(client, member, deafType, Voice, VoiceConfig) {
-    let config;
+module.exports = {
+  execute: async(client, member, deafType, Voice, VoiceConfig) => {    
+		let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
     });
@@ -73,4 +74,4 @@ const voiceChannelDeaf = async function(client, member, deafType, Voice, VoiceCo
       }
     }
   }
-module.exports = voiceChannelDeaf
+}

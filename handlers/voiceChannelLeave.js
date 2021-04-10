@@ -1,4 +1,5 @@
-const voiceChannelLeave = async function(client, member, channel, Voice, VoiceConfig) {
+module.exports = {
+  execute: async(client, member, channel, Voice, VoiceConfig) => {
 
     let config;
     config = await VoiceConfig.findOne({
@@ -73,4 +74,4 @@ const voiceChannelLeave = async function(client, member, channel, Voice, VoiceCo
       } else return;
     }
 }
-module.exports = voiceChannelLeave
+ }
