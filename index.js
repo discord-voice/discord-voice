@@ -3,7 +3,6 @@ const Voice = require("./models/voice.js");
 const VoiceConfig = require("./models/voiceconfig.js");
 const logs = require('discord-logs');
 let mongoUrl;
-const handler = require('./handlerLoader.js');
 /**
  *
  *
