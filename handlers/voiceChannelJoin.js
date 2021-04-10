@@ -5,7 +5,7 @@ module.exports = {
       guildID: member.guild.id
     });
     if (!config) {
-      config = new VoiceConfig({
+      config = {
         guildID: member.guild.id,
         trackbots: false,
         trackallchannels: true,
@@ -14,8 +14,8 @@ module.exports = {
         trackMute: true,
         trackDeaf: true,
         isEnabled: true
-      });
-      await config.save().catch(e => console.log(`Failed to save config: ${e}`));
+      };
+			await VoiceConfig.create(config);
     }
     if (!config.isEnabled) return;
     if (!config.trackbots) if (member.bot) return;
@@ -36,6 +36,7 @@ module.exports = {
       guildID: member.guild.id
     });
     if (!config.trackallchannels) {
+			console.log("Member Joined - False")
       if (config.channelID.includes(channel.id)) {
         if (config.userlimit != 0) {
           if (channel.members.size < userlimit) return;
@@ -60,6 +61,7 @@ module.exports = {
       }
     }
     if (config.trackallchannels) {
+			console.log("Member Joined - True")
       if (config.userlimit != 0) {
         if (channel.members.size < userlimit) return;
       }
