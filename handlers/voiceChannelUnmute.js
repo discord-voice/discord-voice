@@ -30,9 +30,6 @@ const voiceChannelUnmute = async function(client, member, oldMuteType, Voice, Vo
           voiceTime: {},
           joinTime: {}
           });
-					user.joinTime[member.voice.channel.id] = Date.now()
-          await user.save().catch(e => console.log(`Failed to save new user.`));
-					return user;
           }
           if (user.isBlacklisted) return;
           if (user.joinTime[member.voice.channel.id] != 0) return;
@@ -50,9 +47,6 @@ const voiceChannelUnmute = async function(client, member, oldMuteType, Voice, Vo
         voiceTime: {},
         joinTime: {}
         });
-				user.joinTime[member.voice.channel.id] = Date.now()
-        await user.save().catch(e => console.log(`Failed to save new user.`));
-				return user;
         }
         if (user.isBlacklisted) return;
         if (user.joinTime[member.voice.channel.id] != 0) return;

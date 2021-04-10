@@ -30,9 +30,6 @@ const voiceChannelUndeaf = async function(client, member, deafType, Voice, Voice
           voiceTime: {},
           joinTime: {}
           });
-					user.joinTime[member.voice.channel.id] = Date.now()
-          await user.save().catch(e => console.log(`Failed to save new user.`));
-					return user;
           }
           if (user.isBlacklisted) return;
           if (user.joinTime[member.voice.channel.id] != 0) return;
@@ -50,9 +47,6 @@ const voiceChannelUndeaf = async function(client, member, deafType, Voice, Voice
           voiceTime: {},
           joinTime: {}
           });
-					user.joinTime[member.voice.channel.id] = Date.now()
-          await user.save().catch(e => console.log(`Failed to save new user.`));
-					return user;
           }
           if (user.isBlacklisted) return;
           if (user.joinTime[member.voice.channel.id] != 0) return;
