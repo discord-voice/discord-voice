@@ -27,7 +27,8 @@ class DiscordVoice {
 		return mongoose.connect(dbUrl, {
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
-			useFindAndModify: false
+			useFindAndModify: false,
+			useCreateIndex: true
 		});
 	}
 	/**
@@ -258,12 +259,11 @@ class DiscordVoice {
 	static async fetchLeaderboard(guildId, limit) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (!limit) throw new TypeError("A limit was not provided.");
-		var users = await Voice.find({
+		const users = await Voice.find({
 			guildID: guildId
-		}).sort([
-			['voiceTime', 'descending']
-		]).exec();
-		return users.slice(0, limit);
+		})
+		let usersorted = users.sort((a, b) => b.voiceTime.total - a.voiceTime.total)
+		return usersorted.slice(0, limit);
 	}
 	/**
 	 *

@@ -43,10 +43,10 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
           const newUser = new Voice({
             userID: member.user.id,
             guildID: member.guild.id,
-            joinTime: {},
+            joinTime: {}
           });
 					newUser.joinTime[channel.id] = Date.now()
-          await newUser.save().catch(e => console.log(`Failed to save new user.`));
+          await newUser.save().catch(e => console.log(`Failed to save new user: ${e}`));
           return newUser;
         }
         if (user.isBlacklisted) return;
@@ -64,10 +64,10 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
         const newUser = new Voice({
           userID: member.user.id,
           guildID: member.guild.id,
-					joinTime: {},
+					joinTime: {}
         });
 				newUser.joinTime[channel.id] = Date.now()
-        await newUser.save().catch(e => console.log(`Failed to save new user.`));
+        await newUser.save().catch(e => console.log(`Failed to save new user: ${e}`));
         return newUser;
       }
       if (user.isBlacklisted) return;
