@@ -46,6 +46,7 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
             joinTime: {}
           });
 					newUser.joinTime[channel.id] = Date.now()
+					newUser.markModified('joinTime')
           await newUser.save().catch(e => console.log(`Failed to save new user: ${e}`));
           return newUser;
         }
@@ -67,6 +68,7 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
 					joinTime: {}
         });
 				newUser.joinTime[channel.id] = Date.now()
+				newUser.markModified('joinTime')
         await newUser.save().catch(e => console.log(`Failed to save new user: ${e}`));
         return newUser;
       }
