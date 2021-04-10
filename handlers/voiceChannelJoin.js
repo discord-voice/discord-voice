@@ -30,7 +30,7 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
         return client.emit('voiceChannelDeaf', member, deafType);
       }
     }
-    const user = await Voice.findOne({
+    let user = await Voice.findOne({
       userID: member.user.id,
       guildID: member.guild.id
     });
@@ -40,15 +40,11 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
           if (channel.members.size < userlimit) return;
         }
         if (!user) {
-          const newUser = new Voice({
-            userID: member.user.id,
-            guildID: member.guild.id,
-            joinTime: {}
+          user = new Voice({
+          userID: member.user.id,
+          guildID: member.guild.id,
+          joinTime: {}
           });
-					newUser.joinTime[channel.id] = Date.now()
-					newUser.markModified('joinTime')
-          await newUser.save().catch(e => console.log(`Failed to save new user: ${e}`));
-          return newUser;
         }
         if (user.isBlacklisted) return;
         user.joinTime[channel.id] = Date.now();
@@ -62,15 +58,11 @@ const voiceChannelJoin = async function(client, member, channel, Voice, VoiceCon
         if (channel.members.size < userlimit) return;
       }
       if (!user) {
-        const newUser = new Voice({
-          userID: member.user.id,
-          guildID: member.guild.id,
-					joinTime: {}
+        user = new Voice({
+        userID: member.user.id,
+        guildID: member.guild.id,
+				joinTime: {}
         });
-				newUser.joinTime[channel.id] = Date.now()
-				newUser.markModified('joinTime')
-        await newUser.save().catch(e => console.log(`Failed to save new user: ${e}`));
-        return newUser;
       }
       if (user.isBlacklisted) return;
       user.joinTime[channel.id] = Date.now();
