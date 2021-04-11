@@ -4,7 +4,8 @@
 				"models/",
 				"typings/",
 				"index.js",
-				"handlers/"
+				"handlers/",
+				"events/"
 		],
 		"scripts": {
 				"gpr": "node scripts/gpr.js"

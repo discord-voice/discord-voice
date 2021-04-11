@@ -1,6 +1,6 @@
 module.exports = {
-  execute: async(client, member, channel, Voice, VoiceConfig) => {
-
+  execute: async(client, member, channel, Voice, VoiceConfig, event, ops) => {
+		if(!ops) ops = {isSwitch: false}
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -45,7 +45,15 @@ module.exports = {
           user.markModified('joinTime')
 					user.markModified('voiceTime')
           await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
-          return user;
+          let data = {}
+				  data.user = user
+				  data.config = config
+				  event.emit('userVoiceLeave', data, member, channel)
+					if(ops.isSwitch){
+					require('./voiceChannelJoin.js').execute(client, member, ops.newChannel, Voice, VoiceConfig, event); 
+					return user;
+					}
+					return user;
         } else return;
       }
     }
@@ -70,7 +78,15 @@ module.exports = {
           user.markModified('joinTime')
 					user.markModified('voiceTime')
           await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
-          return user;
+          let data = {}
+				  data.user = user
+				  data.config = config
+				  event.emit('userVoiceLeave', data, member, channel)
+					if(ops.isSwitch){
+					require('./voiceChannelJoin.js').execute(client, member, ops.newChannel, Voice, VoiceConfig, event); 
+					return user;
+					}
+					return user;
       } else return;
     }
 }

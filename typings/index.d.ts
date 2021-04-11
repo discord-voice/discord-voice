@@ -3,25 +3,19 @@ import {
         Client
        } from 'discord.js';
 import * as Mongoose from "mongoose";
-
+import { EventEmitter } from "events";
 export = DiscordVoice;
 /**
  *
  *
  * @class DiscordVoice
  */
-class DiscordVoice {
+export class DiscordVoice extends EventEmitter {
     /**
-     *
-     *
-     * @static
-     * @param {String} dbUrl - A valid mongo database URI.
-     * @return {Promise<mongoose.Connection>} - The mongoose connection promise.
-     * @memberof DiscordVoice
-     * @example
-     * Voice.setURL("mongodb://..."); // You only need to do this ONCE per process.
-     */
-    static setURL(dbUrl: string): Promise<Mongoose.Connection>;
+    * @param {Discord.Client} client The Discord Client
+    * @param {GiveawaysManagerOptions} options The manager options
+    */
+    constructor(client: any, mongodbURL: string, connect?: boolean);
     /**
      *
      *
@@ -33,7 +27,7 @@ class DiscordVoice {
      * @example
      * Voice.createUser(<UserID - String>, <GuildID - String>); // It will create a dataobject for the user-id provided in the specified guild-id entry.
      */
-    static createUser(userId: string, guildId: string): Promise<boolean>;
+    createUser(userId: string, guildId: string): Promise<boolean>;
     /**
      *
      *
@@ -45,7 +39,7 @@ class DiscordVoice {
      * @example
      * Voice.deleteUser(<UserID - String>, <GuildID - String>); // It will delete the dataobject for the user-id provided in the specified guild-id entry.
      */
-    static deleteUser(userId: string, guildId: string): Promise<boolean>;
+    deleteUser(userId: string, guildId: string): Promise<boolean>;
     /**
      *
      *
@@ -56,7 +50,7 @@ class DiscordVoice {
      * @example
      * Voice.start(<Client - Discord.js Client>); // It will start the voice activity module.
      */
-    static start(client: Client): Promise<any>;
+    start(client: Client): Promise<any>;
     /**
      *
      *
@@ -69,7 +63,7 @@ class DiscordVoice {
      * @example
      * Voice.setVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It sets the Voice Time of a user in the specified guild to the specified amount. (MAKE SURE TO PROVIDE THE TIME IN MILLISECONDS!)
      */
-    static setVoiceTime(userId: string, guildId: string, voicetime: number): Promise<any>;
+    setVoiceTime(userId: string, guildId: string, voicetime: number): Promise<any>;
     /**
      *
      *
@@ -82,7 +76,7 @@ class DiscordVoice {
      * @example
      * Voice.fetch(<UserID - String>, <GuildID - String>, <FetchPosition - Boolean>); // Retrives selected entry from the database, if it exists.
      */
-    static fetch(userId: string, guildId: string, fetchPosition?: boolean): Promise<any>;
+    fetch(userId: string, guildId: string, fetchPosition?: boolean): Promise<any>;
     /**
      *
      *
@@ -95,7 +89,7 @@ class DiscordVoice {
      * @example
      * Voice.addVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It adds a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
      */
-    static addVoiceTime(userId: string, guildId: string, voicetime: number): Promise<any>;
+    addVoiceTime(userId: string, guildId: string, voicetime: number): Promise<any>;
     /**
      *
      *
@@ -108,7 +102,7 @@ class DiscordVoice {
      * @example
      * Voice.subtractVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It removes a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
      */
-    static subtractVoiceTime(userId: string, guildId: string, voicetime: number): Promise<any>;
+    subtractVoiceTime(userId: string, guildId: string, voicetime: number): Promise<any>;
     /**
      *
      *
@@ -119,7 +113,7 @@ class DiscordVoice {
      * @example
      * Voice.resetGuild(<GuildID - String>); // It deletes the entire guild's data-object from the database.
      */
-    static resetGuild(guildId: string): boolean;
+    resetGuild(guildId: string): boolean;
     /**
      *
      *
@@ -131,20 +125,20 @@ class DiscordVoice {
      * @example
      * Voice.fetchLeaderboard(<GuildID - String>, <Limit - Integer>); // It gets a specified amount of entries from the database, ordered from higgest to lowest within the specified limit of entries.
      */
-    static fetchLeaderboard(guildId: string, limit: number): Promise<any[]>;
+    fetchLeaderboard(guildId: string, limit: number): Promise<any[]>;
     /**
      *
      *
      * @static
      * @param {Discord.Client} client - Your Discord.CLient.
      * @param {array} leaderboard - The output from 'fetchLeaderboard' function.
-     * @param {Boolean} [fetchUsers=false] - whether to fetch each users position.
+     * @param {Boolean} [fetchUsers=true] - Whether to fetch the members or get them from cache.
      * @return {Promise<Array>} - It will return the computedleaderboard array, if fetchUsers is true it will add the position key in the JSON object.
      * @memberof DiscordVoice
      * @example
-     * Voice.computeLeaderboard(<Client - Discord.js Client>, <Leaderboard - fetchLeaderboard output>, <fetchUsers - boolean, disabled by default>); // It returns a new array of object that include voice time, guild id, user id, leaderboard position (if fetchUsers is set to true), username and discriminator.
+     * Voice.computeLeaderboard(<Client - Discord.js Client>, <Leaderboard - fetchLeaderboard output>, <fetchUsers - boolean, enabled by default>); // It returns a new array of object that include voice time, guild id, user id, leaderboard position (if fetchUsers is set to true), username and discriminator.
      */
-    static computeLeaderboard(client: any, leaderboard: any[], fetchUsers?: boolean): Promise<any[]>;
+    computeLeaderboard(client: any, leaderboard: any[], fetchUsers?: boolean): Promise<any[]>;
     /**
      *
      *
@@ -156,7 +150,7 @@ class DiscordVoice {
      * @example
      * Voice.blacklist(<UserID - String>, <GuildID - String>); // It will blacklist the user which will make it not count their voice time.
      */
-    static blacklist(userId: string, guildId: string): Promise<any>;
+    blacklist(userId: string, guildId: string): Promise<any>;
     /**
      *
      *
@@ -168,7 +162,7 @@ class DiscordVoice {
      * @example
      * Voice.unblacklist(<UserID - String>, <GuildID - String>); It will un-blacklist the user which will make it count their voice time.
      */
-    static unblacklist(userId: string, guildId: string): Promise<any>;
+    unblacklist(userId: string, guildId: string): Promise<any>;
     /**
      *
      *
@@ -180,7 +174,7 @@ class DiscordVoice {
      * @example
      * Voice.trackbots(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackbots.
      */
-    static trackbots(guildId: string, data: boolean): Promise<any>;
+    trackbots(guildId: string, data: boolean): Promise<any>;
     /**
      *
      *
@@ -192,7 +186,7 @@ class DiscordVoice {
      * @example
      * Voice.trackallchannels(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackallchannels.
      */
-    static trackallchannels(guildId: string, data: boolean): Promise<any>;
+    trackallchannels(guildId: string, data: boolean): Promise<any>;
     /**
      *
      *
@@ -204,7 +198,7 @@ class DiscordVoice {
      * @example
      * Voice.trackMute(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackMute.
      */
-    static trackMute(guildId: string, data: boolean): Promise<any>;
+    trackMute(guildId: string, data: boolean): Promise<any>;
     /**
      *
      *
@@ -216,7 +210,7 @@ class DiscordVoice {
      * @example
      * Voice.trackDeaf(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackDeaf.
      */
-    static trackDeaf(guildId: string, data: boolean): Promise<any>;
+    trackDeaf(guildId: string, data: boolean): Promise<any>;
     /**
      *
      *
@@ -228,7 +222,7 @@ class DiscordVoice {
      * @example
      * Voice.userlimit(<GuildID - String>, <Data - Number>); It will alter the configuration of userlimit.
      */
-    static userlimit(guildId: string, data: number): Promise<any>;
+    userlimit(guildId: string, data: number): Promise<any>;
     /**
      *
      *
@@ -240,7 +234,7 @@ class DiscordVoice {
      * @example
      * Voice.channelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
      */
-    static channelID(guildId: string, data: string): Promise<boolean>;
+    channelID(guildId: string, data: string): Promise<boolean>;
     /**
      *
      *
@@ -252,7 +246,7 @@ class DiscordVoice {
      * @example
      * Voice.removechannelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
      */
-    static removechannelID(guildId: string, data: string): Promise<boolean>;
+    removechannelID(guildId: string, data: string): Promise<boolean>;
     /**
      *
      *
@@ -264,7 +258,7 @@ class DiscordVoice {
      * @example
      * Voice.toggle(<GuildID - String>, <Data - Boolean>); It will alter the configuration of the module.
      */
-    static toggle(guildId: string, data: boolean): Promise<any>;
+    toggle(guildId: string, data: boolean): Promise<any>;
     /**
      *
      *
@@ -275,6 +269,6 @@ class DiscordVoice {
      * @example
      * Voice.fetchconfig(<GuildID - String>); It will return the config data object if present.
      */
-    static fetchconfig(guildId: string): Promise<boolean>;
+    fetchconfig(guildId: string): Promise<boolean>;
 }
 }

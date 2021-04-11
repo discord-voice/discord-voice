@@ -1,5 +1,5 @@
 module.exports = {
-  execute: async(client, member, channel, Voice, VoiceConfig) => {
+  execute: async(client, member, channel, Voice, VoiceConfig, event) => {
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -22,13 +22,13 @@ module.exports = {
     if (!config.trackMute) {
       if (member.voice.selfMute || member.voice.serverMute) {
         const muteType = member.voice.selfMute ? 'self-muted' : 'server-muted';
-        return client.emit("voiceChannelMute", member, muteType);
+        return require('./voiceChannelMute.js').execute(client, member, muteType, Voice, VoiceConfig);
       }
     }
     if (!config.trackDeaf) {
       if (member.voice.selfDeaf || member.voice.serverDeaf) {
         const deafType = member.voice.selfDeaf ? 'self-deafed' : 'server-v';
-        return client.emit('voiceChannelDeaf', member, deafType);
+        return require('./voiceChannelMute.js').execute(client, member, deafType, Voice, VoiceConfig);
       }
     }
     let user = await Voice.findOne({
@@ -50,14 +50,25 @@ module.exports = {
 				lastUpdated: new Date()
         }
 				user.joinTime[channel.id] = Date.now();
+				let data = {}
+				data.user = user
+				data.config = config
+				event.emit('userVoiceJoin', data, member, channel, true)
 				return await Voice.create(user);
         }
         if (user.isBlacklisted) return;
-				if(user.joinTime[channel.id] != 0) return client.emit("voiceChannelLeave", member, channel);
-        user.joinTime[channel.id] = Date.now();
+				let jointime = user.joinTime[channel.id]
+				if(!jointime) jointime = 0
+				if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
+      	jointime = Date.now();
+				user.joinTime[channel.id] = jointime
 				user.markModified('joinTime')
-        await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
-        return user;
+				await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
+        let data = {}
+				data.user = user
+				data.config = config
+				event.emit('userVoiceJoin', data, member, channel, false)
+				return user;
       }
     }
     if (config.trackallchannels) {
@@ -74,14 +85,25 @@ module.exports = {
 				lastUpdated: new Date()
         }
 				user.joinTime[channel.id] = Date.now();
+				let data = {}
+				data.user = user
+				data.config = config
+				event.emit('userVoiceJoin', data, member, channel, true)
 				return await Voice.create(user);
       }
       if (user.isBlacklisted) return;
-			if(user.joinTime[channel.id] != 0) return client.emit("voiceChannelLeave", member, channel);
-      user.joinTime[channel.id] = Date.now();
+			let jointime = user.joinTime[channel.id]
+			if(!jointime) jointime = 0
+			if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
+      jointime = Date.now();
+			user.joinTime[channel.id] = jointime
 			user.markModified('joinTime')
       await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
-      return user;
+      let data = {}
+			data.user = user
+			data.config = config
+			event.emit('userVoiceJoin', data, member, channel, false)
+			return user;
     }
 		}
 }

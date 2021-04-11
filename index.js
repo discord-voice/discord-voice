@@ -1,29 +1,41 @@
 const mongoose = require("mongoose");
 const Voice = require("./models/voice.js");
 const VoiceConfig = require("./models/voiceconfig.js");
-const logs = require('discord-logs');
-let mongoUrl;
+const { EventEmitter } = require('events');
+let startRegistered = false;
 /**
  *
  *
  * @class DiscordVoice
  */
-class DiscordVoice {
+class DiscordVoice extends EventEmitter {
+  /**
+  * @param {Discord.Client} client The Discord Client
+  * @param {GiveawaysManagerOptions} options The manager options
+  */
+  constructor(client, mongodbURL, connect = true) {
+  super();
+	if (!client) throw new Error('A client was not provided.');
 	/**
-	 *
-	 *
-	 * @static
-	 * @param {String} dbUrl - A valid mongo database URI.
-	 * @return {Promise<mongoose.Connection>} - The mongoose connection promise.
-	 * @memberof DiscordVoice
-	 * @example
-	 * Voice.setURL("mongodb://..."); // You only need to do this ONCE per process.
-	 */
-	static async setURL(dbUrl) {
-		if (!dbUrl) throw new TypeError("A database url was not provided.");
-		if(mongoUrl) throw new TypeError("A database url was already configured.");
-		mongoUrl = dbUrl;
-		return mongoose.connect(dbUrl, {
+  * The Discord Client
+  * @type {Discord.Client}
+  */
+	this.client = client;
+	if (!mongodbURL) throw new TypeError("A database url was not provided.");
+	/**
+  * The mongodb URL.
+  * @type {String}
+  */
+	this.dbUrl = mongodbURL
+	if (connect) this._connect();
+	}
+	/**
+  * Connects to mongoDB
+  * @ignore
+  * @private
+  */
+	 _connect() {
+		return mongoose.connect(this.dbUrl, {
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
 			useFindAndModify: false,
@@ -41,7 +53,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.createUser(<UserID - String>, <GuildID - String>); // It will create a dataobject for the user-id provided in the specified guild-id entry.
 	 */
-	static async createUser(userId, guildId) {
+	async createUser(userId, guildId) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		const isUser = await Voice.findOne({
@@ -67,7 +79,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.deleteUser(<UserID - String>, <GuildID - String>); // It will delete the dataobject for the user-id provided in the specified guild-id entry.
 	 */
-	static async deleteUser(userId, guildId) {
+	async deleteUser(userId, guildId) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		const user = await Voice.findOne({
@@ -91,27 +103,13 @@ class DiscordVoice {
 	 * @example
 	 * Voice.start(<Client - Discord.js Client>); // It will start the voice activity module.
 	 */
-	static async start(client) {
+	async start(client) {
 		if (!client) throw new TypeError("A client was not provided.");
-		logs(client);
-		client.on("voiceChannelJoin", async (member, channel) => {
-				const event = require('./handlers/voiceChannelJoin.js').execute(client, member, channel, Voice, VoiceConfig);
-		});
-		client.on("voiceChannelMute", async (member, muteType) => {
-				const event = require('./handlers/voiceChannelMute.js').execute(client, member, muteType, Voice, VoiceConfig);
-		});
-		client.on("voiceChannelUnmute", async (member, oldMuteType) => {
-				const event = require('./handlers/voiceChannelUnmute.js').execute(client, member, oldMuteType, Voice, VoiceConfig);
-		});
-		client.on("voiceChannelDeaf", async (member, deafType) => {
-				const event = require('./handlers/voiceChannelDeaf.js').execute(client, member, deafType, Voice, VoiceConfig);
-		});
-		client.on("voiceChannelUndeaf", async (member, deafType) => {
-				const event = require('./handlers/voiceChannelUndeaf.js').execute(client, member, deafType, Voice, VoiceConfig);
-		});
-		client.on("voiceChannelLeave", async (member, channel) => {
-				const event = require('./handlers/voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
-		});
+		if (startRegistered) return;
+    startRegistered = true;
+		client.on('voiceStateUpdate', (oldState, newState) => {
+        require('./events/voiceStateUpdate.js').execute(client, oldState, newState, Voice, VoiceConfig, this);
+    });
 	}
 	/**
 	 *
@@ -125,7 +123,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.setVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It sets the Voice Time of a user in the specified guild to the specified amount. (MAKE SURE TO PROVIDE THE TIME IN MILLISECONDS!)
 	 */
-	static async setVoiceTime(userId, guildId, voicetime) {
+	async setVoiceTime(userId, guildId, voicetime) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (voicetime == 0 || !voicetime || isNaN(parseInt(voicetime))) throw new TypeError("An amount of voice time was not provided/was invalid.");
@@ -150,7 +148,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.fetch(<UserID - String>, <GuildID - String>, <FetchPosition - Boolean>); // Retrives selected entry from the database, if it exists.
 	 */
-	static async fetch(userId, guildId, fetchPosition = false) {
+	async fetch(userId, guildId, fetchPosition = false) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		const user = await Voice.findOne({
@@ -162,10 +160,9 @@ class DiscordVoice {
 		if (fetchPosition === true) {
 			const leaderboard = await Voice.find({
 				guildID: guildId
-			}).sort([
-				['voiceTime', 'descending']
-			]).exec();
-			userobj.position = leaderboard.findIndex(i => i.userID === userId) + 1;
+			});
+			let usersorted = leaderboard.sort((a, b) => b.voiceTime.total - a.voiceTime.total)
+			userobj.position = usersorted.findIndex(i => i.userID === userId) + 1;
 		}
 		userobj.data = user
 		return userobj;
@@ -182,7 +179,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.addVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It adds a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
 	 */
-	static async addVoiceTime(userId, guildId, voicetime) {
+	async addVoiceTime(userId, guildId, voicetime) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (voicetime == 0 || !voicetime || isNaN(parseInt(voicetime))) throw new TypeError("An amount of voice time was not provided/was invalid.");
@@ -207,7 +204,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.subtractVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It removes a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
 	 */
-	static async subtractVoiceTime(userId, guildId, voicetime) {
+	async subtractVoiceTime(userId, guildId, voicetime) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (voicetime == 0 || !voicetime || isNaN(parseInt(voicetime))) throw new TypeError("An amount of voice time was not provided/was invalid.");
@@ -230,7 +227,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.resetGuild(<GuildID - String>); // It deletes the entire guild's data-object from the database.
 	 */
-	static async resetGuild(guildId) {
+	async resetGuild(guildId) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		const guild = await Voice.findOne({
 			guildID: guildId
@@ -255,7 +252,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.fetchLeaderboard(<GuildID - String>, <Limit - Integer>); // It gets a specified amount of entries from the database, ordered from higgest to lowest within the specified limit of entries.
 	 */
-	static async fetchLeaderboard(guildId, limit) {
+	async fetchLeaderboard(guildId, limit) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (!limit) throw new TypeError("A limit was not provided.");
 		const users = await Voice.find({
@@ -270,13 +267,13 @@ class DiscordVoice {
 	 * @static
 	 * @param {Discord.Client} client - Your Discord.CLient.
 	 * @param {array} leaderboard - The output from 'fetchLeaderboard' function.
-	 * @param {Boolean} [fetchUsers=false] - whether to fetch each users position.
+	 * @param {Boolean} [fetchUsers=true] - Whether to fetch the members or get them from cache.
 	 * @return {Promise<Array>} - It will return the computedleaderboard array, if fetchUsers is true it will add the position key in the JSON object.
 	 * @memberof DiscordVoice
 	 * @example
-	 * Voice.computeLeaderboard(<Client - Discord.js Client>, <Leaderboard - fetchLeaderboard output>, <fetchUsers - boolean, disabled by default>); // It returns a new array of object that include voice time, guild id, user id, leaderboard position (if fetchUsers is set to true), username and discriminator.
+	 * Voice.computeLeaderboard(<Client - Discord.js Client>, <Leaderboard - fetchLeaderboard output>, <fetchUsers - boolean, enabled by default>); // It returns a new array of object that include voice time, guild id, user id, leaderboard position (if fetchUsers is set to true), username and discriminator.
 	 */
-	static async computeLeaderboard(client, leaderboard, fetchUsers = false) {
+	async computeLeaderboard(client, leaderboard, fetchUsers = true) {
 		if (!client) throw new TypeError("A client was not provided.");
 		if (!leaderboard) throw new TypeError("A leaderboard id was not provided.");
 		if (leaderboard.length < 1) return [];
@@ -319,7 +316,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.blacklist(<UserID - String>, <GuildID - String>); // It will blacklist the user which will make it not count their voice time.
 	 */
-	static async blacklist(userId, guildId) {
+	async blacklist(userId, guildId) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
     const user = await Voice.findOne({
@@ -350,7 +347,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.unblacklist(<UserID - String>, <GuildID - String>); It will un-blacklist the user which will make it count their voice time.
 	 */
-	static async unblacklist(userId, guildId) {
+	async unblacklist(userId, guildId) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
     const user = await Voice.findOne({
@@ -374,7 +371,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.trackbots(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackbots.
 	 */
-	static async trackbots(guildId, data) {
+	async trackbots(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
     const config = await VoiceConfig.findOne({
@@ -409,7 +406,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.trackallchannels(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackallchannels.
 	 */
-	static async trackallchannels(guildId, data) {
+	async trackallchannels(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
     const config = await VoiceConfig.findOne({
@@ -444,7 +441,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.trackMute(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackMute.
 	 */
-	static async trackMute(guildId, data) {
+	async trackMute(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
     const config = await VoiceConfig.findOne({
@@ -479,7 +476,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.trackDeaf(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackDeaf.
 	 */
-	static async trackDeaf(guildId, data) {
+	async trackDeaf(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (data != false && data != true) throw new TypeError("The data provided should have been either true or false.");
     const config = await VoiceConfig.findOne({
@@ -514,7 +511,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.userlimit(<GuildID - String>, <Data - Number>); It will alter the configuration of userlimit.
 	 */
-	static async userlimit(guildId, data) {
+	async userlimit(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (!data || isNaN(parseInt(data))) throw new TypeError("An amount of userlimit was not provided/was invalid.");
     const config = await VoiceConfig.findOne({
@@ -549,7 +546,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.channelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
 	 */
-	static async channelID(guildId, data) {
+	async channelID(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (!data) throw new TypeError("A channel id was not provided.");
     const config = await VoiceConfig.findOne({
@@ -587,7 +584,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.removechannelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
 	 */
-	static async removechannelID(guildId, data) {
+	async removechannelID(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if (!data) throw new TypeError("A channel id was not provided.");
     const config = await VoiceConfig.findOne({
@@ -612,7 +609,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.toggle(<GuildID - String>, <Data - Boolean>); It will alter the configuration of the module.
 	 */
-	static async toggle(guildId, data) {
+	async toggle(guildId, data) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
 		if(data == "on") data = true
 		if(data == "off") data = false
@@ -648,7 +645,7 @@ class DiscordVoice {
 	 * @example
 	 * Voice.fetchconfig(<GuildID - String>); It will return the config data object if present.
 	 */
-	static async fetchconfig(guildId) {
+	async fetchconfig(guildId) {
 		if (!guildId) throw new TypeError("A guild id was not provided.");
     const config = await VoiceConfig.findOne({
 		guildID: guildId

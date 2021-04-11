@@ -1,5 +1,5 @@
 module.exports = {
-  execute: async(client, member, muteType, Voice, VoiceConfig) => {
+  execute: async(client, member, muteType, Voice, VoiceConfig, event) => {
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -44,7 +44,11 @@ module.exports = {
           user.markModified('joinTime')
 					user.markModified('voiceTime')
           await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
-          return user;
+          let data = {}
+					data.user = user
+					data.config = config
+					event.emit('userVoiceMute', data, member, member.voice.channel, muteType)
+					return user;
 					} else return;
         }
       }
@@ -69,9 +73,23 @@ module.exports = {
           user.markModified('joinTime')
 					user.markModified('voiceTime')
           await user.save().catch(e => console.log(`Failed to save user voice time: ${e}`));
-          return user;
+          let data = {}
+					data.user = user
+					data.config = config
+					event.emit('userVoiceMute', data, member, member.voice.channel, muteType)
+					return user;
 					} else return;
       }
-    }
+    } else {
+		let user = await Voice.findOne({
+        userID: member.user.id,
+        guildID: member.guild.id
+    });
+		let data = {}
+		data.user = user
+		data.config = config
+		let channel = member.voice.channel
+		return event.emit('userVoiceMute', data, member, channel, muteType);
+		}
   }
 }
