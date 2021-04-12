@@ -5,7 +5,7 @@ module.exports = {
       guildID: member.guild.id
     });
     if (!config) {
-      config = new VoiceConfig({
+      config = {
         guildID: member.guild.id,
         trackbots: false,
         trackallchannels: true,
@@ -13,9 +13,10 @@ module.exports = {
         channelID: [],
         trackMute: true,
         trackDeaf: true,
-        isEnabled: true
-      });
-      await config.save().catch(e => console.log(`Failed to save config: ${e}`));
+        isEnabled: true,
+				lastUpdated: new Date()
+      }
+			await VoiceConfig.create(config).catch(e => console.log(`Failed to save config: ${e}`));
     }
     if (!config.trackMute) {
       let user = await Voice.findOne({
@@ -38,7 +39,7 @@ module.exports = {
 				  data.user = user
 				  data.config = config
 				  event.emit('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, true)
-					return await Voice.create(user);
+					return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
           }
           if (user.isBlacklisted) return;
           let jointime = user.joinTime[channel.id]
@@ -70,7 +71,7 @@ module.exports = {
 				data.user = user
 				data.config = config
 				event.emit('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, true)
-				return await Voice.create(user);
+				return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
         }
         if (user.isBlacklisted) return;
         let jointime = user.joinTime[channel.id]

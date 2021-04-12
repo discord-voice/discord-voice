@@ -6,7 +6,7 @@ module.exports = {
       guildID: member.guild.id
     });
     if (!config) {
-      config = new VoiceConfig({
+      config = {
         guildID: member.guild.id,
         trackbots: false,
         trackallchannels: true,
@@ -14,8 +14,10 @@ module.exports = {
         channelID: [],
         trackMute: true,
         trackDeaf: true,
-        isEnabled: true
-      });
+        isEnabled: true,
+				lastUpdated: new Date()
+      }
+			await VoiceConfig.create(config).catch(e => console.log(`Failed to save config: ${e}`));
     }
     if (!config.isEnabled) return;
     if (!config.trackbots) if (member.bot) return;

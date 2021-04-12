@@ -13,9 +13,10 @@ module.exports = {
         channelID: [],
         trackMute: true,
         trackDeaf: true,
-        isEnabled: true
+        isEnabled: true,
+				lastUpdated: new Date()
       };
-			await VoiceConfig.create(config);
+			await VoiceConfig.create(config).catch(e => console.log(`Failed to save config: ${e}`));
     }
     if (!config.isEnabled) return;
     if (!config.trackbots) if (member.bot) return;
@@ -54,7 +55,7 @@ module.exports = {
 				data.user = user
 				data.config = config
 				event.emit('userVoiceJoin', data, member, channel, true)
-				return await Voice.create(user);
+				return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
         }
         if (user.isBlacklisted) return;
 				let jointime = user.joinTime[channel.id]
@@ -89,7 +90,7 @@ module.exports = {
 				data.user = user
 				data.config = config
 				event.emit('userVoiceJoin', data, member, channel, true)
-				return await Voice.create(user);
+				return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
       }
       if (user.isBlacklisted) return;
 			let jointime = user.joinTime[channel.id]

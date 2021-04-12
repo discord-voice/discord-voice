@@ -61,12 +61,15 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
 		});
 		if (isUser) return false;
-		const newUser = new Voice({
+		const newUser = {
 			userID: userId,
-			guildID: guildId
-		});
-		await newUser.save().catch(e => console.log(`Failed to create user: ${e}`));
-		return newUser;
+			guildID: guildId,
+			joinTime: {},
+			voiceTime: {},
+      isBlacklisted: false,
+			lastUpdated: new Date()
+		};
+		return await Voice.create(newUser);
 	}
 	/**
 	 *
@@ -90,7 +93,7 @@ class DiscordVoice extends EventEmitter {
 		await Voice.findOneAndDelete({
 			userID: userId,
 			guildID: guildId
-		}).catch(e => console.log(`Failed to delete user: ${e}`));
+		}).exec().catch(e => console.log(`Failed to delete user: ${e}`));
 		return user;
 	}
 	/**
@@ -106,8 +109,8 @@ class DiscordVoice extends EventEmitter {
 	async start() {
 		if (startRegistered) return;
     startRegistered = true;
-		client.on('voiceStateUpdate', (oldState, newState) => {
-        require('./events/voiceStateUpdate.js').execute(client, oldState, newState, Voice, VoiceConfig, this);
+		this.client.on('voiceStateUpdate', (oldState, newState) => {
+        require('./events/voiceStateUpdate.js').execute(this.client, oldState, newState, Voice, VoiceConfig, this);
     });
 	}
 	/**
@@ -116,23 +119,33 @@ class DiscordVoice extends EventEmitter {
 	 * @static
 	 * @param {String} userId - Discord user id.
 	 * @param {String} guildId - Discord guild id.
+	 * @param {String} channelId - Discord channel id.
 	 * @param {Number} voicetime - Amount of voice time in ms to set.
 	 * @return {Promise<Object>} - The user data object.
 	 * @memberof DiscordVoice
 	 * @example
 	 * Voice.setVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It sets the Voice Time of a user in the specified guild to the specified amount. (MAKE SURE TO PROVIDE THE TIME IN MILLISECONDS!)
 	 */
-	async setVoiceTime(userId, guildId, voicetime) {
+	async setVoiceTime(userId, guildId, channelId, voicetime) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
+		if(!channelId) throw new TypeError("A channel id was not provided.");
 		if (voicetime == 0 || !voicetime || isNaN(parseInt(voicetime))) throw new TypeError("An amount of voice time was not provided/was invalid.");
 		const user = await Voice.findOne({
 			userID: userId,
 			guildID: guildId
 		});
 		if (!user) return false;
-		user.voiceTime = voicetime;
-		user.save().catch(e => console.log(`Failed to set voice time: ${e}`));
+		let voicetimechan = user.voiceTime[channelId]
+		if(!voicetimechan) voicetimechan = 0
+		voicetimechan = parseInt(voicetime, 10);
+		user.voiceTime[channelId] = voicetimechan
+		let userobj = user.voiceTime
+		delete userobj.total;
+	  let total = Object.values(userobj).reduce((a, b) => a + b, 0)
+		user.voiceTime['total'] = total
+		user.markModified('voiceTime')
+		user.save().catch(e => console.log(`Failed to add voice time: ${e}`));
 		return user;
 	}
 	/**
@@ -172,22 +185,32 @@ class DiscordVoice extends EventEmitter {
 	 * @static
 	 * @param {String} userId - Discord user id.
 	 * @param {String} guildId - Discord guild id.
+	 * @param {String} channelId - Discord channel id.
 	 * @param {Number} voicetime - Amount of voice time in ms to add.
 	 * @return {Promise<Object>} - The user data object.
 	 * @memberof DiscordVoice
 	 * @example
 	 * Voice.addVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It adds a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
 	 */
-	async addVoiceTime(userId, guildId, voicetime) {
+	async addVoiceTime(userId, guildId, channelId, voicetime) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
+		if(!channelId) throw new TypeError("A channel id was not provided.");
 		if (voicetime == 0 || !voicetime || isNaN(parseInt(voicetime))) throw new TypeError("An amount of voice time was not provided/was invalid.");
 		const user = await Voice.findOne({
 			userID: userId,
 			guildID: guildId
 		});
 		if (!user) return false;
-		user.voiceTime += parseInt(voicetime, 10);
+		let voicetimechan = user.voiceTime[channelId]
+		if(!voicetimechan) voicetimechan = 0
+		voicetimechan += parseInt(voicetime, 10);
+		user.voiceTime[channelId] = voicetimechan
+		let userobj = user.voiceTime
+		delete userobj.total;
+	  let total = Object.values(userobj).reduce((a, b) => a + b, 0)
+		user.voiceTime['total'] = total
+		user.markModified('voiceTime')
 		user.save().catch(e => console.log(`Failed to add voice time: ${e}`));
 		return user;
 	}
@@ -197,22 +220,32 @@ class DiscordVoice extends EventEmitter {
 	 * @static
 	 * @param {String} userId - Discord user id.
 	 * @param {String} guildId - Discord guild id.
+	 * @param {String} channelId - Discord channel id.
 	 * @param {Number} voicetime - Amount of voice time in ms to subtract.
 	 * @return {Promise<Object>} - The user data object.
 	 * @memberof DiscordVoice
 	 * @example
 	 * Voice.subtractVoiceTime(<UserID - String>, <GuildID - String>, <Amount - Integer>); // It removes a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
 	 */
-	async subtractVoiceTime(userId, guildId, voicetime) {
+	async subtractVoiceTime(userId, guildId, channelId, voicetime) {
 		if (!userId) throw new TypeError("An user id was not provided.");
 		if (!guildId) throw new TypeError("A guild id was not provided.");
+		if(!channelId) throw new TypeError("A channel id was not provided.");
 		if (voicetime == 0 || !voicetime || isNaN(parseInt(voicetime))) throw new TypeError("An amount of voice time was not provided/was invalid.");
 		const user = await Voice.findOne({
 			userID: userId,
 			guildID: guildId
 		});
 		if (!user) return false;
-		user.voiceTime -= parseInt(voicetime, 10);
+		let voicetimechan = user.voiceTime[channelId]
+		if(!voicetimechan) voicetimechan = 0
+		voicetimechan -= parseInt(voicetime, 10);
+		user.voiceTime[channelId] = voicetimechan
+		let userobj = user.voiceTime
+		delete userobj.total;
+	  let total = Object.values(userobj).reduce((a, b) => a + b, 0)
+		user.voiceTime['total'] = total
+		user.markModified('voiceTime')
 		user.save().catch(e => console.log(`Failed to subtract voice time: ${e}`));
 		return user;
 	}
@@ -323,15 +356,18 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!user) {
-		const newUser = new Voice({
-		userID: member.user.id,
-		guildID: member.guild.id,
-		oinTime: Date.now()
-						});
-						await newUser.save().catch(e => console.log(`Failed to save new user.`));
-						return newUser;
+		userobj = {
+    userID: userId,
+    guildID: guildId,
+    joinTime: {},
+		voiceTime: {},
+    isBlacklisted: true,
+		lastUpdated: new Date()
+    }
+		return await Voice.create(userobj).catch(e => console.log(`Failed to save user: ${e}`));
 		}
 		user.isBlacklisted = true
+		user.markModified('isBlacklisted')
 		user.save().catch(e => console.log(`Failed to add user to blacklist: ${e}`));
 		return user;
 	}
@@ -356,6 +392,7 @@ class DiscordVoice extends EventEmitter {
 		if (!user) return false;
 		if(!user.isBlacklisted) return false;
 		user.isBlacklisted = false
+		user.markModified('isBlacklisted')
 		user.save().catch(e => console.log(`Failed to remove user from blacklist: ${e}`));
 		return user;
 	}
@@ -377,7 +414,7 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!config) {
-		const newConfig = new VoiceConfig({
+		const newConfig = {
 		guildID: guildId,
 		trackbots: data,
 		trackallchannels: true,
@@ -385,12 +422,13 @@ class DiscordVoice extends EventEmitter {
 		channelID: [],
 		trackMute: true,
 	  trackDeaf: true,
-		isEnabled: true
-		});
-		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
-		return newConfig;
+		isEnabled: true, 
+		lastUpdated: new Date()
+		}
+		return await VoiceConfig.create(newConfig).catch(e => console.log(`Failed to save config: ${e}`));
 		}
 		config.trackbots = data
+		config.markModified('trackbots')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -412,7 +450,7 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!config) {
-		const newConfig = new VoiceConfig({
+		const newConfig = {
 		guildID: guildId,
 		trackbots: false,
 		trackallchannels: data,
@@ -420,12 +458,13 @@ class DiscordVoice extends EventEmitter {
 		channelID: [],
 		trackMute: true,
 	  trackDeaf: true,
-		isEnabled: true
-		});
-		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
-		return newConfig;
+		isEnabled: true,
+		lastUpdated: new Date()
+		}
+		return await VoiceConfig.create(newConfig).catch(e => console.log(`Failed to save config: ${e}`));
 		}
 		config.trackallchannels = data
+		config.markModified('trackallchannels')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -447,7 +486,7 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!config) {
-		const newConfig = new VoiceConfig({
+		const newConfig = {
 		guildID: guildId,
 		trackbots: false,
 		trackallchannels: true,
@@ -455,12 +494,13 @@ class DiscordVoice extends EventEmitter {
 		channelID: [],
 		trackMute: data,
 	  trackDeaf: true,
-		isEnabled: true
-		});
-		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
-		return newConfig;
+		isEnabled: true, 
+		lastUpdated: new Date()
+		}
+		return await VoiceConfig.create(newConfig).catch(e => console.log(`Failed to save config: ${e}`));
 		}
 		config.trackMute = data
+		config.markModified('trackMute')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -482,7 +522,7 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!config) {
-		const newConfig = new VoiceConfig({
+		const newConfig = {
 		guildID: guildId,
 		trackbots: false,
 		trackallchannels: true,
@@ -490,12 +530,13 @@ class DiscordVoice extends EventEmitter {
 		channelID: [],
 		trackMute: true,
 	  trackDeaf: data,
-		isEnabled: true
-		});
-		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
-		return newConfig;
+		isEnabled: true, 
+		lastUpdated: new Date()
+		}
+		return await VoiceConfig.create(newConfig).catch(e => console.log(`Failed to save config: ${e}`));
 		}
 		config.trackDeaf = data
+		config.markModified('trackDeaf')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -517,7 +558,7 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!config) {
-		const newConfig = new VoiceConfig({
+		const newConfig = {
 		guildID: guildId,
 		trackbots: false,
 		trackallchannels: true,
@@ -525,12 +566,13 @@ class DiscordVoice extends EventEmitter {
 		channelID: [],
 		trackMute: true,
 	  trackDeaf: true,
-		isEnabled: true
-		});
-		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
-		return newConfig;
+		isEnabled: true, 
+		lastUpdated: new Date()
+		}
+		return await VoiceConfig.create(newConfig).catch(e => console.log(`Failed to save config: ${e}`));
 		}
 		config.userlimit = data
+		config.markModified('userlimit')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -552,7 +594,7 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!config) {
-		const newConfig = new VoiceConfig({
+		const newConfig = {
 		guildID: guildId,
 		trackbots: false,
 		trackallchannels: true,
@@ -560,15 +602,16 @@ class DiscordVoice extends EventEmitter {
 		channelID: [`${data}`],
 		trackMute: true,
 	  trackDeaf: true,
-		isEnabled: true
-		});
-		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
-		return newConfig;
+		isEnabled: true, 
+		lastUpdated: new Date()
+		}
+		return await VoiceConfig.create(newConfig).catch(e => console.log(`Failed to save config: ${e}`));
 		}
 		let array = config.channelID
 		if(array.includes(data)) return false;
 		array.push(data)
 		config.channelID = array
+		config.markModified('channelID')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -594,6 +637,7 @@ class DiscordVoice extends EventEmitter {
 		if(!array.includes(data)) return false;
 		array = array.filter(d => d !== data);
 		config.channelID = array
+		config.markModified('channelID')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
@@ -617,7 +661,7 @@ class DiscordVoice extends EventEmitter {
 			guildID: guildId
     });
 		if (!config) {
-		const newConfig = new VoiceConfig({
+		const newConfig = {
 		guildID: guildId,
 		trackbots: false,
 		trackallchannels: true,
@@ -625,12 +669,13 @@ class DiscordVoice extends EventEmitter {
 		channelID: [],
 		trackMute: true,
 	  trackDeaf: true,
-		isEnabled: data
-		});
-		await newConfig.save().catch(e => console.log(`Failed to save new user.`));
-		return newConfig;
+		isEnabled: data,
+		lastUpdated: new Date()
+		};
+		return await VoiceConfig.create(newConfig).catch(e => console.log(`Failed to save config: ${e}`));
 		}
 		config.isEnabled = data
+		config.markModified('isEnabled')
 		config.save().catch(e => console.log(`Failed to update config: ${e}`));
 		return config;
 	}
