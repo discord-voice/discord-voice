@@ -103,8 +103,7 @@ class DiscordVoice extends EventEmitter {
 	 * @example
 	 * Voice.start(<Client - Discord.js Client>); // It will start the voice activity module.
 	 */
-	async start(client) {
-		if (!client) throw new TypeError("A client was not provided.");
+	async start() {
 		if (startRegistered) return;
     startRegistered = true;
 		client.on('voiceStateUpdate', (oldState, newState) => {
@@ -653,5 +652,132 @@ class DiscordVoice extends EventEmitter {
 		if (!config) return false;
 		return config;
 	}
+
+	/**
+ 	* Emitted when a user join's any vc.
+ 	* @event DiscordVoice#userVoiceJoin
+ 	* @param {Object} data The user and config data object
+ 	* @param {Discord.GuildMember} member The guild member
+	* @param {Discord.VoiceChannel} channel The voice channel
+	* @param {Boolean} isNew Whether the user is new or not (Newly created in the database)
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('userVoiceJoin', (data, member, channel, isNew) => {
+  * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`${member.user.username} joined ${channel.name} vc!`);
+ 	* });
+ 	*/
+
+	/**
+ 	* Emitted when a user swicthes between vc's.
+ 	* @event DiscordVoice#userVoiceSwitch
+ 	* @param {Discord.GuildMember} member The guild member
+	* @param {Discord.VoiceChannel} oldChannel The user's old voice channel
+	* @param {Discord.VoiceChannel} newChannel The user's new voice channel
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('userVoiceSwitch', (member, oldChannel, newChannel) => {
+  * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`${member.user.username} swicthed from ${oldChannel.name} to ${newChannel.name} vc!`);
+ 	* });
+ 	*/
+
+	/**
+ 	* Emitted when a user mutes in the vc.
+ 	* @event DiscordVoice#userVoiceMute
+	* @param {Object} data The user and config data object
+ 	* @param {Discord.GuildMember} member The guild member
+	* @param {Discord.VoiceChannel} channel The voice channel
+	* @param {String} MuteType The MuteType of the user
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('userVoiceMute', (data, member, channel, MuteType) => {
+  * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`${member.user.username} has muted their mic in ${channel.name}\nTheir mute type is: ${MuteType}`);
+ 	* });
+ 	*/
+
+	/**
+ 	* Emitted when a user un-mutes in the vc.
+ 	* @event DiscordVoice#userVoiceUnMute
+	* @param {Object} data The user and config data object
+ 	* @param {Discord.GuildMember} member The guild member
+	* @param {Discord.VoiceChannel} channel The voice channel
+	* @param {String} oldMuteType The oldMuteType of the user
+	* @param {Boolean} isNew Whether the user is new or not (Newly created in the database)
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('userVoiceUnMute', (data, member, channel, oldMuteType, isNew) => {
+  * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`${member.user.username} has un-muted their mic in ${channel.name}\nTheir previous mute type was: ${oldMuteType}`);
+ 	* });
+ 	*/
+
+	/**
+ 	* Emitted when a user deafens in the vc.
+ 	* @event DiscordVoice#userVoiceDeaf
+	* @param {Object} data The user and config data object
+ 	* @param {Discord.GuildMember} member The guild member
+	* @param {Discord.VoiceChannel} channel The voice channel
+	* @param {String} DeafType The DeafType of the user
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('userVoiceDeaf', (data, member, channel, DeafType) => {
+  * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`${member.user.username} has become deafen in ${channel.name}\nTheir deaf type is: ${DeafType}`);
+ 	* });
+ 	*/
+
+	/**
+ 	* Emitted when a user un-deafens in the vc.
+ 	* @event DiscordVoice#userVoiceUnDeaf
+	* @param {Object} data The user and config data object
+ 	* @param {Discord.GuildMember} member The guild member
+	* @param {Discord.VoiceChannel} channel The voice channel
+	* @param {String} oldDeafType The oldDeafType of the user
+	* @param {Boolean} isNew Whether the user is new or not (Newly created in the database)
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('userVoiceUnDeaf', (data, member, channel, oldDeafType, isNew) => {
+  * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`${member.user.username} has become un-deafen in ${channel.name}\nTheir previous deaf type was: ${oldDeafType}`);
+ 	* });
+ 	*/
+
+	/**
+ 	* Emitted when a user leaves the vc.
+ 	* @event DiscordVoice#userVoiceLeave
+	* @param {Object} data The user and config data object
+ 	* @param {Discord.GuildMember} member The guild member
+	* @param {Discord.VoiceChannel} channel The voice channel
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('userVoiceLeave', (data, member, channel) => {
+  * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`${member.user.username} has left ${channel.name} vc!`);
+ 	* });
+ 	*/
+
+	/**
+ 	* Emitted when there was a error executing the tracking functions.
+ 	* @event DiscordVoice#unhandledVoiceStateUpdate
+	* @param {Object} data The user and config data object
+ 	* @param {Discord.VoiceState} oldState The oldState of the member
+	* @param {Discord.VoiceState} newState The newState of the member
+ 	*
+ 	* @example
+ 	* // This can be used to add features such as logging a user voice activity in a logs channel
+ 	* Voice.on('unhandledVoiceStateUpdate', (oldState, newState) => {
+  * let logchannel = oldState.member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
+	* return logchannel.send(`Voice state for member ${oldState.member.user.username} was updated but discord-voice couldn't find what was updated!`);
+ 	* });
+ 	*/
 }
 module.exports = DiscordVoice;
