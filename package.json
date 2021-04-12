@@ -1,59 +1,66 @@
 {
-  "name": "discord-voice",
-  "scripts": {
-    "gpr": "node scripts/gpr.js"
-  },
-  "version": "1.0.2",
-  "description": "A complete framework to facilitate the tracking of user voice time using discord.js",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Lebyy/discord-voice.git"
-  },
-  "keywords": [
-		"discord",
-		"economy",
-		"discord.js",
-		"bot",
-		"bots",
-		"leveling",
-		"levels",
-		"discord-levels",
-		"discord-xp",
-		"xp",
-		"mongo",
-		"mongoose",
-		"mongodb",
-		"discord-economy",
-		"discord-eco",
-		"framework",
-		"discord-messages",
-		"code",
-		"npm",
-		"messages",
-		"discord-voice",
-		"voice tracker",
-		"voice",
-		"ms",
-		"discordvoice"
-	],
-	"author": "lebyy_dev",
-	"license": "AGPL-3.0",
-	"bugs": {
-		"url": "https://github.com/Lebyy/discord-voice/issues"
-	},
-	"homepage": "https://discord-voice.js.org",
-  "dependencies": {
-    "discord-logs": "^1.9.0",
-    "mongoose": "^5.12.0"
-  },
-  "devDependencies": {
-    "@types/node": "^14.0.5",
-    "discord.js": "^12.5.1",
-    "eslint": "^7.6.0",
-    "jsdoc": "^3.6.4",
-    "jsdoc-skyceil": "Androz2091/jsdoc-skyceil",
-    "typescript": "^4.0.2"
-  }
+		"name": "discord-voice",
+		"files": [
+				"models/",
+				"typings/",
+				"index.js",
+				"handlers/",
+				"events/"
+		],
+		"scripts": {
+				"gpr": "node scripts/gpr.js"
+		},
+		"version": "1.0.3",
+		"description": "A complete framework to facilitate the tracking of user voice time using discord.js",
+		"main": "index.js",
+		"types": "typings/index.d.ts",
+		"repository": {
+				"type": "git",
+				"url": "git+https://github.com/Lebyy/discord-voice.git"
+		},
+		"keywords": [
+				"discord",
+				"economy",
+				"discord.js",
+				"bot",
+				"bots",
+				"leveling",
+				"levels",
+				"discord-levels",
+				"discord-xp",
+				"xp",
+				"mongo",
+				"mongoose",
+				"mongodb",
+				"discord-economy",
+				"discord-eco",
+				"framework",
+				"discord-messages",
+				"code",
+				"npm",
+				"messages",
+				"discord-voice",
+				"voice tracker",
+				"voice",
+				"ms",
+				"discordvoice"
+		],
+		"author": "lebyy_dev",
+		"license": "AGPL-3.0",
+		"bugs": {
+				"url": "https://github.com/Lebyy/discord-voice/issues"
+		},
+		"homepage": "https://discord-voice.js.org",
+		"dependencies": {
+				"discord-logs": "^1.9.0",
+				"mongoose": "^5.12.3"
+		},
+		"devDependencies": {
+				"@types/node": "^14.0.5",
+				"discord.js": "^12.5.1",
+				"eslint": "^7.6.0",
+				"jsdoc": "^3.6.4",
+				"jsdoc-skyceil": "Androz2091/jsdoc-skyceil",
+				"typescript": "^4.2.3"
+		}
 }
