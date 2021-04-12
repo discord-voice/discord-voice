@@ -7,3 +7,4 @@ docs/
 scripts/
 .jsdoc.json
 tsconfig.json
+.prettierrc
