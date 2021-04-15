@@ -52,7 +52,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Boolean/Object>} - If there is data already present it will return false, if no data is present it will return the user data object.
    *
    * @example
-   * Voice.createUser(<UserID - String>, <GuildID - String>); // It will create a dataobject for the user-id provided in the specified guild-id entry.
+   * client.discordVoice.createUser(<UserID - String>, <GuildID - String>); // It will create a dataobject for the user-id provided in the specified guild-id entry.
    */
   async createUser(userId, guildId) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -81,7 +81,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Boolean/Object>} - If there is no data already present it will return false, if data is present it will return the user data object.
    *
    * @example
-   * Voice.deleteUser(<UserID - String>, <GuildID - String>); // It will delete the dataobject for the user-id provided in the specified guild-id entry.
+   * client.discordVoice.deleteUser(<UserID - String>, <GuildID - String>); // It will delete the dataobject for the user-id provided in the specified guild-id entry.
    */
   async deleteUser(userId, guildId) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -106,7 +106,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It return's the user data object.
    *
    * @example
-   * Voice.start(<Client - Discord.js Client>); // It will start the voice activity module.
+   * client.discordVoice.start(<Client - Discord.js Client>); // It will start the voice activity module.
    */
   async start() {
     if (startRegistered) return;
@@ -133,7 +133,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - The user data object.
    *
    * @example
-   * Voice.setVoiceTime(<UserID - String>, <GuildID - String>, <ChannelId - String>, <Amount - Integer>); // It sets the Voice Time of a user in the specified guild to the specified amount. (MAKE SURE TO PROVIDE THE TIME IN MILLISECONDS!)
+   * client.discordVoice.setVoiceTime(<UserID - String>, <GuildID - String>, <ChannelId - String>, <Amount - Integer>); // It sets the Voice Time of a user in the specified guild to the specified amount. (MAKE SURE TO PROVIDE THE TIME IN MILLISECONDS!)
    */
   async setVoiceTime(userId, guildId, channelId, voicetime) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -170,7 +170,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - The user data object.
    *
    * @example
-   * Voice.fetch(<UserID - String>, <GuildID - String>, <FetchPosition - Boolean>); // Retrives selected entry from the database, if it exists.
+   * client.discordVoice.fetch(<UserID - String>, <GuildID - String>, <FetchPosition - Boolean>); // Retrives selected entry from the database, if it exists.
    */
   async fetch(userId, guildId, fetchPosition = false) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -204,7 +204,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - The user data object.
    *
    * @example
-   * Voice.addVoiceTime(<UserID - String>, <GuildID - String>, <ChannelId - String>, <Amount - Integer>); // It adds a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
+   * client.discordVoice.addVoiceTime(<UserID - String>, <GuildID - String>, <ChannelId - String>, <Amount - Integer>); // It adds a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
    */
   async addVoiceTime(userId, guildId, channelId, voicetime) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -242,7 +242,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - The user data object.
    *
    * @example
-   * Voice.subtractVoiceTime(<UserID - String>, <GuildID - String>, <ChannelId - String>, <Amount - Integer>); // It removes a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
+   * client.discordVoice.subtractVoiceTime(<UserID - String>, <GuildID - String>, <ChannelId - String>, <Amount - Integer>); // It removes a specified amount of voice time in ms to the current amount of voice time for that user, in that guild.
    */
   async subtractVoiceTime(userId, guildId, channelId, voicetime) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -279,7 +279,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Boolean} - Return's true if success.
    *
    * @example
-   * Voice.resetGuild(<GuildID - String>); // It deletes the entire guild's data-object from the database.
+   * client.discordVoice.resetGuild(<GuildID - String>); // It deletes the entire guild's data-object from the database.
    */
   async resetGuild(guildId) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -308,7 +308,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Array>} - It will return the leaderboard array.
    *
    * @example
-   * Voice.fetchLeaderboard(<GuildID - String>, <Limit - Integer>); // It gets a specified amount of entries from the database, ordered from higgest to lowest within the specified limit of entries.
+   * client.discordVoice.fetchLeaderboard(<GuildID - String>, <Limit - Integer>); // It gets a specified amount of entries from the database, ordered from higgest to lowest within the specified limit of entries.
    */
   async fetchLeaderboard(guildId, limit) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -331,7 +331,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Array>} - It will return the computedleaderboard array, if fetchUsers is true it will add the position key in the JSON object.
    *
    * @example
-   * Voice.computeLeaderboard(<Client - Discord.js Client>, <Leaderboard - fetchLeaderboard output>, <fetchUsers - boolean, enabled by default>); // It returns a new array of object that include voice time, guild id, user id, leaderboard position (if fetchUsers is set to true), username and discriminator.
+   * client.discordVoice.computeLeaderboard(<Client - Discord.js Client>, <Leaderboard - fetchLeaderboard output>, <fetchUsers - boolean, enabled by default>); // It returns a new array of object that include voice time, guild id, user id, leaderboard position (if fetchUsers is set to true), username and discriminator.
    */
   async computeLeaderboard(client, leaderboard, fetchUsers = true) {
     if (!client) throw new TypeError("A client was not provided.");
@@ -386,7 +386,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It will return the user data-object.
    *
    * @example
-   * Voice.blacklist(<UserID - String>, <GuildID - String>); // It will blacklist the user which will make it not count their voice time.
+   * client.discordVoice.blacklist(<UserID - String>, <GuildID - String>); // It will blacklist the user which will make it not count their voice time.
    */
   async blacklist(userId, guildId) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -424,7 +424,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - If there is no user data present it will return false, if the use is not blacklisted it will return false, if the user data is present and the user is blacklisted it will return the user-data object.
    *
    * @example
-   * Voice.unblacklist(<UserID - String>, <GuildID - String>); It will un-blacklist the user which will make it count their voice time.
+   * client.discordVoice.unblacklist(<UserID - String>, <GuildID - String>); It will un-blacklist the user which will make it count their voice time.
    */
   async unblacklist(userId, guildId) {
     if (!userId) throw new TypeError("An user id was not provided.");
@@ -451,7 +451,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It will return the config data-object.
    *
    * @example
-   * Voice.trackbots(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackbots.
+   * client.discordVoice.trackbots(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackbots.
    */
   async trackbots(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -492,7 +492,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It will return the config data-object.
    *
    * @example
-   * Voice.trackallchannels(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackallchannels.
+   * client.discordVoice.trackallchannels(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackallchannels.
    */
   async trackallchannels(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -533,7 +533,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It will return the config data-object.
    *
    * @example
-   * Voice.trackMute(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackMute.
+   * client.discordVoice.trackMute(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackMute.
    */
   async trackMute(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -574,7 +574,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It will return the config data-object.
    *
    * @example
-   * Voice.trackDeaf(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackDeaf.
+   * client.discordVoice.trackDeaf(<GuildID - String>, <Data - Boolean>); It will alter the configuration of trackDeaf.
    */
   async trackDeaf(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -615,7 +615,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It will return the config data-object.
    *
    * @example
-   * Voice.userlimit(<GuildID - String>, <Data - Number>); It will alter the configuration of userlimit.
+   * client.discordVoice.userlimit(<GuildID - String>, <Data - Number>); It will alter the configuration of userlimit.
    */
   async userlimit(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -656,7 +656,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Boolean/Object>} - If no data is present it will return false, if the channel id supplied is present in the database it will return false, if there is data present and the channel id is not present in the data it will return the config data object.
    *
    * @example
-   * Voice.channelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
+   * client.discordVoice.channelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
    */
   async channelID(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -697,7 +697,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Boolean/Object>} - If no data is present it will return false, if the channel id supplied is not present in the database it will return false, if there is data present and the channel id is present in the data it will return the config data object.
    *
    * @example
-   * Voice.removechannelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
+   * client.discordVoice.removechannelID(<GuildID - String>, <Data - String>); It will alter the configuration of channelID.
    */
   async removechannelID(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -723,7 +723,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Object>} - It will return the config data-object.
    *
    * @example
-   * Voice.toggle(<GuildID - String>, <Data - Boolean>); It will alter the configuration of the module.
+   * client.discordVoice.toggle(<GuildID - String>, <Data - Boolean>); It will alter the configuration of the module.
    */
   async toggle(guildId, data) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -765,7 +765,7 @@ class DiscordVoice extends EventEmitter {
    * @return {Promise<Boolean/Object>} - If no data is present it will return false, if there is data present it will return the config data object.
    *
    * @example
-   * Voice.fetchconfig(<GuildID - String>); It will return the config data object if present.
+   * client.discordVoice.fetchconfig(<GuildID - String>); It will return the config data object if present.
    */
   async fetchconfig(guildId) {
     if (!guildId) throw new TypeError("A guild id was not provided.");
@@ -786,7 +786,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('userVoiceJoin', (data, member, channel, isNew) => {
+   * client.discordVoice.on('userVoiceJoin', (data, member, channel, isNew) => {
    * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`${member.user.username} joined ${channel.name} vc!`);
    * });
@@ -801,7 +801,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('userVoiceSwitch', (member, oldChannel, newChannel) => {
+   * client.discordVoice.on('userVoiceSwitch', (member, oldChannel, newChannel) => {
    * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`${member.user.username} swicthed from ${oldChannel.name} to ${newChannel.name} vc!`);
    * });
@@ -817,7 +817,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('userVoiceMute', (data, member, channel, MuteType) => {
+   * client.discordVoice.on('userVoiceMute', (data, member, channel, MuteType) => {
    * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`${member.user.username} has muted their mic in ${channel.name}\nTheir mute type is: ${MuteType}`);
    * });
@@ -834,7 +834,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('userVoiceUnMute', (data, member, channel, oldMuteType, isNew) => {
+   * client.discordVoice.on('userVoiceUnMute', (data, member, channel, oldMuteType, isNew) => {
    * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`${member.user.username} has un-muted their mic in ${channel.name}\nTheir previous mute type was: ${oldMuteType}`);
    * });
@@ -850,7 +850,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('userVoiceDeaf', (data, member, channel, DeafType) => {
+   * client.discordVoice.on('userVoiceDeaf', (data, member, channel, DeafType) => {
    * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`${member.user.username} has become deafen in ${channel.name}\nTheir deaf type is: ${DeafType}`);
    * });
@@ -867,7 +867,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('userVoiceUnDeaf', (data, member, channel, oldDeafType, isNew) => {
+   * client.discordVoice.on('userVoiceUnDeaf', (data, member, channel, oldDeafType, isNew) => {
    * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`${member.user.username} has become un-deafen in ${channel.name}\nTheir previous deaf type was: ${oldDeafType}`);
    * });
@@ -882,7 +882,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('userVoiceLeave', (data, member, channel) => {
+   * client.discordVoice.on('userVoiceLeave', (data, member, channel) => {
    * let logchannel = member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`${member.user.username} has left ${channel.name} vc!`);
    * });
@@ -897,7 +897,7 @@ class DiscordVoice extends EventEmitter {
    *
    * @example
    * // This can be used to add features such as logging a user voice activity in a logs channel
-   * Voice.on('unhandledVoiceStateUpdate', (oldState, newState) => {
+   * client.discordVoice.on('unhandledVoiceStateUpdate', (oldState, newState) => {
    * let logchannel = oldState.member.guild.channels.cache.get("xxxxxxxxxxxxxxxxxx")
    * return logchannel.send(`Voice state for member ${oldState.member.user.username} was updated but discord-voice couldn't find what was updated!`);
    * });
