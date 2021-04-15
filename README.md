@@ -18,6 +18,10 @@ npm update discord-voice
 ```
 
 # Changelog
+- **15 April 2021** (v1.0.4)
+1. Fixed a bug with the mute handler
+2. Updated the README to show how to use module
+
 - **12 April 2021** (v1.0.3) - `WARNING! This update contains a lot of BREAKING changes in the way whole module works, considering reading the README again on how to initiate the new model.`
 1. Added plenty of events which will be triggered on the user's vc actions. (Check the docs for a brief list of them)
 2. Options are now guild based and adding them in the start function won't work anymore there are seperate function made for them. (Check the docs for a brief list of them)
@@ -29,31 +33,40 @@ npm update discord-voice
 2. Added the system of minimum users in a voice channel.
 3. Added the resetGuild function.
 
-# Setting Up
-First things first, we include the module into the project.
+# Examples
+*Following example assumes that you are able to write asynchronous code (use `await`).*
+
+- **Launch of the module**
 ```js
+const Discord = require('discord.js'),
+    client = new Discord.Client(),
+    settings = {
+        prefix: 'dv!',
+        token: 'Your Discord Token'
+    };
+
+// We load the module here
 const DiscordVoice = require("discord-voice");
 // You need to supply your Discord.Client here with your mongodb URL!
 const Voice = new DiscordVoice(client, "mongodb://...");
-```
 
-# Examples
+// We now have a discordVoice property to access Discord-Voice everywhere!
+client.discordVoice = Voice;
 
-*Following example assumes that you are able to write asynchronous code (use `await`).*
-
-- **Starting The Voice Activity Tracking**
-
-```js
 client.on('ready', async () => {
-const StartVoice = await Voice.start();
+    // We start the voice activity tracking here!
+    await client.discordVoice.start();
 });
+
+client.login(settings.token);
 ```
+
 - **Voice Time Command**
 
 ```js
 const target = message.mentions.users.first() || message.author; // Grab the target.
 
-const user = await Voice.fetch(target.id, message.guild.id); // Selects the target from the database.
+const user = await client.discordVoice.fetch(target.id, message.guild.id); // Selects the target from the database.
 
 if (!user) return message.channel.send("Seems like this user does not have any Voice Activity so far..."); // If there isnt such user in the database, we send a message in general.
 
@@ -63,11 +76,11 @@ message.channel.send(`> **${target.tag}** currently has ${user.data.voiceTime.to
 - **Leaderboard Command**
 
 ```js
-const rawLeaderboard = await Voice.fetchLeaderboard(message.guild.id, 10); // We grab top 10 users with most voice time in the current server.
+const rawLeaderboard = await client.discordVoice.fetchLeaderboard(message.guild.id, 10); // We grab top 10 users with most voice time in the current server.
 
 if (rawLeaderboard.length < 1) return reply("Nobody's in leaderboard yet.");
 
-const leaderboard = await Voice.computeLeaderboard(client, rawLeaderboard, true); // We process the leaderboard.
+const leaderboard = await client.discordVoice.computeLeaderboard(client, rawLeaderboard, true); // We process the leaderboard.
 
 const lb = leaderboard.map(e => `${e.position}. ${e.username}#${e.discriminator}\nVoice Time: ${e.voiceTime.total}ms`); // We map the outputs.
 

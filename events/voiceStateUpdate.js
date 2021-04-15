@@ -20,25 +20,25 @@ module.exports = {
     }
     
     if (!oldState.mute && newState.mute) {
-        const muteType = member.voice.selfMute ? 'self-muted' : 'server-muted';
+        const muteType = newState.selfMute ? 'self-muted' : 'server-muted';
         require('../handlers/voiceChannelMute.js').execute(client, newMember, muteType, Voice, VoiceConfig, event);
         emitted = true;
     }
     
     if (oldState.mute && !newState.mute) {
-        const muteType = member.voice.selfMute ? 'self-muted' : 'server-muted';
+        const muteType = oldState.selfMute ? 'self-muted' : 'server-muted';
         require('../handlers/voiceChannelUnmute.js').execute(client, newMember, muteType, Voice, VoiceConfig, event); 
         emitted = true;
     }
     
     if (!oldState.deaf && newState.deaf) {
-        const deafType = member.voice.selfDeaf ? 'self-deafed' : 'server-v';
+        const deafType = newState.selfDeaf ? 'self-deafed' : 'server-v';
         require('../handlers/voiceChannelDeaf.js').execute(client, newMember, deafType, Voice, VoiceConfig, event);
         emitted = true;
     }
     
     if (oldState.deaf && !newState.deaf) {
-        const deafType = member.voice.selfDeaf ? 'self-deafed' : 'server-v';
+        const deafType = oldState.selfDeaf ? 'self-deafed' : 'server-v';
         require('../handlers/voiceChannelUndeaf.js').execute(client, newMember, deafType, Voice, VoiceConfig, event);
         emitted = true;
     }

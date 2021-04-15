@@ -103,7 +103,6 @@ class DiscordVoice extends EventEmitter {
    *
    *
    *
-   * @param {Discord.Client} client - The Discord Client.
    * @return {Promise<Object>} - It return's the user data object.
    *
    * @example
