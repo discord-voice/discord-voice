@@ -34,7 +34,7 @@ module.exports = {
           isBlacklisted: false,
 				  lastUpdated: new Date()
           }
-				  user.joinTime[channel.id] = Date.now();
+				  user.joinTime[member.voice.channel.id] = Date.now();
 			  	let data = {}
 				  data.user = user
 				  data.config = config
@@ -42,11 +42,11 @@ module.exports = {
 					return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
           }
           if (user.isBlacklisted) return;
-          let jointime = user.joinTime[channel.id]
+          let jointime = user.joinTime[member.voice.channel.id]
 					if(!jointime) jointime = 0
 					if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
       		jointime = Date.now();
-					user.joinTime[channel.id] = jointime
+					user.joinTime[member.voice.channel.id] = jointime
 					user.markModified('joinTime')
           await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
           let data = {}
@@ -66,7 +66,7 @@ module.exports = {
         isBlacklisted: false,
 				lastUpdated: new Date()
         }
-				user.joinTime[channel.id] = Date.now();
+				user.joinTime[member.voice.channel.id] = Date.now();
 				let data = {}
 				data.user = user
 				data.config = config
@@ -74,11 +74,11 @@ module.exports = {
 				return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
         }
         if (user.isBlacklisted) return;
-        let jointime = user.joinTime[channel.id]
+        let jointime = user.joinTime[member.voice.channel.id]
 				if(!jointime) jointime = 0
 				if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
       	jointime = Date.now();
-				user.joinTime[channel.id] = jointime
+				user.joinTime[member.voice.channel.id] = jointime
 				user.markModified('joinTime')
         await user.save().catch(e => console.log(`Failed to save user join time: ${e}`));
         let data = {}
