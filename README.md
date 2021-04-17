@@ -1,5 +1,5 @@
 <p align="center"><a href="https://nodei.co/npm/discord-voice/"><img src="https://nodei.co/npm/discord-voice.png"></a></p>
-<p align="center"><img src="https://img.shields.io/npm/v/discord-voice"> <img src="https://img.shields.io/github/repo-size/Lebyy/discord-voice"> <img src="https://img.shields.io/npm/l/discord-voice"> <img src="https://img.shields.io/npm/dt/discord-voice"> <img src="https://img.shields.io/github/contributors/Lebyy/discord-voice"> <img src="https://img.shields.io/github/package-json/dependency-version/Lebyy/discord-voice/mongoose"> <img src="https://img.shields.io/github/package-json/dependency-version/Lebyy/discord-voice/discord-logs"> <a href="https://discord.gg/pndumb6J3t"><img src="https://discordapp.com/api/guilds/815261972450115585/widget.png" alt="Discord server - https://discord.gg/pndumb6J3t"/></a> <a href="https://discord-voice.js.org"><img src="https://img.shields.io/badge/Documentation-Click%20here-blue" alt="Documentation - https://discord-voice.js.org"/></a></p>
+<p align="center"><img src="https://img.shields.io/npm/v/discord-voice?style=for-the-badge"> <img src="https://img.shields.io/github/repo-size/Lebyy/discord-voice?style=for-the-badge"> <img src="https://img.shields.io/npm/l/discord-voice?style=for-the-badge"> <img src="https://img.shields.io/npm/dt/discord-voice?style=for-the-badge"> <img src="https://img.shields.io/github/contributors/Lebyy/discord-voice?style=for-the-badge"> <img src="https://img.shields.io/github/package-json/dependency-version/Lebyy/discord-voice/mongoose?style=for-the-badge"> <a href="https://discord.gg/pndumb6J3t" target="_blank"> <img alt="Discord" src="https://img.shields.io/badge/Chat-Click%20here-7289d9?style=for-the-badge&logo=discord"> </a> <a href="https://discord-voice.js.org"><img src="https://img.shields.io/badge/Documentation-Click%20here-blue?style=for-the-badge" alt="Documentation - https://discord-voice.js.org"/></a></p>
 
 # Discord-Voice
 - A lightweight and easy to use voice activity tracker framework for discord bots, uses MongoDB.
@@ -18,6 +18,12 @@ npm update discord-voice
 ```
 
 # Changelog
+- **17 April 2021** (v1.0.6)
+1. Fixed a bug with the unhandledVoiceStateUpdate handler.
+
+- **16 April 2021** (v1.0.5)
+1. Fixed a bug with the UnMute and UnDeaf handlers
+
 - **15 April 2021** (v1.0.4)
 1. Fixed a bug with the mute handler
 2. Updated the README to show how to use module
@@ -93,5 +99,12 @@ message.channel.send(`**Leaderboard**:\n\n${lb.join("\n\n")}`);
 Shifted to our docs! Make sure to check them out [here](https://discord-voice.js.org)!
 
 # Enjoying Discord-Voice?
-Consider donating: https://www.buymeacoffee.com/lebyydev
+Consider donating! 
+
+<a href="https://www.patreon.com/Lebyy">
+  <img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" width="160">
+</a>
+<a href="https://www.buymeacoffee.com/lebyydev" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+<a href='https://ko-fi.com/N4N04B26C' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi3.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
 Thanks 😊

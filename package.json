@@ -52,8 +52,7 @@
 	},
 	"homepage": "https://discord-voice.js.org",
 	"dependencies": {
-		"discord-logs": "^1.9.0",
-		"mongoose": "^5.12.3"
+		"mongoose": "^5.12.4"
 	},
 	"devDependencies": {
 		"@types/node": "^14.0.5",
