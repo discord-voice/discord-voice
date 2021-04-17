@@ -54,7 +54,7 @@ module.exports = {
     }
 		
     if (!emitted) {
-        require('./handlers/unhandledVoiceStateUpdate.js').execute(client, oldState, newState, Voice, VoiceConfig, event);
+        require('../handlers/unhandledVoiceStateUpdate.js').execute(client, oldState, newState, Voice, VoiceConfig, event);
     }
 	}
 }
