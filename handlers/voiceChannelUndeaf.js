@@ -44,7 +44,7 @@ module.exports = {
           if (user.isBlacklisted) return;
           let jointime = user.joinTime[member.voice.channel.id]
 					if(!jointime) jointime = 0
-					if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
+					if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, member.voice.channel, Voice, VoiceConfig);
       		jointime = Date.now();
 					user.joinTime[member.voice.channel.id] = jointime
 					user.markModified('joinTime')
@@ -75,7 +75,7 @@ module.exports = {
           }
           let jointime = user.joinTime[member.voice.channel.id]
 					if(!jointime) jointime = 0
-					if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, channel, Voice, VoiceConfig);
+					if(jointime != 0) return require('./voiceChannelLeave.js').execute(client, member, member.voice.channel, Voice, VoiceConfig);
       		jointime = Date.now();
 					user.joinTime[member.voice.channel.id] = jointime
 					user.markModified('joinTime')
