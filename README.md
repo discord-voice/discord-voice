@@ -23,7 +23,7 @@ npm update discord-voice
 2. Fixed a bug with the voiceChannelUnmute handler. 
 
 - **17 April 2021** (v1.0.6)
-4. Fixed a bug with the unhandledVoiceStateUpdate handler.
+1. Fixed a bug with the unhandledVoiceStateUpdate handler.
 
 - **16 April 2021** (v1.0.5)
 1. Fixed a bug with the UnMute and UnDeaf handlers
