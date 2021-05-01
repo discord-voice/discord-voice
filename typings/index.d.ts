@@ -9,10 +9,11 @@ declare module 'discord-voice' {
      *
      * @class DiscordVoice
      */
-    export class DiscordVoice extends EventEmitter {
+    class DiscordVoice extends EventEmitter {
         /**
-        * @param {Discord.Client} client The Discord Client
-        * @param {GiveawaysManagerOptions} options The manager options
+        * @param {Client} client The Discord Client
+        * @param {string} mongodbURL The manager options
+        * @param {?boolean} connect The manager options
         */
         constructor(client: any, mongodbURL: string, connect?: boolean);
         /**
@@ -269,5 +270,8 @@ declare module 'discord-voice' {
          */
         fetchconfig(guildId: string): Promise<boolean>;
     }
-    }
-    
+
+    namespace DiscordVoice {}
+
+    export = DiscordVoice;
+}
