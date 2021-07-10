@@ -1,6 +1,6 @@
 module.exports = {
-  execute: async(client, member, oldChannel, newChannel, Voice, VoiceConfig, event) => {
-	require('./voiceChannelLeave.js').execute(client, member, oldChannel, Voice, VoiceConfig, event, { isSwitch: true, newChannel: newChannel}); 
-  return event.emit('userVoiceSwitch', member, oldChannel, newChannel);
+  execute: async(client, member, oldChannel, newChannel, Voice, VoiceConfig, manager) => {
+	require('./voiceChannelLeave.js').execute(client, member, oldChannel, Voice, VoiceConfig, manager, { isSwitch: true, newChannel: newChannel}); 
+  return manager.emitEvent('userVoiceSwitch', member, oldChannel, newChannel);
 }
  }

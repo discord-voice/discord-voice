@@ -1,5 +1,5 @@
 module.exports = {
-  execute: async(client, member, oldDeafType, Voice, VoiceConfig, event) => {
+  execute: async(client, member, oldDeafType, Voice, VoiceConfig, manager) => {
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -38,7 +38,7 @@ module.exports = {
 				  let data = {}
 				  data.user = user
 				  data.config = config
-				  event.emit('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, true)
+				  manager.emitEvent('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, true)
 					return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
           }
           if (user.isBlacklisted) return;
@@ -52,7 +52,7 @@ module.exports = {
           let data = {}
 					data.user = user
 					data.config = config
-					event.emit('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, false)
+					manager.emitEvent('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, false)
 					return user;
         }
       }
@@ -70,7 +70,7 @@ module.exports = {
 				  let data = {}
 				  data.user = user
 				  data.config = config
-				  event.emit('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, true)
+				  manager.emitEvent('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, true)
 					return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
           }
           let jointime = user.joinTime[member.voice.channel.id]
@@ -83,7 +83,7 @@ module.exports = {
           let data = {}
 					data.user = user
 					data.config = config
-					event.emit('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, false)
+					manager.emitEvent('userVoiceUnDeaf', data, member, member.voice.channel, oldDeafType, false)
 					return user;
       }
     } else {
@@ -96,10 +96,10 @@ module.exports = {
 		data.config = config
 		if(!user){
 		data.user = null
-		return event.emit('userVoiceUnDeaf', data, member, channel, oldDeafType, true);
+		return manager.emitEvent('userVoiceUnDeaf', data, member, channel, oldDeafType, true);
 		}
 		data.user = user
-		return event.emit('userVoiceUnDeaf', data, member, channel, oldDeafType, false);
+		return manager.emitEvent('userVoiceUnDeaf', data, member, channel, oldDeafType, false);
 		}
   }
 }

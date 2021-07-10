@@ -122,6 +122,16 @@ class DiscordVoice extends EventEmitter {
       );
     });
   }
+
+  /**
+   * Emits the received events
+   * @ignore
+   * @private
+   */
+  async emitEvent(eventName, ...args) {
+    return this.emit(eventName, ...args);
+  }
+
   /**
    *
    *
