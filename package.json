@@ -10,7 +10,7 @@
 	"scripts": {
 		"gpr": "node scripts/gpr.js"
 	},
-	"version": "1.0.8",
+	"version": "1.0.8-patch1",
 	"description": "A complete framework to facilitate the tracking of user voice time using discord.js",
 	"main": "index.js",
 	"types": "typings/index.d.ts",

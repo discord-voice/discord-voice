@@ -1,5 +1,5 @@
 module.exports = {
-  execute: async(client, member, muteType, Voice, VoiceConfig, manager) => {
+  execute: async(client, member, muteType, Voice, VoiceConfig, emit) => {
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -48,7 +48,7 @@ module.exports = {
           let data = {}
 					data.user = user
 					data.config = config
-					manager.emitEvent('userVoiceMute', data, member, member.voice.channel, muteType)
+					emit('userVoiceMute', data, member, member.voice.channel, muteType)
 					return user;
 					} else return;
         }
@@ -77,7 +77,7 @@ module.exports = {
           let data = {}
 					data.user = user
 					data.config = config
-					manager.emitEvent('userVoiceMute', data, member, member.voice.channel, muteType)
+					emit('userVoiceMute', data, member, member.voice.channel, muteType)
 					return user;
 					} else return;
       }
@@ -90,7 +90,7 @@ module.exports = {
 		data.user = user
 		data.config = config
 		let channel = member.voice.channel
-		return manager.emitEvent('userVoiceMute', data, member, channel, muteType);
+		return emit('userVoiceMute', data, member, channel, muteType);
 		}
   }
 }

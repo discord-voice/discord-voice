@@ -1,5 +1,5 @@
 module.exports = {
-  execute: async(client, member, channel, Voice, VoiceConfig, manager, ops) => {
+  execute: async(client, member, channel, Voice, VoiceConfig, emit, ops) => {
 		if(!ops) ops = {isSwitch: false}
     let config;
     config = await VoiceConfig.findOne({
@@ -50,9 +50,9 @@ module.exports = {
           let data = {}
 				  data.user = user
 				  data.config = config
-				  manager.emitEvent("userVoiceLeave", data, member, channel);
+				  emit("userVoiceLeave", data, member, channel);
 					if(ops.isSwitch){
-					require('./voiceChannelJoin.js').execute(client, member, ops.newChannel, Voice, VoiceConfig, manager); 
+					require('./voiceChannelJoin.js').execute(client, member, ops.newChannel, Voice, VoiceConfig, emit); 
 					return user;
 					}
 					return user;
@@ -83,7 +83,7 @@ module.exports = {
           let data = {}
 				  data.user = user
 				  data.config = config
-				  manager.emitEvent("userVoiceLeave", data, member, channel);
+				  emit("userVoiceLeave", data, member, channel);
 					if(ops.isSwitch){
 					require("./voiceChannelJoin.js").execute(
             client,

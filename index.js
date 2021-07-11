@@ -118,7 +118,7 @@ class DiscordVoice extends EventEmitter {
         newState,
         Voice,
         VoiceConfig,
-        this
+        this.emitEvent.bind(this),
       );
     });
   }
@@ -128,7 +128,7 @@ class DiscordVoice extends EventEmitter {
    * @ignore
    * @private
    */
-  async emitEvent(eventName, ...args) {
+  emitEvent(eventName, ...args) {
     return this.emit(eventName, ...args);
   }
 

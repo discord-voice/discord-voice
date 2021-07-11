@@ -1,5 +1,5 @@
 module.exports = {
-  execute: async(client, member, oldMuteType, Voice, VoiceConfig, manager) => { 
+  execute: async(client, member, oldMuteType, Voice, VoiceConfig, emit) => { 
 		let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -38,7 +38,7 @@ module.exports = {
 			  	let data = {}
 				  data.user = user
 				  data.config = config
-				  manager.emitEvent('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, true)
+				  emit('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, true)
 					return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
           }
           if (user.isBlacklisted) return;
@@ -52,7 +52,7 @@ module.exports = {
           let data = {}
 				  data.user = user
 				  data.config = config
-				  manager.emitEvent('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, false)
+				  emit('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, false)
 					return user;
         }
       }
@@ -70,7 +70,7 @@ module.exports = {
 				let data = {}
 				data.user = user
 				data.config = config
-				manager.emitEvent('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, true)
+				emit('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, true)
 				return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
         }
         if (user.isBlacklisted) return;
@@ -84,7 +84,7 @@ module.exports = {
         let data = {}
 				data.user = user
 				data.config = config
-				manager.emitEvent('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, false)
+				emit('userVoiceUnMute', data, member, member.voice.channel, oldMuteType, false)
 				return user;
       }
     } else {
@@ -97,10 +97,10 @@ module.exports = {
 		data.config = config
 		if(!user){
 		data.user = null
-		return manager.emitEvent('userVoiceUnMute', data, member, channel, oldMuteType, true);
+		return emit('userVoiceUnMute', data, member, channel, oldMuteType, true);
 		}
 		data.user = user
-		return manager.emitEvent('userVoiceUnMute', data, member, channel, oldMuteType, false);
+		return emit('userVoiceUnMute', data, member, channel, oldMuteType, false);
 		}
   }
 }

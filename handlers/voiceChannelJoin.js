@@ -1,5 +1,5 @@
 module.exports = {
-  execute: async(client, member, channel, Voice, VoiceConfig, manager) => {
+  execute: async(client, member, channel, Voice, VoiceConfig, emit) => {
     let config;
     config = await VoiceConfig.findOne({
       guildID: member.guild.id
@@ -54,7 +54,7 @@ module.exports = {
 				let data = {}
 				data.user = user
 				data.config = config
-				manager.emitEvent('userVoiceJoin', data, member, channel, true)
+				emit('userVoiceJoin', data, member, channel, true)
 				return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
         }
         if (user.isBlacklisted) return;
@@ -68,7 +68,7 @@ module.exports = {
         let data = {}
 				data.user = user
 				data.config = config
-				manager.emitEvent('userVoiceJoin', data, member, channel, false)
+				emit('userVoiceJoin', data, member, channel, false)
 				return user;
       }
     }
@@ -89,7 +89,7 @@ module.exports = {
 				let data = {}
 				data.user = user
 				data.config = config
-				manager.emitEvent('userVoiceJoin', data, member, channel, true)
+				emit("userVoiceJoin", data, member, channel, true);
 				return await Voice.create(user).catch(e => console.log(`Failed to save user voice time: ${e}`));
       }
       if (user.isBlacklisted) return;
@@ -103,7 +103,7 @@ module.exports = {
       let data = {}
 			data.user = user
 			data.config = config
-			manager.emitEvent('userVoiceJoin', data, member, channel, false)
+			emit("userVoiceJoin", data, member, channel, false);
 			return user;
     }
 		}

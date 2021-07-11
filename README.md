@@ -18,6 +18,9 @@ npm update discord-voice
 ```
 
 # Changelog
+- **11 July 2021** (v1.0.8-patch1)
+1. Fixes a issue with the event emitter.
+
 - **10 July 2021** (v1.0.8)
 1. Fixed a bug with the package throwing error on partial users.
 2. Fixes a issue with the event emitter.
