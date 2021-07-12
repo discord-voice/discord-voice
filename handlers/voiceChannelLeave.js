@@ -91,7 +91,7 @@ module.exports = {
             ops.newChannel,
             Voice,
             VoiceConfig,
-            manager
+            emit
           ); 
 					return user;
 					}

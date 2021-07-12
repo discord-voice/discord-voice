@@ -18,6 +18,9 @@ npm update discord-voice
 ```
 
 # Changelog
+- **12 July 2021** (v1.0.8-patch2)
+1. Fixes a typo.
+
 - **11 July 2021** (v1.0.8-patch1)
 1. Fixes a issue with the event emitter.
 
