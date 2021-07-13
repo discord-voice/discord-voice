@@ -2,7 +2,7 @@ const merge = require("deepmerge");
 const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
-const { } = require("./Constants.js");
+const {} = require("./Constants.js");
 const VoiceManager = require("./Manager.js");
 
 class Config extends EventEmitter {
@@ -99,11 +99,10 @@ class Config extends EventEmitter {
     );
     if (hasPermission) return false;
     if (!this.trackBots && member.user.bot) return false;
-    if (
-      !this.trackMute &&
-      (member.voice.selfMute || member.voice.serverMute)
-    ) return false;
-    if (!this.trackDeaf && (member.voice.selfDeaf || member.voice.serverDeaf)) return false;
+    if (!this.trackMute && (member.voice.selfMute || member.voice.serverMute))
+      return false;
+    if (!this.trackDeaf && (member.voice.selfDeaf || member.voice.serverDeaf))
+      return false;
     return true;
   }
   get exemptChannelsFunction() {
@@ -134,10 +133,13 @@ class Config extends EventEmitter {
     return false;
   }
   async checkChannel(channel) {
-   const exemptChannel = await this.exemptChannels(channel);
-   if (exemptChannel) return false;
-   if (!this.trackAllChannels && !this.channelIDs.includes(channel.id)) return false;
-   if(this.userLimit > 0 && channel.members.size < this.userLimit) return false;
-   return true; 
+    const exemptChannel = await this.exemptChannels(channel);
+    if (exemptChannel) return false;
+    if (!this.trackAllChannels && !this.channelIDs.includes(channel.id))
+      return false;
+    if (this.userLimit > 0 && channel.members.size < this.userLimit)
+      return false;
+    return true;
   }
 }
+module.exports = Config;

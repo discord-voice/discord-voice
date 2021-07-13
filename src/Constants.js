@@ -1,7 +1,7 @@
 exports.defaultManagerOptions = {
   userStorage: "./users.json",
   configStorage: "./configs.json",
-  updateCountdownEvery: 5000,
+  checkMembersEvery: 5000,
   default: {
     trackBots: false,
     trackAllChannels: true,

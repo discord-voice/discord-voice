@@ -161,12 +161,10 @@ class VoiceManager extends EventEmitter {
   _checkUsers() {
     if (this.users.length <= 0) return;
     this.users.forEach(async (user) => {
-      if (user && user.member && user.channel && user.channel.members.has(user.id)) {
-        let config = this.config.find(
-          (g) => g.guildID === user.guild.id
-        );
-        if(!config) {
-          this.manager.configs.push(
+      if (user && user.member && user.channel) {
+        let config = this.configs.find((g) => g.guildID === user.guild.id);
+        if (!config) {
+          this.configs.push(
             new Config(this, {
               guildID: user.guild.id,
               trackBots: false,
@@ -181,7 +179,7 @@ class VoiceManager extends EventEmitter {
               isEnabled: true,
             })
           );
-          await this.manager.saveConfig(this.guildID, {
+          await this.saveConfig(this.guildID, {
             guildID: user.guild.id,
             trackBots: false,
             trackAllChannels: true,
@@ -194,42 +192,75 @@ class VoiceManager extends EventEmitter {
             trackDeaf: true,
             isEnabled: true,
           });
-          config = this.config.find((g) => g.guildID === user.guild.id);
+          config = this.configs.find((g) => g.guildID === user.guild.id);
         }
-        if (!config.isEnabled || (!(await config.checkMember(user.member)) || !(await config.checkChannel(user.channel)))) return;
-        let previousVoiceTime = user.data.voiceTime.channels.filter(
-          (chn, indx) => {
-            if (chn === user.channel.id) return { data: chn, index: indx };
-          }
-        );
-        if (!previousVoiceTime.data) previousVoiceTime.data = 1;
-        else previousVoiceTime.data += 1;
-        user.data.voiceTime.channels[previousVoiceTime.index] =
-          previousVoiceTime.data;
-        await this.editUser(user.id, user.guild.id, user.data);
-        return;
+        if (
+          !config.isEnabled ||
+          !(await config.checkMember(user.member)) ||
+          !(await config.checkChannel(user.channel))
+        )
+          return;
+        if (user.voiceTime.channels.length <= 0) {
+          user.voiceTime = {
+            channels: [
+              {
+                channelID: user.channel.id,
+                voiceTime: 1,
+              },
+            ],
+            total: 1,
+          };
+          await this.editUser(user.id, user.guild.id, user.data);
+          return;
+        } else {
+          let previousVoiceTime = user.voiceTime.channels.find(
+            (chn) => chn.channelID === user.channel.id
+          );
+          let index = user.voiceTime.channels.indexOf(previousVoiceTime);
+          if (!previousVoiceTime)
+            previousVoiceTime = {
+              channelID: user.channel.id,
+              voiceTime: 1,
+            };
+          else previousVoiceTime.voiceTime += 1;
+          if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
+          else user.voiceTime.channels[index] = previousVoiceTime;
+          user.voiceTime.total = user.voiceTime.channels.reduce(function (
+            sum,
+            data
+          ) {
+            return sum + data.voiceTime;
+          },
+          0);
+          await this.editUser(user.id, user.guild.id, user.data);
+          return;
+        }
       }
     });
   }
 
   async _handleVoiceStateUpdate(oldState, newState) {
     if (!oldState.channel && newState.channel) {
-      this.users.push(
-        new User(this, {
+      if (!this.users.find((u) => u.userID === newState.member.id)) {
+        this.users.push(
+          new User(this, {
+            userID: newState.member.id,
+            guildID: newState.member.guild.id,
+            voiceTime: {
+              channels: [],
+              total: 0,
+            },
+          })
+        );
+        await this.saveUser(newState.member.id, newState.member.guild.id, {
           userID: newState.member.id,
           guildID: newState.member.guild.id,
-          voiceTime: [],
-        })
-      );
-      await this.manager.saveUser(
-        newState.member.id,
-        newState.member.guild.id,
-        {
-          userID: newState.member.id,
-          guildID: newState.member.guild.id,
-          voiceTime: [],
-        }
-      );
+          voiceTime: {
+            channels: [],
+            total: 0,
+          },
+        });
+      }
     }
   }
 
@@ -244,10 +275,12 @@ class VoiceManager extends EventEmitter {
     });
     setInterval(() => {
       if (this.client.readyAt) this._checkUsers.call(this);
-    }, this.options.updateCountdownEvery);
+    }, this.options.checkMembersEvery);
     this.ready = true;
     this.client.on("voiceStateUpdate", (oldState, newState) =>
       this._handleVoiceStateUpdate(oldState, newState)
     );
   }
 }
+
+module.exports = VoiceManager;
