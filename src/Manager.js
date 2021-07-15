@@ -20,7 +20,7 @@ class VoiceManager extends EventEmitter {
     if (init) this._init();
   }
 
-  async updateConfig(guildID, updatedConfig) {
+ updateConfig(guildID, updatedConfig) {
     return new Promise(async (resolve, reject) => {
       updatedConfig =
         updatedConfig && typeof updatedConfig === "object"
