@@ -12,7 +12,7 @@ class User extends EventEmitter {
     this.client = manager.client;
     this.userID = options.userID;
     this.guildID = options.guildID;
-    this.voiceTime = options.voiceTime;
+    this.voiceTime = options.data.voiceTime;
     this.options = options;
   }
 
@@ -35,22 +35,27 @@ class User extends EventEmitter {
                 new User(this, {
                   userID: x.id,
                   guildID: x.guild.id,
-                  voiceTime: {
-                    channels: [],
-                    total: 0,
+                  data: {
+                    voiceTime: {
+                      channels: [],
+                      total: 0,
+                    },
                   },
                 })
               );
               this.manager.saveUser(x.id, x.guild.id, {
                 userID: x.id,
                 guildID: x.guild.id,
-                voiceTime: {
-                  channels: [],
-                  total: 0,
+                data: {
+                  voiceTime: {
+                    channels: [],
+                    total: 0,
+                  },
                 },
               });
             }
-            if (x.id === this.userID) return { channel: voicechannel, member: x };
+            if (x.id === this.userID)
+              return { channel: voicechannel, member: x };
           })
           .find((val) => val);
       })
@@ -73,9 +78,24 @@ class User extends EventEmitter {
     const baseData = {
       userID: this.userID,
       guildID: this.guildID,
-      voiceTime: this.voiceTime,
+      data: {
+        voiceTime: this.voiceTime,
+      },
     };
     return baseData;
+  }
+
+  edit(options = {}) {
+    return new Promise(async (resolve, reject) => {
+      if (
+        typeof options.newVoiceTime === "object" &&
+        Array.isArray(options.newVoiceTime.channels) &&
+        Number.isInteger(options.newVoiceTime.total)
+      )
+        this.voiceTime = options.newVoiceTime;
+      await this.manager.editUser(this.userID, this.guildID, this.data);
+      resolve(this);
+    });
   }
 }
 module.exports = User;

@@ -10,7 +10,7 @@ class Config extends EventEmitter {
     super();
     this.manager = manager;
     this.guildID = options.guildID;
-    this.options = options;
+    this.options = options.data;
   }
 
   get isEnabled() {
@@ -37,24 +37,26 @@ class Config extends EventEmitter {
   get data() {
     const baseData = {
       guildID: this.guildID,
-      trackBots: this.options.trackBots,
-      trackAllChannels: this.options.trackAllChannels,
-      exemptChannels:
-        !this.options.exemptChannels ||
-        typeof this.options.exemptChannels === "string"
-          ? this.options.exemptChannels
-          : serialize(this.options.exemptChannels),
-      userLimit: this.options.userLimit,
-      channelIDs: this.options.channelIDs,
-      exemptPermissions: this.options.exemptPermissions,
-      exemptMembers:
-        !this.options.exemptMembers ||
-        typeof this.options.exemptMembers === "string"
-          ? this.options.exemptMembers
-          : serialize(this.options.exemptMembers),
-      trackMute: this.options.trackMute,
-      trackDeaf: this.options.trackDeaf,
-      isEnabled: this.options.isEnabled,
+      data: {
+        trackBots: this.options.trackBots,
+        trackAllChannels: this.options.trackAllChannels,
+        exemptChannels:
+          !this.options.exemptChannels ||
+          typeof this.options.exemptChannels === "string"
+            ? this.options.exemptChannels
+            : serialize(this.options.exemptChannels),
+        userLimit: this.options.userLimit,
+        channelIDs: this.options.channelIDs,
+        exemptPermissions: this.options.exemptPermissions,
+        exemptMembers:
+          !this.options.exemptMembers ||
+          typeof this.options.exemptMembers === "string"
+            ? this.options.exemptMembers
+            : serialize(this.options.exemptMembers),
+        trackMute: this.options.trackMute,
+        trackDeaf: this.options.trackDeaf,
+        isEnabled: this.options.isEnabled,
+      },
     };
     return baseData;
   }
@@ -140,6 +142,38 @@ class Config extends EventEmitter {
     if (this.userLimit > 0 && channel.members.size < this.userLimit)
       return false;
     return true;
+  }
+  edit(options = {}) {
+    return new Promise(async (resolve, reject) => {
+      if (typeof options.newTrackBots === "boolean")
+        this.options.trackBots = options.newTrackBots;
+      if (typeof options.newTrackAllChannels === "boolean")
+        this.options.trackAllChannels = options.newTrackAllChannels;
+      if (
+        typeof options.newExemptChannels === "string" &&
+        options.newExemptChannels.includes("function anonymous")
+      )
+        this.options.exemptChannels = options.newExemptChannels;
+      if (Number.isInteger(options.newUserLimit))
+        this.options.userLimit = options.newUserLimit;
+      if (Array.isArray(options.newChannelIDs))
+        this.options.channelIDs = options.newChannelIDs;
+      if (Array.isArray(options.newExemptPermissions))
+        this.options.exemptPermissions = options.newExemptPermissions;
+      if (
+        typeof options.newExemptMembers === "string" &&
+        options.newExemptMembers.includes("function anonymous")
+      )
+        this.options.exemptMembers = options.newExemptMembers;
+      if (typeof options.newTrackMute === "boolean")
+        this.options.trackMute = options.newTrackMute;
+      if (typeof options.newTrackDeaf === "boolean")
+        this.options.trackDeaf = options.newTrackDeaf;
+      if (typeof options.newIsEnabled === "boolean")
+        this.options.isEnabled = options.newIsEnabled;
+      await this.manager.editConfig(this.guildID, this.data);
+      resolve(this);
+    });
   }
 }
 module.exports = Config;

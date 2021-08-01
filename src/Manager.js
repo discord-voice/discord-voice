@@ -7,7 +7,11 @@ const existsAsync = promisify(exists);
 const readFileAsync = promisify(readFile);
 const Config = require("./Config.js");
 const User = require("./User.js");
-const { defaultManagerOptions, defaultConfig } = require("./Constants.js");
+const {
+  defaultManagerOptions,
+  defaultConfigData,
+  defaultUserData,
+} = require("./Constants.js");
 class VoiceManager extends EventEmitter {
   constructor(client, options, init = true) {
     super();
@@ -20,15 +24,114 @@ class VoiceManager extends EventEmitter {
     if (init) this._init();
   }
 
- updateConfig(guildID, updatedConfig) {
+  createUser(userID, guildID, options) {
     return new Promise(async (resolve, reject) => {
-      updatedConfig =
-        updatedConfig && typeof updatedConfig === "object"
-          ? merge(defaultConfig, updatedConfig)
-          : defaultConfig;
-      if (!guildID) {
-        return reject(`guildID is not valid. (val=${guildID})`);
+      if (!this.ready) {
+        return reject("The manager is not ready yet.");
       }
+      options =
+        options && typeof options === "object"
+          ? merge(defaultUserData, options)
+          : defaultUserData;
+      if (!userID) {
+        return reject(`userID is not a valid user. (val=${userID})`);
+      }
+      if (!guildID) {
+        return reject(`guildID is not a valid guild. (val=${guildID})`);
+      }
+      const user = new User(this, {
+        userID: userID,
+        guildID: guildID,
+        data: options,
+      });
+      this.users.push(user);
+      await this.saveUser(userID, guildID, user.data);
+      resolve(user);
+    });
+  }
+  createConfig(guildID, options) {
+    return new Promise(async (resolve, reject) => {
+      if (!this.ready) {
+        return reject("The manager is not ready yet.");
+      }
+      options =
+        options && typeof options === "object"
+          ? merge(defaultConfigData, options)
+          : defaultConfigData;
+      if (!guildID) {
+        return reject(`guildID is not a valid guild. (val=${guildID})`);
+      }
+      const config = new Config(this, {
+        guildID: guildID,
+        data: options,
+      });
+      this.configs.push(config);
+      await this.saveConfig(guildID, config.data);
+      resolve(config);
+    });
+  }
+  removeUser(userID, guildID) {
+    return new Promise(async (resolve, reject) => {
+      const user = this.users.find(
+        (u) => u.guildID === guildID && u.userID === userID
+      );
+      if (!user) {
+        return reject(
+          "No user found with ID " +
+            userID +
+            " in guild with ID" +
+            guildID +
+            "."
+        );
+      }
+      this.users = this.users.filter(
+        (d) =>
+          d !==
+          {
+            userID: userID,
+            guildID: guildID,
+            data: user.data.data,
+          }
+      );
+      await this.deleteUser(messageID);
+      resolve();
+    });
+  }
+  removeConfig(guildID) {
+    return new Promise(async (resolve, reject) => {
+      const config = this.configs.find((c) => c.guildID === guildID);
+      if (!config) {
+        return reject("No config found for guild with ID " + guildID + ".");
+      }
+      this.configs = this.configs.filter((c) => c.guildID !== guildID);
+      await this.deleteConfig(messageID);
+      resolve();
+    });
+  }
+  updateUser(userID, guildID, options = {}) {
+    return new Promise(async (resolve, reject) => {
+      const user = this.users.find(
+        (u) => u.guildID === guildID && u.userID === userID
+      );
+      if (!user) {
+        return reject(
+          "No user found with ID " +
+            userID +
+            " in guild with ID" +
+            guildID +
+            "."
+        );
+      }
+      user.edit(options).then(resolve).catch(reject);
+    });
+  }
+  updateConfig(guildID, options = {}) {
+    return new Promise(async (resolve, reject) => {
+      const config = this.configs.find((c) => c.guildID === guildID);
+      if (!config) {
+        return reject("No config found for guild with ID " + guildID + ".");
+      }
+      config.edit(options).then(resolve).catch(reject);
     });
   }
 
@@ -167,6 +270,23 @@ class VoiceManager extends EventEmitter {
           this.configs.push(
             new Config(this, {
               guildID: user.guild.id,
+              data: {
+                trackBots: false,
+                trackAllChannels: true,
+                exemptChannels: () => false,
+                userLimit: 0,
+                channelIDs: [],
+                exemptPermissions: [],
+                exemptMembers: () => false,
+                trackMute: true,
+                trackDeaf: true,
+                isEnabled: true,
+              },
+            })
+          );
+          await this.saveConfig(this.guildID, {
+            guildID: user.guild.id,
+            data: {
               trackBots: false,
               trackAllChannels: true,
               exemptChannels: () => false,
@@ -177,20 +297,7 @@ class VoiceManager extends EventEmitter {
               trackMute: true,
               trackDeaf: true,
               isEnabled: true,
-            })
-          );
-          await this.saveConfig(this.guildID, {
-            guildID: user.guild.id,
-            trackBots: false,
-            trackAllChannels: true,
-            exemptChannels: () => false,
-            userLimit: 0,
-            channelIDs: [],
-            exemptPermissions: [],
-            exemptMembers: () => false,
-            trackMute: true,
-            trackDeaf: true,
-            isEnabled: true,
+            },
           });
           config = this.configs.find((g) => g.guildID === user.guild.id);
         }
@@ -246,18 +353,22 @@ class VoiceManager extends EventEmitter {
           new User(this, {
             userID: newState.member.id,
             guildID: newState.member.guild.id,
-            voiceTime: {
-              channels: [],
-              total: 0,
+            data: {
+              voiceTime: {
+                channels: [],
+                total: 0,
+              },
             },
           })
         );
         await this.saveUser(newState.member.id, newState.member.guild.id, {
           userID: newState.member.id,
           guildID: newState.member.guild.id,
-          voiceTime: {
-            channels: [],
-            total: 0,
+          data: {
+            voiceTime: {
+              channels: [],
+              total: 0,
+            },
           },
         });
       }

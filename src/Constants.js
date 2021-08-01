@@ -16,7 +16,7 @@ exports.defaultManagerOptions = {
   },
 };
 
-exports.defaultConfig = {
+exports.defaultConfigData = {
   trackBots: false,
   trackAllChannels: true,
   exemptChannels: () => false,
@@ -27,4 +27,11 @@ exports.defaultConfig = {
   trackMute: true,
   trackDeaf: true,
   isEnabled: true,
+};
+
+exports.defaultUserData = {
+  voiceTime: {
+    channels: [],
+    total: 0,
+  },
 };
