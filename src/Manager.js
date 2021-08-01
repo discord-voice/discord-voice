@@ -312,10 +312,10 @@ class VoiceManager extends EventEmitter {
             channels: [
               {
                 channelID: user.channel.id,
-                voiceTime: 1,
+                voiceTime: 1000,
               },
             ],
-            total: 1,
+            total: 1000,
           };
           await this.editUser(user.id, user.guild.id, user.data);
           return;
@@ -327,9 +327,9 @@ class VoiceManager extends EventEmitter {
           if (!previousVoiceTime)
             previousVoiceTime = {
               channelID: user.channel.id,
-              voiceTime: 1,
+              voiceTime: 1000,
             };
-          else previousVoiceTime.voiceTime += 1;
+          else previousVoiceTime.voiceTime += 1000;
           if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
           else user.voiceTime.channels[index] = previousVoiceTime;
           user.voiceTime.total = user.voiceTime.channels.reduce(function (
