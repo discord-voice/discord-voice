@@ -2,7 +2,7 @@ const merge = require("deepmerge");
 const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
-const {} = require("./Constants.js");
+const { defaultUserData } = require("./Constants.js");
 const VoiceManager = require("./Manager.js");
 
 class User extends EventEmitter {
@@ -13,6 +13,7 @@ class User extends EventEmitter {
     this.userID = options.userID;
     this.guildID = options.guildID;
     this.voiceTime = options.data.voiceTime;
+    this.levelingData = options.data.levelingData;
     this.options = options;
   }
 
@@ -31,28 +32,7 @@ class User extends EventEmitter {
         return voicechannel.members
           .map((x) => {
             if (!this.manager.users.find((u) => u.userID === x.id)) {
-              this.manager.users.push(
-                new User(this, {
-                  userID: x.id,
-                  guildID: x.guild.id,
-                  data: {
-                    voiceTime: {
-                      channels: [],
-                      total: 0,
-                    },
-                  },
-                })
-              );
-              this.manager.saveUser(x.id, x.guild.id, {
-                userID: x.id,
-                guildID: x.guild.id,
-                data: {
-                  voiceTime: {
-                    channels: [],
-                    total: 0,
-                  },
-                },
-              });
+              this.manager.createUser(x.id, x.guild.id);
             }
             if (x.id === this.userID)
               return { channel: voicechannel, member: x };
@@ -80,6 +60,7 @@ class User extends EventEmitter {
       guildID: this.guildID,
       data: {
         voiceTime: this.voiceTime,
+        levelingData: this.levelingData,
       },
     };
     return baseData;
@@ -93,6 +74,12 @@ class User extends EventEmitter {
         Number.isInteger(options.newVoiceTime.total)
       )
         this.voiceTime = options.newVoiceTime;
+      if (
+        typeof options.newLevelingData === "object" &&
+        Number.isInteger(options.newLevelingData.xp) &&
+        Number.isInteger(options.newLevelingData.level)
+      )
+        this.levelingData = options.newLevelingData;
       await this.manager.editUser(this.userID, this.guildID, this.data);
       resolve(this);
     });

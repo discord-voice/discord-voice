@@ -6,13 +6,18 @@ exports.defaultManagerOptions = {
     trackBots: false,
     trackAllChannels: true,
     exemptChannels: () => false,
-    userLimit: 0,
     channelIDs: [],
     exemptPermissions: [],
     exemptMembers: () => false,
     trackMute: true,
     trackDeaf: true,
     isEnabled: true,
+    minUserCountToParticipate: 0,
+    minXPToParticipate: 0,
+    minLevelToParticipate: 0,
+    maxXPToParticipate: 0,
+    maxLevelToParticipate: 0,
+    xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
   },
 };
 
@@ -20,18 +25,28 @@ exports.defaultConfigData = {
   trackBots: false,
   trackAllChannels: true,
   exemptChannels: () => false,
-  userLimit: 0,
   channelIDs: [],
   exemptPermissions: [],
   exemptMembers: () => false,
   trackMute: true,
   trackDeaf: true,
   isEnabled: true,
+  minUserCountToParticipate: 0,
+  maxUserCountToParticipate: 0,
+  minXPToParticipate: 0,
+  minLevelToParticipate: 0,
+  maxXPToParticipate: 0,
+  maxLevelToParticipate: 0,
+  xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
 };
 
 exports.defaultUserData = {
   voiceTime: {
     channels: [],
     total: 0,
+  },
+  levelingData: {
+    xp: 0,
+    level: 0,
   },
 };

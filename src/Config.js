@@ -31,8 +31,41 @@ class Config extends EventEmitter {
       this.manager.options.default.trackAllChannels
     );
   }
-  get userLimit() {
-    return this.options.userLimit || this.manager.options.default.userLimit;
+  get minUserCountToParticipate() {
+    return (
+      this.options.minUserCountToParticipate ||
+      this.manager.options.default.minUserCountToParticipate
+    );
+  }
+  get maxUserCountToParticipate() {
+    return (
+      this.options.maxUserCountToParticipate ||
+      this.manager.options.default.maxUserCountToParticipate
+    );
+  }
+  get minXPToParticipate() {
+    return (
+      this.options.minXPToParticipate ||
+      this.manager.options.default.minXPToParticipate
+    );
+  }
+  get minLevelToParticipate() {
+    return (
+      this.options.minLevelToParticipate ||
+      this.manager.options.default.minLevelToParticipate
+    );
+  }
+  get maxXPToParticipate() {
+    return (
+      this.options.maxXPToParticipate ||
+      this.manager.options.default.maxXPToParticipate
+    );
+  }
+  get maxLevelToParticipate() {
+    return (
+      this.options.maxLevelToParticipate ||
+      this.manager.options.default.maxLevelToParticipate
+    );
   }
   get data() {
     const baseData = {
@@ -45,7 +78,6 @@ class Config extends EventEmitter {
           typeof this.options.exemptChannels === "string"
             ? this.options.exemptChannels
             : serialize(this.options.exemptChannels),
-        userLimit: this.options.userLimit,
         channelIDs: this.options.channelIDs,
         exemptPermissions: this.options.exemptPermissions,
         exemptMembers:
@@ -56,6 +88,17 @@ class Config extends EventEmitter {
         trackMute: this.options.trackMute,
         trackDeaf: this.options.trackDeaf,
         isEnabled: this.options.isEnabled,
+        minUserCountToParticipate: this.options.minUserCountToParticipate,
+        maxUserCountToParticipate: this.options.maxUserCountToParticipate,
+        minXPToParticipate: this.options.minXPToParticipate,
+        minLevelToParticipate: this.options.minLevelToParticipate,
+        maxXPToParticipate: this.options.maxXPToParticipate,
+        maxLevelToParticipate: this.options.maxLevelToParticipate,
+        xpAmountToAdd:
+          !this.options.xpAmountToAdd ||
+          typeof this.options.xpAmountToAdd === "string"
+            ? this.options.xpAmountToAdd
+            : serialize(this.options.xpAmountToAdd),
       },
     };
     return baseData;
@@ -72,6 +115,14 @@ class Config extends EventEmitter {
         this.options.exemptMembers.includes("function anonymous")
         ? eval(`(${this.options.exemptMembers})`)
         : eval(this.options.exemptMembers)
+      : null;
+  }
+  get xpAmountToAddFunction() {
+    return this.options.xpAmountToAdd
+      ? typeof this.options.xpAmountToAdd === "string" &&
+        this.options.xpAmountToAdd.includes("function anonymous")
+        ? eval(`(${this.options.xpAmountToAdd})`)
+        : eval(this.options.xpAmountToAdd)
       : null;
   }
   async exemptMembers(member) {
@@ -93,6 +144,25 @@ class Config extends EventEmitter {
     }
     return false;
   }
+  async xpAmountToAdd() {
+    if (typeof this.xpAmountToAddFunction === "function") {
+      try {
+        const result = await this.xpAmountToAddFunction();
+        return result;
+      } catch (err) {
+        console.error(
+          `xpAmountToAdd Config Error\n${serialize(
+            this.xpAmountToAddFunction
+          )}\n${err}`
+        );
+        return false;
+      }
+    }
+    if (typeof this.manager.options.default.xpAmountToAdd === "function") {
+      return await this.manager.options.default.xpAmountToAdd();
+    }
+    return false;
+  }
   async checkMember(member) {
     const exemptMember = await this.exemptMembers(member);
     if (exemptMember) return false;
@@ -104,6 +174,26 @@ class Config extends EventEmitter {
     if (!this.trackMute && (member.voice.selfMute || member.voice.serverMute))
       return false;
     if (!this.trackDeaf && (member.voice.selfDeaf || member.voice.serverDeaf))
+      return false;
+    if (
+      this.minXPToParticipate &&
+      member.data.data.levelingData.xp < this.minXPToParticipate
+    )
+      return false;
+    if (
+      this.minLevelToParticipate > 0 &&
+      member.data.data.levelingData.level < this.minLevelToParticipate
+    )
+      return false;
+    if (
+      this.maxXPToParticipate > 0 &&
+      member.data.data.levelingData.xp > this.maxXPToParticipate
+    )
+      return false;
+    if (
+      this.maxLevelToParticipate > 0 &&
+      member.data.data.levelingData.level > this.maxLevelToParticipate
+    )
       return false;
     return true;
   }
@@ -139,7 +229,15 @@ class Config extends EventEmitter {
     if (exemptChannel) return false;
     if (!this.trackAllChannels && !this.channelIDs.includes(channel.id))
       return false;
-    if (this.userLimit > 0 && channel.members.size < this.userLimit)
+    if (
+      this.minUserCountToParticipate > 0 &&
+      channel.members.size < this.minUserCountToParticipate
+    )
+      return false;
+    if (
+      this.maxUserCountToParticipate > 0 &&
+      channel.members.size > this.maxUserCountToParticipate
+    )
       return false;
     return true;
   }
@@ -154,8 +252,6 @@ class Config extends EventEmitter {
         options.newExemptChannels.includes("function anonymous")
       )
         this.options.exemptChannels = options.newExemptChannels;
-      if (Number.isInteger(options.newUserLimit))
-        this.options.userLimit = options.newUserLimit;
       if (Array.isArray(options.newChannelIDs))
         this.options.channelIDs = options.newChannelIDs;
       if (Array.isArray(options.newExemptPermissions))
@@ -171,6 +267,25 @@ class Config extends EventEmitter {
         this.options.trackDeaf = options.newTrackDeaf;
       if (typeof options.newIsEnabled === "boolean")
         this.options.isEnabled = options.newIsEnabled;
+      if (Number.isInteger(options.newMinUserCountToParticipate))
+        this.options.minUserCountToParticipate =
+          options.newMinUserCountToParticipate;
+      if (Number.isInteger(options.newMaxUserCountToParticipate))
+        this.options.maxUserCountToParticipate =
+          options.newMaxUserCountToParticipate;
+      if (Number.isInteger(options.newMinXPToParticipate))
+        this.options.minXPToParticipate = options.newMinXPToParticipate;
+      if (Number.isInteger(options.newMinLevelToParticipate))
+        this.options.minLevelToParticipate = options.newMinLevelToParticipate;
+      if (Number.isInteger(options.newMaxXPToParticipate))
+        this.options.maxXPToParticipate = options.newMaxXPToParticipate;
+      if (Number.isInteger(options.newMaxLevelToParticipate))
+        this.options.maxLevelToParticipate = options.newMaxLevelToParticipate;
+      if (
+        typeof options.newXPAmountToAdd === "string" &&
+        options.newXPAmountToAdd.includes("function anonymous")
+      )
+        this.options.xpAmountToAdd = options.newXPAmountToAdd;
       await this.manager.editConfig(this.guildID, this.data);
       resolve(this);
     });

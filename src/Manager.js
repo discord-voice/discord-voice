@@ -267,39 +267,7 @@ class VoiceManager extends EventEmitter {
       if (user && user.member && user.channel) {
         let config = this.configs.find((g) => g.guildID === user.guild.id);
         if (!config) {
-          this.configs.push(
-            new Config(this, {
-              guildID: user.guild.id,
-              data: {
-                trackBots: false,
-                trackAllChannels: true,
-                exemptChannels: () => false,
-                userLimit: 0,
-                channelIDs: [],
-                exemptPermissions: [],
-                exemptMembers: () => false,
-                trackMute: true,
-                trackDeaf: true,
-                isEnabled: true,
-              },
-            })
-          );
-          await this.saveConfig(this.guildID, {
-            guildID: user.guild.id,
-            data: {
-              trackBots: false,
-              trackAllChannels: true,
-              exemptChannels: () => false,
-              userLimit: 0,
-              channelIDs: [],
-              exemptPermissions: [],
-              exemptMembers: () => false,
-              trackMute: true,
-              trackDeaf: true,
-              isEnabled: true,
-            },
-          });
-          config = this.configs.find((g) => g.guildID === user.guild.id);
+          config = await this.createConfig(user.guild.id);
         }
         if (
           !config.isEnabled ||
@@ -317,6 +285,10 @@ class VoiceManager extends EventEmitter {
             ],
             total: 1000,
           };
+          user.levelingData.xp += await config.xpAmountToAdd();
+          user.levelingData.level = Math.floor(
+            0.1 * Math.sqrt(user.levelingData.xp)
+          );
           await this.editUser(user.id, user.guild.id, user.data);
           return;
         } else {
@@ -339,6 +311,10 @@ class VoiceManager extends EventEmitter {
             return sum + data.voiceTime;
           },
           0);
+          user.levelingData.xp += await config.xpAmountToAdd();
+          user.levelingData.level = Math.floor(
+            0.1 * Math.sqrt(user.levelingData.xp)
+          );
           await this.editUser(user.id, user.guild.id, user.data);
           return;
         }
@@ -349,28 +325,7 @@ class VoiceManager extends EventEmitter {
   async _handleVoiceStateUpdate(oldState, newState) {
     if (!oldState.channel && newState.channel) {
       if (!this.users.find((u) => u.userID === newState.member.id)) {
-        this.users.push(
-          new User(this, {
-            userID: newState.member.id,
-            guildID: newState.member.guild.id,
-            data: {
-              voiceTime: {
-                channels: [],
-                total: 0,
-              },
-            },
-          })
-        );
-        await this.saveUser(newState.member.id, newState.member.guild.id, {
-          userID: newState.member.id,
-          guildID: newState.member.guild.id,
-          data: {
-            voiceTime: {
-              channels: [],
-              total: 0,
-            },
-          },
-        });
+      return await this.createUser(newState.member.id, newState.member.guild.id);
       }
     }
   }
