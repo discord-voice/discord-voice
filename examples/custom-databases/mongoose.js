@@ -47,7 +47,6 @@ const configDataSchema = new mongoose.Schema({
     exemptMembers: String,
     trackMute: Boolean,
     trackDeaf: Boolean,
-    isEnabled: Boolean,
     minUserCountToParticipate: Number,
     maxUserCountToParticipate: Number,
     minXPToParticipate: Number,
@@ -55,6 +54,8 @@ const configDataSchema = new mongoose.Schema({
     maxXPToParticipate: Number,
     maxLevelToParticipate: Number,
     xpAmountToAdd: String,
+    voiceTimeTrackingEnabled: Boolean,
+    levelingTrackingEnabled: Boolean,
   },
 });
 

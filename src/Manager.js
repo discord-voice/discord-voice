@@ -270,54 +270,66 @@ class VoiceManager extends EventEmitter {
           config = await this.createConfig(user.guild.id);
         }
         if (
-          !config.isEnabled ||
           !(await config.checkMember(user.member)) ||
           !(await config.checkChannel(user.channel))
         )
           return;
-        if (user.voiceTime.channels.length <= 0) {
-          user.voiceTime = {
-            channels: [
-              {
+        if (config.voiceTimeTrackingEnabled) {
+          if (user.voiceTime.channels.length <= 0) {
+            user.voiceTime = {
+              channels: [
+                {
+                  channelID: user.channel.id,
+                  voiceTime: 1000,
+                },
+              ],
+              total: 1000,
+            };
+            if (config.levelingTrackingEnabled) {
+              user.levelingData.xp += await config.xpAmountToAdd();
+              user.levelingData.level = Math.floor(
+                0.1 * Math.sqrt(user.levelingData.xp)
+              );
+            }
+            await this.editUser(user.id, user.guild.id, user.data);
+            return;
+          } else {
+            let previousVoiceTime = user.voiceTime.channels.find(
+              (chn) => chn.channelID === user.channel.id
+            );
+            let index = user.voiceTime.channels.indexOf(previousVoiceTime);
+            if (!previousVoiceTime)
+              previousVoiceTime = {
                 channelID: user.channel.id,
                 voiceTime: 1000,
-              },
-            ],
-            total: 1000,
-          };
+              };
+            else previousVoiceTime.voiceTime += 1000;
+            if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
+            else user.voiceTime.channels[index] = previousVoiceTime;
+            user.voiceTime.total = user.voiceTime.channels.reduce(function (
+              sum,
+              data
+            ) {
+              return sum + data.voiceTime;
+            },
+            0);
+            if (config.levelingTrackingEnabled) {
+              user.levelingData.xp += await config.xpAmountToAdd();
+              user.levelingData.level = Math.floor(
+                0.1 * Math.sqrt(user.levelingData.xp)
+              );
+            }
+            await this.editUser(user.id, user.guild.id, user.data);
+            return;
+          }
+        } else if (config.levelingTrackingEnabled) {
           user.levelingData.xp += await config.xpAmountToAdd();
           user.levelingData.level = Math.floor(
             0.1 * Math.sqrt(user.levelingData.xp)
           );
           await this.editUser(user.id, user.guild.id, user.data);
           return;
-        } else {
-          let previousVoiceTime = user.voiceTime.channels.find(
-            (chn) => chn.channelID === user.channel.id
-          );
-          let index = user.voiceTime.channels.indexOf(previousVoiceTime);
-          if (!previousVoiceTime)
-            previousVoiceTime = {
-              channelID: user.channel.id,
-              voiceTime: 1000,
-            };
-          else previousVoiceTime.voiceTime += 1000;
-          if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
-          else user.voiceTime.channels[index] = previousVoiceTime;
-          user.voiceTime.total = user.voiceTime.channels.reduce(function (
-            sum,
-            data
-          ) {
-            return sum + data.voiceTime;
-          },
-          0);
-          user.levelingData.xp += await config.xpAmountToAdd();
-          user.levelingData.level = Math.floor(
-            0.1 * Math.sqrt(user.levelingData.xp)
-          );
-          await this.editUser(user.id, user.guild.id, user.data);
-          return;
-        }
+        } else return;
       }
     });
   }
@@ -325,7 +337,10 @@ class VoiceManager extends EventEmitter {
   async _handleVoiceStateUpdate(oldState, newState) {
     if (!oldState.channel && newState.channel) {
       if (!this.users.find((u) => u.userID === newState.member.id)) {
-      return await this.createUser(newState.member.id, newState.member.guild.id);
+        return await this.createUser(
+          newState.member.id,
+          newState.member.guild.id
+        );
       }
     }
   }

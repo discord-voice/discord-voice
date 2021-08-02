@@ -13,8 +13,13 @@ class Config extends EventEmitter {
     this.options = options.data;
   }
 
-  get isEnabled() {
-    return this.options.isEnabled || this.manager.options.default.isEnabled;
+  get voiceTimeTrackingEnabled() {
+    return this.options.voiceTimeTrackingEnabled ||
+      this.manager.options.default.voiceTimeTrackingEnabled;
+  }
+  get levelingTrackingEnabled() {
+    return this.options.levelingTrackingEnabled ||
+      this.manager.options.default.levelingTrackingEnabled;
   }
   get trackBots() {
     return this.options.trackBots || this.manager.options.default.trackBots;

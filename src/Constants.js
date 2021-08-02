@@ -11,13 +11,14 @@ exports.defaultManagerOptions = {
     exemptMembers: () => false,
     trackMute: true,
     trackDeaf: true,
-    isEnabled: true,
     minUserCountToParticipate: 0,
     minXPToParticipate: 0,
     minLevelToParticipate: 0,
     maxXPToParticipate: 0,
     maxLevelToParticipate: 0,
     xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
+    voiceTimeTrackingEnabled: true,
+    levelingTrackingEnabled: true,
   },
 };
 
@@ -30,7 +31,6 @@ exports.defaultConfigData = {
   exemptMembers: () => false,
   trackMute: true,
   trackDeaf: true,
-  isEnabled: true,
   minUserCountToParticipate: 0,
   maxUserCountToParticipate: 0,
   minXPToParticipate: 0,
@@ -38,6 +38,8 @@ exports.defaultConfigData = {
   maxXPToParticipate: 0,
   maxLevelToParticipate: 0,
   xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
+  voiceTimeTrackingEnabled: true,
+  levelingTrackingEnabled: true,
 };
 
 exports.defaultUserData = {
