@@ -17,6 +17,7 @@ exports.VoiceManagerOptions = {
     maxXPToParticipate: 0,
     maxLevelToParticipate: 0,
     xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
+    voiceTimeToAdd: () => 1000,
     voiceTimeTrackingEnabled: true,
     levelingTrackingEnabled: true,
   },
@@ -38,6 +39,7 @@ exports.defaultConfigData = {
   maxXPToParticipate: 0,
   maxLevelToParticipate: 0,
   xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
+  voiceTimeToAdd: () => 1000,
   voiceTimeTrackingEnabled: true,
   levelingTrackingEnabled: true,
 };

@@ -1,5 +1,11 @@
-const Discord = require("discord.js"),
-  client = new Discord.Client(),
+const { Client, Intents } = require("discord.js"), // npm install discord.js
+  client = new Client({
+    intents: [
+      Intents.FLAGS.GUILD_VOICE_STATES,
+      Intents.FLAGS.GUILDS,
+      Intents.FLAGS.GUILD_MESSAGES,
+    ], // The GUILD_VOICE_STATES and GUILDS intents are required for discord-voice to function.
+  }),
   settings = {
     prefix: "v!",
     token: "Your Discord Bot Token",

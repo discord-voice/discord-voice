@@ -1,6 +1,12 @@
 const ms = require("ms"); // npm install ms
-const Discord = require("discord.js"), // npm install discord.js
-  client = new Discord.Client(),
+const { Client, Intents } = require("discord.js"), // npm install discord.js
+  client = new Client({
+    intents: [
+      Intents.FLAGS.GUILD_VOICE_STATES,
+      Intents.FLAGS.GUILDS,
+      Intents.FLAGS.GUILD_MESSAGES,
+    ], // The GUILD_VOICE_STATES and GUILDS intents are required for discord-voice to function.
+  }),
   settings = {
     prefix: "v!",
     token: "Your Discord Bot Token",
@@ -25,7 +31,7 @@ client.on("ready", () => {
   console.log("I'm ready!");
 });
 
-client.on("message", (message) => {
+client.on("messageCreate", (message) => {
   const args = message.content
     .slice(settings.prefix.length)
     .trim()
@@ -39,12 +45,17 @@ client.on("message", (message) => {
       (u) => u.guildID === message.guild.id && u.userID === message.author.id
     );
     if (!userData)
-      return message.channel.send("You don't have any voice time recorded!");
-    message.channel.send(
-      `Your total voiceTime is ${ms(userData.data.data.voiceTime.total, {
-        long: true,
-      })}!`
-    );
+      return message.channel.send({
+        content: "You don't have any voice time recorded!",
+      });
+    message.channel.send({
+      content: `Your total voiceTime is ${ms(
+        userData.data.data.voiceTime.total,
+        {
+          long: true,
+        }
+      )}!`,
+    });
   }
 
   if (command === "leaderboard") {
@@ -57,7 +68,9 @@ client.on("message", (message) => {
     // We grab top 10 users with most total voice time in the current server.
 
     if (users.length < 1)
-      return message.channel.send("Nobody's in leaderboard yet.");
+      return message.channel.send({
+        content: "Nobody's in leaderboard yet.",
+      });
     const leaderboard = users.map(
       (user) =>
         `${
@@ -76,7 +89,9 @@ client.on("message", (message) => {
     );
     // Here we map the output.
 
-    message.channel.send(`**Leaderboard**:\n\n${leaderboard.join("\n\n")}`);
+    message.channel.send({
+      content: `**Leaderboard**:\n\n${leaderboard.join("\n\n")}`,
+    });
     // This will send the leaderboard of the guild!
   }
 });

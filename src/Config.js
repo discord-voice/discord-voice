@@ -13,14 +13,6 @@ class Config extends EventEmitter {
     this.options = options.data;
   }
 
-  get voiceTimeTrackingEnabled() {
-    return this.options.voiceTimeTrackingEnabled ||
-      this.manager.options.default.voiceTimeTrackingEnabled;
-  }
-  get levelingTrackingEnabled() {
-    return this.options.levelingTrackingEnabled ||
-      this.manager.options.default.levelingTrackingEnabled;
-  }
   get trackBots() {
     return this.options.trackBots || this.manager.options.default.trackBots;
   }
@@ -72,6 +64,18 @@ class Config extends EventEmitter {
       this.manager.options.default.maxLevelToParticipate
     );
   }
+  get voiceTimeTrackingEnabled() {
+    return (
+      this.options.voiceTimeTrackingEnabled ||
+      this.manager.options.default.voiceTimeTrackingEnabled
+    );
+  }
+  get levelingTrackingEnabled() {
+    return (
+      this.options.levelingTrackingEnabled ||
+      this.manager.options.default.levelingTrackingEnabled
+    );
+  }
   get data() {
     const baseData = {
       guildID: this.guildID,
@@ -104,6 +108,13 @@ class Config extends EventEmitter {
           typeof this.options.xpAmountToAdd === "string"
             ? this.options.xpAmountToAdd
             : serialize(this.options.xpAmountToAdd),
+        voiceTimeToAdd:
+          !this.options.voiceTimeToAdd ||
+          typeof this.options.voiceTimeToAdd === "string"
+            ? this.options.voiceTimeToAdd
+            : serialize(this.options.voiceTimeToAdd),
+        voiceTimeTrackingEnabled: this.options.voiceTimeTrackingEnabled,
+        levelingTrackingEnabled: this.options.levelingTrackingEnabled,
       },
     };
     return baseData;
@@ -128,6 +139,14 @@ class Config extends EventEmitter {
         this.options.xpAmountToAdd.includes("function anonymous")
         ? eval(`(${this.options.xpAmountToAdd})`)
         : eval(this.options.xpAmountToAdd)
+      : null;
+  }
+  get voiceTimeToAddFunction() {
+    return this.options.voiceTimeToAdd
+      ? typeof this.options.voiceTimeToAdd === "string" &&
+        this.options.voiceTimeToAdd.includes("function anonymous")
+        ? eval(`(${this.options.voiceTimeToAdd})`)
+        : eval(this.options.voiceTimeToAdd)
       : null;
   }
   async exemptMembers(member) {
@@ -160,13 +179,32 @@ class Config extends EventEmitter {
             this.xpAmountToAddFunction
           )}\n${err}`
         );
-        return false;
+        return Math.floor(Math.random() * 10) + 1;
       }
     }
     if (typeof this.manager.options.default.xpAmountToAdd === "function") {
       return await this.manager.options.default.xpAmountToAdd();
     }
-    return false;
+    return Math.floor(Math.random() * 10) + 1;
+  }
+  async voiceTimeToAdd() {
+    if (typeof this.voiceTimeToAddFunction === "function") {
+      try {
+        const result = await this.voiceTimeToAddFunction();
+        return result;
+      } catch (err) {
+        console.error(
+          `voiceTimeToAdd Config Error\n${serialize(
+            this.voiceTimeToAddFunction
+          )}\n${err}`
+        );
+        return 1000;
+      }
+    }
+    if (typeof this.manager.options.default.voiceTimeToAdd === "function") {
+      return await this.manager.options.default.voiceTimeToAdd();
+    }
+    return 1000;
   }
   async checkMember(member) {
     const exemptMember = await this.exemptMembers(member);
@@ -291,6 +329,17 @@ class Config extends EventEmitter {
         options.newXPAmountToAdd.includes("function anonymous")
       )
         this.options.xpAmountToAdd = options.newXPAmountToAdd;
+      if (
+        typeof options.newVoiceTimeToAdd === "string" &&
+        options.newVoiceTimeToAdd.includes("function anonymous")
+      )
+        this.options.voiceTimeToAdd = options.newVoiceTimeToAdd;
+      if (typeof options.newVoiceTimeTrackingEnabled === "boolean")
+        this.options.voiceTimeTrackingEnabled =
+          options.newVoiceTimeTrackingEnabled;
+      if (typeof options.newLevelingTrackingEnabled === "boolean")
+        this.options.levelingTrackingEnabled =
+          options.newLevelingTrackingEnabled;
       await this.manager.editConfig(this.guildID, this.data);
       resolve(this);
     });

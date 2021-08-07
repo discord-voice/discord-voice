@@ -1,3 +1,4 @@
+/** @type {*} */
 const { EventEmitter } = require("events");
 const merge = require("deepmerge");
 const { writeFile, readFile, exists } = require("fs");
@@ -23,7 +24,7 @@ class VoiceManager extends EventEmitter {
    */
   constructor(client, options, init = true) {
     super();
-    if (!client) throw new Error("Client is a required option.");
+    if (!client?.options) throw new Error(`Client is a required option. (val=${client})`);
     /**
      * The Discord Client
      * @type {Discord.Client}
@@ -56,7 +57,7 @@ class VoiceManager extends EventEmitter {
    *
    * @param {Discord.Snowflake} userID The id of the user
    * @param {Discord.Snowflake} guildID The guild id of the user
-   * @param {CreateUserOptions} options The options for the user data
+   * @param {defaultUserData} options The options for the user data
    *
    * @returns {Promise<User>}
    *
@@ -94,6 +95,36 @@ class VoiceManager extends EventEmitter {
       resolve(user);
     });
   }
+  /**
+   * Creates a new config
+   *
+   * @param {Discord.Snowflake} guildID The guild id of the user
+   * @param {defaultConfigData} options The options for the user data
+   *
+   * @returns {Promise<Config>}
+   *
+   * @example
+   * manager.createConfig(message.author.id, message.guild.id, {
+   *      trackBots: false, // If the user is a bot it will not be tracked.
+   *      trackAllChannels: true, // All of the channels in the guild will be tracked.
+   *      exemptChannels: () => false, // The user will not be tracked in these channels. (This is a function).
+   *      channelIDs: [], // The channel ids to track. (If trackAllChannels is true, this is ignored)
+   *      exemptPermissions: [], // The user permissions to not track.
+   *      exemptMembers: () => false, // The user will not be tracked. (This is a function).
+   *      trackMute: true, // It will track users if they are muted aswell.
+   *      trackDeaf: true, // It will track users if they are deafen aswell.
+   *      minUserCountToParticipate: 0, // The min amount of users to be in a channel to be tracked.
+   *      maxUserCountToParticipate: 0, // The max amount of users to be in a channel to be tracked.
+   *      minXPToParticipate: 0, // The min amount of xp needed to be tracked.
+   *      minLevelToParticipate: 0, // The min level needed to be tracked.
+   *      maxXPToParticipate: 0, // The max amount of xp needed to be tracked.
+   *      maxLevelToParticipate: 0, // The max level needed to be tracked.
+   *      xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1, // The amount of xp to add to the user (This is a function).
+   *      voiceTimeToAdd: () => 1000, // The amount of time in ms to add to the user (This is a function).
+   *      voiceTimeTrackingEnabled: true, // Whether the voiceTimeTracking module is enabled.
+   *      levelingTrackingEnabled: true, // Whether the levelingTracking module is enabled.
+   * });
+   */
   createConfig(guildID, options) {
     return new Promise(async (resolve, reject) => {
       if (!this.ready) {
@@ -115,6 +146,7 @@ class VoiceManager extends EventEmitter {
       resolve(config);
     });
   }
+
   removeUser(userID, guildID) {
     return new Promise(async (resolve, reject) => {
       const user = this.users.find(
@@ -309,10 +341,10 @@ class VoiceManager extends EventEmitter {
   _checkUsers() {
     if (this.users.length <= 0) return;
     this.users.forEach(async (user) => {
-      if (user && user.member && user.channel) {
-        let config = this.configs.find((g) => g.guildID === user.guild.id);
+      if (user.member && user.channel) {
+        let config = this.configs.find((g) => g.guildID === user.guildID);
         if (!config) {
-          config = await this.createConfig(user.guild.id);
+          config = await this.createConfig(user.guildID);
         }
         if (
           !(await config.checkMember(user.member)) ||
@@ -320,27 +352,17 @@ class VoiceManager extends EventEmitter {
         )
           return;
         if (config.voiceTimeTrackingEnabled) {
-          if (user.voiceTime.channels.length <= 0) {
-            user.voiceTime = {
-              channels: [
-                {
-                  channelID: user.channel.id,
-                  voiceTime: 0,
-                },
-              ],
-              total: 0,
-            };
-          }
-          let previousVoiceTime = user.voiceTime.channels.find(
-            (chn) => chn.channelID === user.channel.id
-          );
+          let previousVoiceTime;
+          user.voiceTime.channels.length <= 0
+            ? (previousVoiceTime = {
+                channelID: user.channel.id,
+                voiceTime: 0,
+              })
+            : (previousVoiceTime = user.voiceTime.channels.find(
+                (chn) => chn.channelID === user.channel.id
+              ));
           let index = user.voiceTime.channels.indexOf(previousVoiceTime);
-          if (!previousVoiceTime)
-            previousVoiceTime = {
-              channelID: user.channel.id,
-              voiceTime: 1000,
-            };
-          else previousVoiceTime.voiceTime += 1000;
+          previousVoiceTime.voiceTime += await config.voiceTimeToAdd();
           if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
           else user.voiceTime.channels[index] = previousVoiceTime;
           user.voiceTime.total = user.voiceTime.channels.reduce(function (
@@ -356,14 +378,14 @@ class VoiceManager extends EventEmitter {
               0.1 * Math.sqrt(user.levelingData.xp)
             );
           }
-          await this.editUser(user.id, user.guild.id, user.data);
+          await this.editUser(user.userID, user.guildID, user.data);
           return;
         } else if (config.levelingTrackingEnabled) {
           user.levelingData.xp += await config.xpAmountToAdd();
           user.levelingData.level = Math.floor(
             0.1 * Math.sqrt(user.levelingData.xp)
           );
-          await this.editUser(user.id, user.guild.id, user.data);
+          await this.editUser(user.userID, user.guildID, user.data);
           return;
         } else return;
       }

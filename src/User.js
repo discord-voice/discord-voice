@@ -2,8 +2,6 @@ const merge = require("deepmerge");
 const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
-const { defaultUserData } = require("./Constants.js");
-const VoiceManager = require("./Manager.js");
 
 class User extends EventEmitter {
   constructor(manager, options) {
@@ -27,7 +25,7 @@ class User extends EventEmitter {
 
   get channelAndMember() {
     return this.guild.channels.cache
-      .filter((c) => c.type == "voice")
+      .filter((c) => c.type == "voice" || c.type == "GUILD_VOICE")
       .map((voicechannel) => {
         return voicechannel.members
           .map((x) => {

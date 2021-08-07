@@ -1,4 +1,11 @@
-const Discord = require("discord.js"),
+const { Client, Intents } = require("discord.js"), // npm install discord.js
+  client = new Client({
+    intents: [
+      Intents.FLAGS.GUILD_VOICE_STATES,
+      Intents.FLAGS.GUILDS,
+      Intents.FLAGS.GUILD_MESSAGES,
+    ], // The GUILD_VOICE_STATES and GUILDS intents are required for discord-voice to function.
+  }),
   client = new Discord.Client(),
   settings = {
     prefix: "v!",
@@ -54,6 +61,7 @@ const configDataSchema = new mongoose.Schema({
     maxXPToParticipate: Number,
     maxLevelToParticipate: Number,
     xpAmountToAdd: String,
+    voiceTimeToAdd: String,
     voiceTimeTrackingEnabled: Boolean,
     levelingTrackingEnabled: Boolean,
   },
