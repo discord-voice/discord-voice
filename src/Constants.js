@@ -1,4 +1,4 @@
-exports.defaultManagerOptions = {
+exports.VoiceManagerOptions = {
   userStorage: "./users.json",
   configStorage: "./configs.json",
   checkMembersEvery: 5000,

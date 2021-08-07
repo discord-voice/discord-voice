@@ -5,25 +5,70 @@ const { promisify } = require("util");
 const writeFileAsync = promisify(writeFile);
 const existsAsync = promisify(exists);
 const readFileAsync = promisify(readFile);
-const Config = require("./Config.js");
-const User = require("./User.js");
 const {
-  defaultManagerOptions,
+  VoiceManagerOptions,
   defaultConfigData,
   defaultUserData,
 } = require("./Constants.js");
+const Config = require("./Config.js");
+const User = require("./User.js");
+
+/**
+ * Voice Manager
+ */
 class VoiceManager extends EventEmitter {
+  /**
+   * @param {Discord.Client} client The Discord Client
+   * @param {VoiceManagerOptions} options The manager options
+   */
   constructor(client, options, init = true) {
     super();
     if (!client) throw new Error("Client is a required option.");
+    /**
+     * The Discord Client
+     * @type {Discord.Client}
+     */
     this.client = client;
+    /**
+     * Whether the manager is ready
+     * @type {Boolean}
+     */
     this.ready = false;
+    /**
+     * The users managed by this manager
+     * @type {User[]}
+     */
     this.users = [];
+    /**
+     * The configs managed by this manager
+     * @type {Config[]}
+     */
     this.configs = [];
-    this.options = merge(defaultManagerOptions, options);
+    /**
+     * The manager options
+     * @type {VoiceManagerOptions}
+     */
+    this.options = merge(VoiceManagerOptions, options);
     if (init) this._init();
   }
-
+  /**
+   * Creates a new user
+   *
+   * @param {Discord.Snowflake} userID The id of the user
+   * @param {Discord.Snowflake} guildID The guild id of the user
+   * @param {CreateUserOptions} options The options for the user data
+   *
+   * @returns {Promise<User>}
+   *
+   * @example
+   * manager.createUser(message.author.id, message.guild.id, {
+   *      levelingData: {
+   *      xp: 0,
+   *      level: 0,
+   *      },
+   *      // The user will have 0 xp and 0 level.
+   * });
+   */
   createUser(userID, guildID, options) {
     return new Promise(async (resolve, reject) => {
       if (!this.ready) {
@@ -280,48 +325,39 @@ class VoiceManager extends EventEmitter {
               channels: [
                 {
                   channelID: user.channel.id,
-                  voiceTime: 1000,
+                  voiceTime: 0,
                 },
               ],
-              total: 1000,
+              total: 0,
             };
-            if (config.levelingTrackingEnabled) {
-              user.levelingData.xp += await config.xpAmountToAdd();
-              user.levelingData.level = Math.floor(
-                0.1 * Math.sqrt(user.levelingData.xp)
-              );
-            }
-            await this.editUser(user.id, user.guild.id, user.data);
-            return;
-          } else {
-            let previousVoiceTime = user.voiceTime.channels.find(
-              (chn) => chn.channelID === user.channel.id
-            );
-            let index = user.voiceTime.channels.indexOf(previousVoiceTime);
-            if (!previousVoiceTime)
-              previousVoiceTime = {
-                channelID: user.channel.id,
-                voiceTime: 1000,
-              };
-            else previousVoiceTime.voiceTime += 1000;
-            if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
-            else user.voiceTime.channels[index] = previousVoiceTime;
-            user.voiceTime.total = user.voiceTime.channels.reduce(function (
-              sum,
-              data
-            ) {
-              return sum + data.voiceTime;
-            },
-            0);
-            if (config.levelingTrackingEnabled) {
-              user.levelingData.xp += await config.xpAmountToAdd();
-              user.levelingData.level = Math.floor(
-                0.1 * Math.sqrt(user.levelingData.xp)
-              );
-            }
-            await this.editUser(user.id, user.guild.id, user.data);
-            return;
           }
+          let previousVoiceTime = user.voiceTime.channels.find(
+            (chn) => chn.channelID === user.channel.id
+          );
+          let index = user.voiceTime.channels.indexOf(previousVoiceTime);
+          if (!previousVoiceTime)
+            previousVoiceTime = {
+              channelID: user.channel.id,
+              voiceTime: 1000,
+            };
+          else previousVoiceTime.voiceTime += 1000;
+          if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
+          else user.voiceTime.channels[index] = previousVoiceTime;
+          user.voiceTime.total = user.voiceTime.channels.reduce(function (
+            sum,
+            data
+          ) {
+            return sum + data.voiceTime;
+          },
+          0);
+          if (config.levelingTrackingEnabled) {
+            user.levelingData.xp += await config.xpAmountToAdd();
+            user.levelingData.level = Math.floor(
+              0.1 * Math.sqrt(user.levelingData.xp)
+            );
+          }
+          await this.editUser(user.id, user.guild.id, user.data);
+          return;
         } else if (config.levelingTrackingEnabled) {
           user.levelingData.xp += await config.xpAmountToAdd();
           user.levelingData.level = Math.floor(
