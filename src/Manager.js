@@ -16,6 +16,21 @@ const User = require("./User.js");
 
 /**
  * Voice Manager
+ * @example 
+ * // Requires Manager from discord-voice
+ * const { VoiceManager } = require("discord-voice");
+ * // Create a new instance of the manager class
+ * const manager = new VoiceManager(client, {
+ * userStorage: "./users.json",
+ * configStorage: "./configs.json",
+ * checkMembersEvery: 5000,
+ * default: {
+ *   trackBots: false,
+ *   trackAllChannels: true,
+ * },
+ * });
+ * // We now have a voiceManager property to access the manager everywhere!
+ * client.voiceManager = manager;
  */
 class VoiceManager extends EventEmitter {
   /**
