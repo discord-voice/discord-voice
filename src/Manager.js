@@ -36,7 +36,7 @@ const User = require("./User.js");
  */
 class VoiceManager extends EventEmitter {
   /**
-   * @param {Discord.Client} client The Discord Client
+   * @param {Client} client The Discord Client
    * @param {VoiceManagerOptions} options The manager options
    */
   constructor(client, options, init = true) {
