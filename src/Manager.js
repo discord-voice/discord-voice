@@ -1,4 +1,3 @@
-/** @type {*} */
 const { EventEmitter } = require("events");
 const merge = require("deepmerge");
 const { writeFile, readFile, exists } = require("fs");
@@ -7,9 +6,12 @@ const writeFileAsync = promisify(writeFile);
 const existsAsync = promisify(exists);
 const readFileAsync = promisify(readFile);
 const {
-  VoiceManagerOptions,
+  defaultVoiceManagerOptions,
   defaultConfigData,
   defaultUserData,
+  VoiceManagerOptions,
+  ConfigData,
+  UserData,
 } = require("./Constants.js");
 const Config = require("./Config.js");
 const User = require("./User.js");
@@ -39,10 +41,11 @@ class VoiceManager extends EventEmitter {
    */
   constructor(client, options, init = true) {
     super();
-    if (!client?.options) throw new Error(`Client is a required option. (val=${client})`);
+    if (!client?.options)
+      throw new Error(`Client is a required option. (val=${client})`);
     /**
      * The Discord Client
-     * @type {Discord.Client}
+     * @type {Client}
      */
     this.client = client;
     /**
@@ -64,15 +67,15 @@ class VoiceManager extends EventEmitter {
      * The manager options
      * @type {VoiceManagerOptions}
      */
-    this.options = merge(VoiceManagerOptions, options);
+    this.options = merge(defaultVoiceManagerOptions, options);
     if (init) this._init();
   }
   /**
    * Creates a new user
    *
-   * @param {Discord.Snowflake} userID The id of the user
-   * @param {Discord.Snowflake} guildID The guild id of the user
-   * @param {defaultUserData} options The options for the user data
+   * @param {Snowflake} userID The id of the user
+   * @param {Snowflake} guildID The guild id of the user
+   * @param {UserData} options The options for the user data
    *
    * @returns {Promise<User>}
    *
@@ -113,8 +116,8 @@ class VoiceManager extends EventEmitter {
   /**
    * Creates a new config
    *
-   * @param {Discord.Snowflake} guildID The guild id of the user
-   * @param {defaultConfigData} options The options for the user data
+   * @param {Snowflake} guildID The guild id of the user
+   * @param {ConfigData} options The options for the user data
    *
    * @returns {Promise<Config>}
    *

@@ -2,14 +2,35 @@ const merge = require("deepmerge");
 const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
-const {} = require("./Constants.js");
+const {
+  ConfigData,
+} = require("./Constants.js");
 const VoiceManager = require("./Manager.js");
 
+/**
+ * Represents a Config
+ */
 class Config extends EventEmitter {
+  /**
+   * @param {VoiceManager} manager The Voice Manager
+   * @param {ConfigData} options The giveaway data
+   */
   constructor(manager, options) {
     super();
+    /**
+     * The Voice manager
+     * @type {VoiceManager}
+     */
     this.manager = manager;
+    /**
+     * The guild ID of the config
+     * @type {Snowflake}
+     */
     this.guildID = options.guildID;
+    /**
+     * The config data
+     * @type {ConfigData}
+     */
     this.options = options.data;
   }
 
@@ -172,7 +193,8 @@ class Config extends EventEmitter {
     if (typeof this.xpAmountToAddFunction === "function") {
       try {
         const result = await this.xpAmountToAddFunction();
-        return result;
+        if (typeof result === "number") return result;
+        else return Math.floor(Math.random() * 10) + 1;
       } catch (err) {
         console.error(
           `xpAmountToAdd Config Error\n${serialize(
@@ -183,7 +205,9 @@ class Config extends EventEmitter {
       }
     }
     if (typeof this.manager.options.default.xpAmountToAdd === "function") {
-      return await this.manager.options.default.xpAmountToAdd();
+      const result = await this.manager.options.default.xpAmountToAdd();
+      if (typeof result === "number") return result;
+      else return Math.floor(Math.random() * 10) + 1;
     }
     return Math.floor(Math.random() * 10) + 1;
   }
@@ -191,7 +215,8 @@ class Config extends EventEmitter {
     if (typeof this.voiceTimeToAddFunction === "function") {
       try {
         const result = await this.voiceTimeToAddFunction();
-        return result;
+        if (typeof result === "number") return result;
+        else return 1000;
       } catch (err) {
         console.error(
           `voiceTimeToAdd Config Error\n${serialize(
@@ -202,7 +227,9 @@ class Config extends EventEmitter {
       }
     }
     if (typeof this.manager.options.default.voiceTimeToAdd === "function") {
-      return await this.manager.options.default.voiceTimeToAdd();
+      const result = await this.manager.options.default.voiceTimeToAdd();
+      if (typeof result === "number") return result;
+      else return 1000;
     }
     return 1000;
   }

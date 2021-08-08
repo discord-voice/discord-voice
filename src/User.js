@@ -2,17 +2,58 @@ const merge = require("deepmerge");
 const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
+const { 
+  UserData, 
+  UserVoiceTimeData, 
+  UserLevelingData
+ } = require("./Constants.js");
+const VoiceManager = require("./Manager.js");
 
+/**
+ * Represents a User
+ */
 class User extends EventEmitter {
+  /**
+   * @param {VoiceManager} manager The Voice Manager
+   * @param {UserData} options The giveaway data
+   */
   constructor(manager, options) {
     super();
+    /**
+     * The Voice manager
+     * @type {VoiceManager}
+     */
     this.manager = manager;
+    /**
+     * The Discord Client
+     * @type {Client}
+     */
     this.client = manager.client;
+    /**
+     * The user id
+     * @type {Snowflake}
+     */
     this.userID = options.userID;
+    /**
+     * The guild ID of the config
+     * @type {Snowflake}
+     */
     this.guildID = options.guildID;
+    /**
+     * The user voice time data
+     * @type {UserVoiceTimeData}
+     */
     this.voiceTime = options.data.voiceTime;
+    /**
+     * The user leveling data
+     * @type {UserLevelingData}
+     */
     this.levelingData = options.data.levelingData;
-    this.options = options;
+    /**
+     * The user data
+     * @type {UserData}
+     */
+    this.options = options.data;
   }
 
   get guild() {
