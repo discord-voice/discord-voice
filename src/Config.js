@@ -3,7 +3,9 @@ const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
 const {
+  ConfigOptions,
   ConfigData,
+  ConfigEditOptions,
 } = require("./Constants.js");
 const VoiceManager = require("./Manager.js");
 
@@ -13,12 +15,12 @@ const VoiceManager = require("./Manager.js");
 class Config extends EventEmitter {
   /**
    * @param {VoiceManager} manager The Voice Manager
-   * @param {ConfigData} options The giveaway data
+   * @param {ConfigOptions} options The giveaway data
    */
   constructor(manager, options) {
     super();
     /**
-     * The Voice manager
+     * The Voice Manager
      * @type {VoiceManager}
      */
     this.manager = manager;
@@ -29,7 +31,7 @@ class Config extends EventEmitter {
     this.guildID = options.guildID;
     /**
      * The config data
-     * @type {ConfigData}
+     * @type {ConfigOptions}
      */
     this.options = options.data;
   }

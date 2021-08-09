@@ -7,11 +7,13 @@ const existsAsync = promisify(exists);
 const readFileAsync = promisify(readFile);
 const {
   defaultVoiceManagerOptions,
-  defaultConfigData,
-  defaultUserData,
+  defaultUserOptions,
+  defaultConfigOptions,
   VoiceManagerOptions,
-  ConfigData,
+  UserOptions,
+  ConfigOptions,
   UserData,
+  ConfigData,
 } = require("./Constants.js");
 const Config = require("./Config.js");
 const User = require("./User.js");
@@ -54,12 +56,12 @@ class VoiceManager extends EventEmitter {
      */
     this.ready = false;
     /**
-     * The users managed by this manager
+     * The user's managed by this manager
      * @type {User[]}
      */
     this.users = [];
     /**
-     * The configs managed by this manager
+     * The config's managed by this manager
      * @type {Config[]}
      */
     this.configs = [];
@@ -71,11 +73,11 @@ class VoiceManager extends EventEmitter {
     if (init) this._init();
   }
   /**
-   * Creates a new user
+   * Creates a new user in the database
    *
-   * @param {Snowflake} userID The id of the user
-   * @param {Snowflake} guildID The guild id of the user
-   * @param {UserData} options The options for the user data
+   * @param {Snowflake} userId The id of the user
+   * @param {Snowflake} guildId The guild id of the user
+   * @param {UserOptions} options The options for the user 
    *
    * @returns {Promise<User>}
    *
@@ -88,36 +90,36 @@ class VoiceManager extends EventEmitter {
    *      // The user will have 0 xp and 0 level.
    * });
    */
-  createUser(userID, guildID, options) {
+  createUser(userId, guildId, options) {
     return new Promise(async (resolve, reject) => {
       if (!this.ready) {
         return reject("The manager is not ready yet.");
       }
       options =
         options && typeof options === "object"
-          ? merge(defaultUserData, options)
-          : defaultUserData;
-      if (!userID) {
-        return reject(`userID is not a valid user. (val=${userID})`);
+          ? merge(defaultUserOptions, options)
+          : defaultUserOptions;
+      if (!userId) {
+        return reject(`userId is not a valid user. (val=${userId})`);
       }
-      if (!guildID) {
-        return reject(`guildID is not a valid guild. (val=${guildID})`);
+      if (!guildId) {
+        return reject(`guildId is not a valid guild. (val=${guildId})`);
       }
       const user = new User(this, {
-        userID: userID,
-        guildID: guildID,
+        userId: userId,
+        guildId: guildId,
         data: options,
       });
       this.users.push(user);
-      await this.saveUser(userID, guildID, user.data);
+      await this.saveUser(userId, guildId, user.data);
       resolve(user);
     });
   }
   /**
-   * Creates a new config
+   * Creates a new config in the database
    *
-   * @param {Snowflake} guildID The guild id of the user
-   * @param {ConfigData} options The options for the user data
+   * @param {Snowflake} guildId The guild id of the config
+   * @param {ConfigOptions} options The options for config
    *
    * @returns {Promise<Config>}
    *
@@ -143,39 +145,39 @@ class VoiceManager extends EventEmitter {
    *      levelingTrackingEnabled: true, // Whether the levelingTracking module is enabled.
    * });
    */
-  createConfig(guildID, options) {
+  createConfig(guildId, options) {
     return new Promise(async (resolve, reject) => {
       if (!this.ready) {
         return reject("The manager is not ready yet.");
       }
       options =
         options && typeof options === "object"
-          ? merge(defaultConfigData, options)
-          : defaultConfigData;
-      if (!guildID) {
-        return reject(`guildID is not a valid guild. (val=${guildID})`);
+          ? merge(defaultConfigOptions, options)
+          : defaultConfigOptions;
+      if (!guildId) {
+        return reject(`guildId is not a valid guild. (val=${guildId})`);
       }
       const config = new Config(this, {
-        guildID: guildID,
+        guildId: guildId,
         data: options,
       });
       this.configs.push(config);
-      await this.saveConfig(guildID, config.data);
+      await this.saveConfig(guildId, config.data);
       resolve(config);
     });
   }
 
-  removeUser(userID, guildID) {
+  removeUser(userId, guildId) {
     return new Promise(async (resolve, reject) => {
       const user = this.users.find(
-        (u) => u.guildID === guildID && u.userID === userID
+        (u) => u.guildId === guildId && u.userId === userId
       );
       if (!user) {
         return reject(
           "No user found with ID " +
-            userID +
+            userId +
             " in guild with ID" +
-            guildID +
+            guildId +
             "."
         );
       }
@@ -183,8 +185,8 @@ class VoiceManager extends EventEmitter {
         (d) =>
           d !==
           {
-            userID: userID,
-            guildID: guildID,
+            userId: userId,
+            guildId: guildId,
             data: user.data.data,
           }
       );
@@ -192,45 +194,45 @@ class VoiceManager extends EventEmitter {
       resolve();
     });
   }
-  removeConfig(guildID) {
+  removeConfig(guildId) {
     return new Promise(async (resolve, reject) => {
-      const config = this.configs.find((c) => c.guildID === guildID);
+      const config = this.configs.find((c) => c.guildId === guildId);
       if (!config) {
-        return reject("No config found for guild with ID " + guildID + ".");
+        return reject("No config found for guild with ID " + guildId + ".");
       }
-      this.configs = this.configs.filter((c) => c.guildID !== guildID);
+      this.configs = this.configs.filter((c) => c.guildId !== guildId);
       await this.deleteConfig(messageID);
       resolve();
     });
   }
-  updateUser(userID, guildID, options = {}) {
+  updateUser(userId, guildId, options = {}) {
     return new Promise(async (resolve, reject) => {
       const user = this.users.find(
-        (u) => u.guildID === guildID && u.userID === userID
+        (u) => u.guildId === guildId && u.userId === userId
       );
       if (!user) {
         return reject(
           "No user found with ID " +
-            userID +
+            userId +
             " in guild with ID" +
-            guildID +
+            guildId +
             "."
         );
       }
       user.edit(options).then(resolve).catch(reject);
     });
   }
-  updateConfig(guildID, options = {}) {
+  updateConfig(guildId, options = {}) {
     return new Promise(async (resolve, reject) => {
-      const config = this.configs.find((c) => c.guildID === guildID);
+      const config = this.configs.find((c) => c.guildId === guildId);
       if (!config) {
-        return reject("No config found for guild with ID " + guildID + ".");
+        return reject("No config found for guild with ID " + guildId + ".");
       }
       config.edit(options).then(resolve).catch(reject);
     });
   }
 
-  async deleteUser(userID, guildID) {
+  async deleteUser(userId, guildId) {
     await writeFileAsync(
       this.options.userStorage,
       JSON.stringify(this.users.map((user) => user.data)),
@@ -240,7 +242,7 @@ class VoiceManager extends EventEmitter {
     return;
   }
 
-  async deleteConfig(guildID) {
+  async deleteConfig(guildId) {
     await writeFileAsync(
       this.options.configStorage,
       JSON.stringify(this.configs.map((config) => config.data)),
@@ -278,7 +280,7 @@ class VoiceManager extends EventEmitter {
     return;
   }
 
-  async saveUser(userID, guildID, userData) {
+  async saveUser(userId, guildId, userData) {
     await writeFileAsync(
       this.options.userStorage,
       JSON.stringify(this.users.map((user) => user.data)),
@@ -288,7 +290,7 @@ class VoiceManager extends EventEmitter {
     return;
   }
 
-  async saveConfig(guildID, configData) {
+  async saveConfig(guildId, configData) {
     await writeFileAsync(
       this.options.configStorage,
       JSON.stringify(this.configs.map((config) => config.data)),
@@ -360,9 +362,9 @@ class VoiceManager extends EventEmitter {
     if (this.users.length <= 0) return;
     this.users.forEach(async (user) => {
       if (user.member && user.channel) {
-        let config = this.configs.find((g) => g.guildID === user.guildID);
+        let config = this.configs.find((g) => g.guildId === user.guildId);
         if (!config) {
-          config = await this.createConfig(user.guildID);
+          config = await this.createConfig(user.guildId);
         }
         if (
           !(await config.checkMember(user.member)) ||
@@ -396,14 +398,14 @@ class VoiceManager extends EventEmitter {
               0.1 * Math.sqrt(user.levelingData.xp)
             );
           }
-          await this.editUser(user.userID, user.guildID, user.data);
+          await this.editUser(user.userId, user.guildId, user.data);
           return;
         } else if (config.levelingTrackingEnabled) {
           user.levelingData.xp += await config.xpAmountToAdd();
           user.levelingData.level = Math.floor(
             0.1 * Math.sqrt(user.levelingData.xp)
           );
-          await this.editUser(user.userID, user.guildID, user.data);
+          await this.editUser(user.userId, user.guildId, user.data);
           return;
         } else return;
       }
@@ -412,7 +414,7 @@ class VoiceManager extends EventEmitter {
 
   async _handleVoiceStateUpdate(oldState, newState) {
     if (!oldState.channel && newState.channel) {
-      if (!this.users.find((u) => u.userID === newState.member.id)) {
+      if (!this.users.find((u) => u.userId === newState.member.id)) {
         return await this.createUser(
           newState.member.id,
           newState.member.guild.id

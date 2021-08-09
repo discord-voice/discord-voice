@@ -3,9 +3,11 @@ const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
 const { 
+  UserOptions, 
+  UserVoiceTimeOptions, 
+  UserLevelingOptions,
   UserData, 
-  UserVoiceTimeData, 
-  UserLevelingData
+  UserEditOptions,
  } = require("./Constants.js");
 const VoiceManager = require("./Manager.js");
 
@@ -15,12 +17,12 @@ const VoiceManager = require("./Manager.js");
 class User extends EventEmitter {
   /**
    * @param {VoiceManager} manager The Voice Manager
-   * @param {UserData} options The giveaway data
+   * @param {UserOptions} options The giveaway data
    */
   constructor(manager, options) {
     super();
     /**
-     * The Voice manager
+     * The Voice Manager
      * @type {VoiceManager}
      */
     this.manager = manager;
@@ -30,50 +32,65 @@ class User extends EventEmitter {
      */
     this.client = manager.client;
     /**
-     * The user id
+     * The id of the user
      * @type {Snowflake}
      */
-    this.userID = options.userID;
+    this.userId = options.userId;
     /**
-     * The guild ID of the config
+     * The guild id of the user
      * @type {Snowflake}
      */
-    this.guildID = options.guildID;
+    this.guildId = options.guildId;
     /**
-     * The user voice time data
-     * @type {UserVoiceTimeData}
+     * The user voice time options
+     * @type {UserVoiceTimeOptions}
      */
     this.voiceTime = options.data.voiceTime;
     /**
-     * The user leveling data
-     * @type {UserLevelingData}
+     * The user leveling options
+     * @type {UserLevelingOptions}
      */
     this.levelingData = options.data.levelingData;
     /**
-     * The user data
-     * @type {UserData}
+     * The user options
+     * @type {UserOptions}
      */
     this.options = options.data;
   }
 
+  /**
+   * The guild of the user
+   * @type {Guild}
+   * @readonly
+   */
   get guild() {
-    return this.client.guilds.cache.get(this.guildID);
+    return this.client.guilds.cache.get(this.guildId);
   }
 
+  /**
+   * The user
+   * @type {DiscordUser}
+   * @readonly
+   */
   get user() {
-    return this.client.users.cache.get(this.userID);
+    return this.client.users.cache.get(this.userId);
   }
 
+  /**
+   * Returns the user's voice channel and the member itself and creates a new user if a member is present in the voice channel and dosen't exist in the databse
+   * @type {object}
+   * @readonly
+   */
   get channelAndMember() {
     return this.guild.channels.cache
       .filter((c) => c.type == "voice" || c.type == "GUILD_VOICE")
       .map((voicechannel) => {
         return voicechannel.members
           .map((x) => {
-            if (!this.manager.users.find((u) => u.userID === x.id)) {
+            if (!this.manager.users.find((u) => u.userId === x.id)) {
               this.manager.createUser(x.id, x.guild.id);
             }
-            if (x.id === this.userID)
+            if (x.id === this.userId)
               return { channel: voicechannel, member: x };
           })
           .find((val) => val);
@@ -81,22 +98,36 @@ class User extends EventEmitter {
       .find((val) => val);
   }
 
+  /**
+   * The user's voice channel if present
+   * @type {VoiceChannel}
+   * @readonly
+   */
   get channel() {
     let returnedJSONObject = this.channelAndMember;
     if (returnedJSONObject) return returnedJSONObject.channel;
     else return null;
   }
 
+  /**
+   * The guild member data of the user
+   * @type {Member}
+   * @readonly
+   */
   get member() {
     let returnedJSONObject = this.channelAndMember;
     if (returnedJSONObject) return returnedJSONObject.member;
     else return null;
   }
 
+  /**
+   * The raw user data object for this user
+   * @type {UserData}
+   */
   get data() {
     const baseData = {
-      userID: this.userID,
-      guildID: this.guildID,
+      userId: this.userId,
+      guildId: this.guildId,
       data: {
         voiceTime: this.voiceTime,
         levelingData: this.levelingData,
@@ -105,6 +136,11 @@ class User extends EventEmitter {
     return baseData;
   }
 
+  /**
+   * Edits the user
+   * @param {UserEditOptions} options The edit options
+   * @returns {Promise<User>} The edited user
+   */
   edit(options = {}) {
     return new Promise(async (resolve, reject) => {
       if (
@@ -119,7 +155,7 @@ class User extends EventEmitter {
         Number.isInteger(options.newLevelingData.level)
       )
         this.levelingData = options.newLevelingData;
-      await this.manager.editUser(this.userID, this.guildID, this.data);
+      await this.manager.editUser(this.userId, this.guildId, this.data);
       resolve(this);
     });
   }
