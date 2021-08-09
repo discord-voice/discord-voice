@@ -208,3 +208,12 @@ exports.UserData = {};
  * @property {UserLevelingOptions} [newLevelingData] The new leveling options
  */
 exports.UserEditOptions = {};
+
+/**
+ * The channelAndMember getter returned options
+ * @typedef {object} channelAndMemberOptions
+ *
+ * @property {VoiceChannel} channel The user voice channel if present
+ * @property {Member} member The guild member data of the user if present
+ */
+exports.channelAndMemberOptions = {};

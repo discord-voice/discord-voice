@@ -2,13 +2,14 @@ const merge = require("deepmerge");
 const Discord = require("discord.js");
 const serialize = require("serialize-javascript");
 const { EventEmitter } = require("events");
-const { 
-  UserOptions, 
-  UserVoiceTimeOptions, 
+const {
+  UserOptions,
+  UserVoiceTimeOptions,
   UserLevelingOptions,
-  UserData, 
+  UserData,
   UserEditOptions,
- } = require("./Constants.js");
+  channelAndMemberOptions,
+} = require("./Constants.js");
 const VoiceManager = require("./Manager.js");
 
 /**
@@ -61,6 +62,7 @@ class User extends EventEmitter {
   /**
    * The guild of the user
    * @type {Guild}
+   * @readonly
    */
   get guild() {
     return this.client.guilds.cache.get(this.guildId);
@@ -69,6 +71,7 @@ class User extends EventEmitter {
   /**
    * The user
    * @type {DiscordUser}
+   * @readonly
    */
   get user() {
     return this.client.users.cache.get(this.userId);
@@ -76,7 +79,8 @@ class User extends EventEmitter {
 
   /**
    * Returns the user's voice channel and the member itself and creates a new user if a member is present in the voice channel and dosen't exist in the databse
-   * @type {object}
+   * @type {channelAndMemberOptions}
+   * @readonly
    */
   get channelAndMember() {
     return this.guild.channels.cache
@@ -98,6 +102,7 @@ class User extends EventEmitter {
   /**
    * The user's voice channel if present
    * @type {VoiceChannel}
+   * @readonly
    */
   get channel() {
     let returnedJSONObject = this.channelAndMember;
@@ -108,6 +113,7 @@ class User extends EventEmitter {
   /**
    * The guild member data of the user
    * @type {Member}
+   * @readonly
    */
   get member() {
     let returnedJSONObject = this.channelAndMember;
@@ -118,6 +124,7 @@ class User extends EventEmitter {
   /**
    * The raw user data object for this user
    * @type {UserData}
+   * @readonly
    */
   get data() {
     const baseData = {
