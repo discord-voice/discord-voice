@@ -141,7 +141,7 @@ class User extends EventEmitter {
   /**
    * Edits the user
    * @param {UserEditOptions} options The edit options
-   * @returns {Promise<User>} The edited user
+   * @returns {Promise<User>}
    */
   edit(options = {}) {
     return new Promise(async (resolve, reject) => {
