@@ -123,6 +123,7 @@ class User extends EventEmitter {
   /**
    * The raw user data object for this user
    * @type {UserData}
+   * @readonly
    */
   get data() {
     const baseData = {
