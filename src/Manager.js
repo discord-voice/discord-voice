@@ -174,9 +174,9 @@ class VoiceManager extends EventEmitter {
       );
       if (!user) {
         return reject(
-          "No user found with ID " +
+          "No user found with Id " +
             userId +
-            " in guild with ID" +
+            " in guild with Id" +
             guildId +
             "."
         );
@@ -198,7 +198,7 @@ class VoiceManager extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       const config = this.configs.find((c) => c.guildId === guildId);
       if (!config) {
-        return reject("No config found for guild with ID " + guildId + ".");
+        return reject("No config found for guild with Id " + guildId + ".");
       }
       this.configs = this.configs.filter((c) => c.guildId !== guildId);
       await this.deleteConfig(messageID);
@@ -212,9 +212,9 @@ class VoiceManager extends EventEmitter {
       );
       if (!user) {
         return reject(
-          "No user found with ID " +
+          "No user found with Id " +
             userId +
-            " in guild with ID" +
+            " in guild with Id" +
             guildId +
             "."
         );
@@ -226,7 +226,7 @@ class VoiceManager extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       const config = this.configs.find((c) => c.guildId === guildId);
       if (!config) {
-        return reject("No config found for guild with ID " + guildId + ".");
+        return reject("No config found for guild with Id " + guildId + ".");
       }
       config.edit(options).then(resolve).catch(reject);
     });
@@ -375,11 +375,11 @@ class VoiceManager extends EventEmitter {
           let previousVoiceTime;
           user.voiceTime.channels.length <= 0
             ? (previousVoiceTime = {
-                channelID: user.channel.id,
+                channelId: user.channel.id,
                 voiceTime: 0,
               })
             : (previousVoiceTime = user.voiceTime.channels.find(
-                (chn) => chn.channelID === user.channel.id
+                (chn) => chn.channelId === user.channel.id
               ));
           let index = user.voiceTime.channels.indexOf(previousVoiceTime);
           previousVoiceTime.voiceTime += await config.voiceTimeToAdd();
