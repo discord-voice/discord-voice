@@ -25,8 +25,8 @@ db.once("open", () => {
 
 // Create the schema for user data
 const userDataSchema = new mongoose.Schema({
-  userID: String,
-  guildID: String,
+  userId: String,
+  guildId: String,
   data: {
     voiceTime: {
       channels: [String],
@@ -44,7 +44,7 @@ const userDataModel = mongoose.model("users", userDataSchema);
 
 // Create the schema for config data
 const configDataSchema = new mongoose.Schema({
-  guildID: String,
+  guildId: String,
   data: {
     trackBots: Boolean,
     trackAllChannels: Boolean,
@@ -85,7 +85,7 @@ const VoiceManagerWithOwnDatabase = class extends VoiceManager {
   }
 
   // This function is called when a user needs to be saved in the database.
-  async saveUser(userID, guildID, userData) {
+  async saveUser(userId, guildId, userData) {
     // Add the new user to the database
     await userDataModel.create(userData);
     // Don't forget to return something!
@@ -93,7 +93,7 @@ const VoiceManagerWithOwnDatabase = class extends VoiceManager {
   }
 
   // This function is called when a config needs to be saved in the database.
-  async saveConfig(guildID, configData) {
+  async saveConfig(guildId, configData) {
     // Add the new config to the database
     await configDataModel.create(configData);
     // Don't forget to return something!
@@ -101,39 +101,39 @@ const VoiceManagerWithOwnDatabase = class extends VoiceManager {
   }
 
   // This function is called when a user needs to be edited in the database.
-  async editUser(userID, guildID, userData) {
-    // Find by userID and guildID and update it
+  async editUser(userId, guildId, userData) {
+    // Find by userId and guildId and update it
     await userDataModel
-      .findOneAndUpdate({ userID: userID, guildID: guildID }, userData)
+      .findOneAndUpdate({ userId: userId, guildId: guildId }, userData)
       .exec();
     // Don't forget to return something!
     return true;
   }
 
   // This function is called when a config needs to be edited in the database.
-  async editConfig(guildID, configData) {
-    // Find by guildID and update it
+  async editConfig(guildId, configData) {
+    // Find by guildId and update it
     await configDataModel
-      .findOneAndUpdate({ guildID: guildID }, configData)
+      .findOneAndUpdate({ guildId: guildId }, configData)
       .exec();
     // Don't forget to return something!
     return true;
   }
 
   // This function is called when a user needs to be deleted from the database.
-  async deleteUser(userID, guildID) {
-    // Find by userID and guildID and delete it
+  async deleteUser(userId, guildId) {
+    // Find by userId and guildId and delete it
     await userDataModel
-      .findOneAndDelete({ userID: userID, guildID: guildID })
+      .findOneAndDelete({ userId: userId, guildId: guildId })
       .exec();
     // Don't forget to return something!
     return true;
   }
 
   // This function is called when a config needs to be deleted from the database.
-  async deleteConfig(guildID) {
-    // Find by userID and guildID and delete it
-    await configDataModel.findOneAndDelete({ guildID: guildID }).exec();
+  async deleteConfig(guildId) {
+    // Find by userId and guildId and delete it
+    await configDataModel.findOneAndDelete({ guildId: guildId }).exec();
     // Don't forget to return something!
     return true;
   }
