@@ -364,7 +364,6 @@ class VoiceManager extends EventEmitter {
       if (user.member && user.channel) {
         let config = this.configs.find((g) => g.guildId === user.guildId);
         if (!config) {
-          console.log(config)
           config = await this.createConfig(user.guildId);
         }
         if (
