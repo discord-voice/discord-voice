@@ -29,7 +29,7 @@ const userDataSchema = new mongoose.Schema({
   guildId: String,
   data: {
     voiceTime: {
-      channels: [String],
+      channels: Array,
       total: Number,
     },
     levelingData: {
@@ -49,7 +49,7 @@ const configDataSchema = new mongoose.Schema({
     trackBots: Boolean,
     trackAllChannels: Boolean,
     exemptChannels: String,
-    channelIds: [String],
+    channelIds: Array,
     exemptPermissions: [],
     exemptMembers: String,
     trackMute: Boolean,
