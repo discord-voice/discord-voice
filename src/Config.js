@@ -15,7 +15,7 @@ const VoiceManager = require("./Manager.js");
 class Config extends EventEmitter {
   /**
    * @param {VoiceManager} manager The Voice Manager
-   * @param {ConfigOptions} options The giveaway data
+   * @param {ConfigOptions} options The config options
    */
   constructor(manager, options) {
     super();
@@ -208,7 +208,7 @@ class Config extends EventEmitter {
   }
 
   /**
-   * Members with any of these permissions won't be able to win a giveaway.
+   * Members with any of these permissions won't be tracked.
    * @type {PermissionResolvable[]}
    */
   get exemptPermissions() {

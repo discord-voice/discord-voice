@@ -18,7 +18,7 @@ const VoiceManager = require("./Manager.js");
 class User extends EventEmitter {
   /**
    * @param {VoiceManager} manager The Voice Manager
-   * @param {UserOptions} options The giveaway data
+   * @param {UserOptions} options The user options
    */
   constructor(manager, options) {
     super();
