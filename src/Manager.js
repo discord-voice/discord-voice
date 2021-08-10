@@ -20,7 +20,7 @@ const User = require("./User.js");
 
 /**
  * Voice Manager
- * @example 
+ * @example
  * // Requires Manager from discord-voice
  * const { VoiceManager } = require("discord-voice");
  * // Create a new instance of the manager class
@@ -77,7 +77,7 @@ class VoiceManager extends EventEmitter {
    *
    * @param {Snowflake} userId The id of the user
    * @param {Snowflake} guildId The guild id of the user
-   * @param {UserOptions} options The options for the user 
+   * @param {UserOptions} options The options for the user
    *
    * @returns {Promise<User>}
    *
@@ -378,9 +378,9 @@ class VoiceManager extends EventEmitter {
                 channelId: user.channel.id,
                 voiceTime: 0,
               })
-            : (previousVoiceTime = (user.voiceTime.channels.find(
+            : (previousVoiceTime = user.voiceTime.channels.find(
                 (chn) => chn.channelId === user.channel.id
-              )));
+              ));
           let index = user.voiceTime.channels.indexOf(previousVoiceTime);
           previousVoiceTime.voiceTime += await config.voiceTimeToAdd();
           if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
@@ -415,10 +415,22 @@ class VoiceManager extends EventEmitter {
   async _handleVoiceStateUpdate(oldState, newState) {
     if (!oldState.channel && newState.channel) {
       if (!this.users.find((u) => u.userId === newState.member.id)) {
-        return await this.createUser(
-          newState.member.id,
-          newState.member.guild.id
+        let config = this.configs.find(
+          (g) => g.guildId === newState.member.guild.id
         );
+        if (!config) {
+          config = await this.createConfig(newState.member.guild.id);
+        }
+        if (
+          !(await config.checkMember(newState.member)) ||
+          !(await config.checkChannel(newState.channel))
+        )
+          return;
+        else
+          return await this.createUser(
+            newState.member.id,
+            newState.member.guild.id
+          );
       }
     }
   }
