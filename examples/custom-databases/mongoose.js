@@ -40,7 +40,7 @@ const userDataSchema = new mongoose.Schema({
 });
 
 // Create the model for user data
-const userDataModel = mongoose.model("users", userDataModel);
+const userDataModel = mongoose.model("users", userDataSchema);
 
 // Create the schema for config data
 const configDataSchema = new mongoose.Schema({
@@ -68,7 +68,7 @@ const configDataSchema = new mongoose.Schema({
 });
 
 // Create the model for config data
-const configDataModel = mongoose.model("configs", configDataModel);
+const configDataModel = mongoose.model("configs", configDataSchema);
 
 const { VoiceManager } = require("discord-voice");
 const VoiceManagerWithOwnDatabase = class extends VoiceManager {
