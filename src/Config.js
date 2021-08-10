@@ -25,10 +25,10 @@ class Config extends EventEmitter {
      */
     this.manager = manager;
     /**
-     * The guild ID of the config
+     * The guild Id of the config
      * @type {Snowflake}
      */
-    this.guildID = options.guildID;
+    this.guildId = options.guildId;
     /**
      * The config data
      * @type {ConfigOptions}
@@ -36,72 +36,136 @@ class Config extends EventEmitter {
     this.options = options.data;
   }
 
+  /**
+   * Whether bots are able to be tracked.
+   * @type {Boolean}
+   */
   get trackBots() {
     return this.options.trackBots || this.manager.options.default.trackBots;
   }
+
+  /**
+   * Whether to track all of the guild's voice channels.
+   * @type {Boolean}
+   */
   get trackMute() {
     return this.options.trackMute || this.manager.options.default.trackMute;
   }
+
+  /**
+   * Whether members who are deafened should be tracked.
+   * @type {Boolean}
+   */
   get trackDeaf() {
     return this.options.trackDeaf || this.manager.options.default.trackDeaf;
   }
+
+  /**
+   * Whether the bots are able to be tracked
+   * @type {Boolean}
+   */
   get trackAllChannels() {
     return (
       this.options.trackAllChannels ||
       this.manager.options.default.trackAllChannels
     );
   }
+
+  /**
+   * The min amount of users to be in a channel to be tracked (0 is equal to no limit).
+   * @type {Number}
+   */
   get minUserCountToParticipate() {
     return (
       this.options.minUserCountToParticipate ||
       this.manager.options.default.minUserCountToParticipate
     );
   }
+
+  /**
+   * The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
+   * @type {Number}
+   */
   get maxUserCountToParticipate() {
     return (
       this.options.maxUserCountToParticipate ||
       this.manager.options.default.maxUserCountToParticipate
     );
   }
+
+  /**
+   * The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+   * @type {Number}
+   */
   get minXPToParticipate() {
     return (
       this.options.minXPToParticipate ||
       this.manager.options.default.minXPToParticipate
     );
   }
+
+  /**
+   * The min amount of level the user needs to have to be tracked (0 is equal to no limit).
+   * @type {Number}
+   */
   get minLevelToParticipate() {
     return (
       this.options.minLevelToParticipate ||
       this.manager.options.default.minLevelToParticipate
     );
   }
+
+  /**
+   * The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+   * @type {Number}
+   */
   get maxXPToParticipate() {
     return (
       this.options.maxXPToParticipate ||
       this.manager.options.default.maxXPToParticipate
     );
   }
+
+  /**
+   * The max amount of level the user can be tracked uptil (0 is equal to no limit).
+   * @type {Number}
+   */
   get maxLevelToParticipate() {
     return (
       this.options.maxLevelToParticipate ||
       this.manager.options.default.maxLevelToParticipate
     );
   }
+
+  /**
+   * Whether the voice time tracking module is enabled.
+   * @type {Boolean}
+   */
   get voiceTimeTrackingEnabled() {
     return (
       this.options.voiceTimeTrackingEnabled ||
       this.manager.options.default.voiceTimeTrackingEnabled
     );
   }
+
+  /**
+   * Whether the leveling tracking module is enabled.
+   * @type {Boolean}
+   */
   get levelingTrackingEnabled() {
     return (
       this.options.levelingTrackingEnabled ||
       this.manager.options.default.levelingTrackingEnabled
     );
   }
+
+  /**
+   * The raw config object for this guild's config.
+   * @type {ConfigData}
+   */
   get data() {
     const baseData = {
-      guildID: this.guildID,
+      guildId: this.guildId,
       data: {
         trackBots: this.options.trackBots,
         trackAllChannels: this.options.trackAllChannels,
@@ -110,7 +174,7 @@ class Config extends EventEmitter {
           typeof this.options.exemptChannels === "string"
             ? this.options.exemptChannels
             : serialize(this.options.exemptChannels),
-        channelIDs: this.options.channelIDs,
+        channelIds: this.options.channelIds,
         exemptPermissions: this.options.exemptPermissions,
         exemptMembers:
           !this.options.exemptMembers ||
@@ -142,12 +206,22 @@ class Config extends EventEmitter {
     };
     return baseData;
   }
+
+  /**
+   * Members with any of these permissions won't be able to win a giveaway.
+   * @type {PermissionResolvable[]}
+   */
   get exemptPermissions() {
     return Array.isArray(this.options.exemptPermissions) &&
       this.options.exemptPermissions.length
       ? this.options.exemptPermissions
       : this.manager.options.default.exemptPermissions;
   }
+
+  /**
+   * The exemptMembers function
+   * @type {Function}
+   */
   get exemptMembersFunction() {
     return this.options.exemptMembers
       ? typeof this.options.exemptMembers === "string" &&
@@ -156,6 +230,11 @@ class Config extends EventEmitter {
         : eval(this.options.exemptMembers)
       : null;
   }
+
+  /**
+   * The xpAmountToAdd function
+   * @type {Function}
+   */
   get xpAmountToAddFunction() {
     return this.options.xpAmountToAdd
       ? typeof this.options.xpAmountToAdd === "string" &&
@@ -164,6 +243,11 @@ class Config extends EventEmitter {
         : eval(this.options.xpAmountToAdd)
       : null;
   }
+
+  /**
+   * The voiceTimeToAdd function
+   * @type {Function}
+   */
   get voiceTimeToAddFunction() {
     return this.options.voiceTimeToAdd
       ? typeof this.options.voiceTimeToAdd === "string" &&
@@ -172,6 +256,12 @@ class Config extends EventEmitter {
         : eval(this.options.voiceTimeToAdd)
       : null;
   }
+
+  /**
+   * Function to filter members. If true is returned, the member won't be tracked.
+   * @property {GuildMember} member The member to check
+   * @returns {Promise<boolean>}
+   */
   async exemptMembers(member) {
     if (typeof this.exemptMembersFunction === "function") {
       try {
@@ -179,7 +269,7 @@ class Config extends EventEmitter {
         return result;
       } catch (err) {
         console.error(
-          `User ID: ${member.id}\nGuild ID: ${this.guildID}\nChannel ID: ${
+          `User Id: ${member.id}\nGuild Id: ${this.guildId}\nChannel Id: ${
             member.voice.channel.id
           }\n${serialize(this.exemptMembersFunction)}\n${err}`
         );
@@ -191,6 +281,11 @@ class Config extends EventEmitter {
     }
     return false;
   }
+
+  /**
+   * Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
+   * @returns {Promise<number>}
+   */
   async xpAmountToAdd() {
     if (typeof this.xpAmountToAddFunction === "function") {
       try {
@@ -213,6 +308,11 @@ class Config extends EventEmitter {
     }
     return Math.floor(Math.random() * 10) + 1;
   }
+
+  /**
+   * Function for voiceTimeToAdd. If not provided, the default value is used (1000).
+   * @returns {Promise<number>}
+   */
   async voiceTimeToAdd() {
     if (typeof this.voiceTimeToAddFunction === "function") {
       try {
@@ -235,6 +335,11 @@ class Config extends EventEmitter {
     }
     return 1000;
   }
+
+  /**
+   * @param {Member} member The member to check
+   * @returns {Promise<boolean>}
+   */
   async checkMember(member) {
     const exemptMember = await this.exemptMembers(member);
     if (exemptMember) return false;
@@ -269,6 +374,11 @@ class Config extends EventEmitter {
       return false;
     return true;
   }
+
+  /**
+   * The exemptChannels function
+   * @type {Function}
+   */
   get exemptChannelsFunction() {
     return this.options.exemptChannels
       ? typeof this.options.exemptChannels === "string" &&
@@ -277,6 +387,11 @@ class Config extends EventEmitter {
         : eval(this.options.exemptChannels)
       : null;
   }
+
+  /**
+   * Function to filter channels. If true is returned, the channel won't be tracked.
+   * @returns {Promise<number>}
+   */
   async exemptChannels(channel) {
     if (typeof this.exemptChannelsFunction === "function") {
       try {
@@ -284,7 +399,7 @@ class Config extends EventEmitter {
         return result;
       } catch (err) {
         console.error(
-          `Guild ID: ${this.guildID}\nChannel ID: ${channel.id}\n${serialize(
+          `Guild Id: ${this.guildId}\nChannel Id: ${channel.id}\n${serialize(
             this.exemptChannelsFunction
           )}\n${err}`
         );
@@ -296,10 +411,15 @@ class Config extends EventEmitter {
     }
     return false;
   }
+
+  /**
+   * @param {VoiceChannel} channel The channel to check
+   * @returns {Promise<boolean>}
+   */
   async checkChannel(channel) {
     const exemptChannel = await this.exemptChannels(channel);
     if (exemptChannel) return false;
-    if (!this.trackAllChannels && !this.channelIDs.includes(channel.id))
+    if (!this.trackAllChannels && !this.channelIds.includes(channel.id))
       return false;
     if (
       this.minUserCountToParticipate > 0 &&
@@ -313,6 +433,12 @@ class Config extends EventEmitter {
       return false;
     return true;
   }
+
+  /**
+   * Edits the config
+   * @param {ConfigEditOptions} options The edit options
+   * @returns {Promise<Config>}
+   */
   edit(options = {}) {
     return new Promise(async (resolve, reject) => {
       if (typeof options.newTrackBots === "boolean")
@@ -324,8 +450,8 @@ class Config extends EventEmitter {
         options.newExemptChannels.includes("function anonymous")
       )
         this.options.exemptChannels = options.newExemptChannels;
-      if (Array.isArray(options.newChannelIDs))
-        this.options.channelIDs = options.newChannelIDs;
+      if (Array.isArray(options.newChannelIds))
+        this.options.channelIds = options.newChannelIds;
       if (Array.isArray(options.newExemptPermissions))
         this.options.exemptPermissions = options.newExemptPermissions;
       if (
@@ -337,8 +463,6 @@ class Config extends EventEmitter {
         this.options.trackMute = options.newTrackMute;
       if (typeof options.newTrackDeaf === "boolean")
         this.options.trackDeaf = options.newTrackDeaf;
-      if (typeof options.newIsEnabled === "boolean")
-        this.options.isEnabled = options.newIsEnabled;
       if (Number.isInteger(options.newMinUserCountToParticipate))
         this.options.minUserCountToParticipate =
           options.newMinUserCountToParticipate;
@@ -369,7 +493,7 @@ class Config extends EventEmitter {
       if (typeof options.newLevelingTrackingEnabled === "boolean")
         this.options.levelingTrackingEnabled =
           options.newLevelingTrackingEnabled;
-      await this.manager.editConfig(this.guildID, this.data);
+      await this.manager.editConfig(this.guildId, this.data);
       resolve(this);
     });
   }

@@ -49,7 +49,7 @@ const configDataSchema = new mongoose.Schema({
     trackBots: Boolean,
     trackAllChannels: Boolean,
     exemptChannels: String,
-    channelIDs: [String],
+    channelIds: [String],
     exemptPermissions: [],
     exemptMembers: String,
     trackMute: Boolean,

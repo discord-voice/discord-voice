@@ -128,7 +128,7 @@ class VoiceManager extends EventEmitter {
    *      trackBots: false, // If the user is a bot it will not be tracked.
    *      trackAllChannels: true, // All of the channels in the guild will be tracked.
    *      exemptChannels: () => false, // The user will not be tracked in these channels. (This is a function).
-   *      channelIDs: [], // The channel ids to track. (If trackAllChannels is true, this is ignored)
+   *      channelIds: [], // The channel ids to track. (If trackAllChannels is true, this is ignored)
    *      exemptPermissions: [], // The user permissions to not track.
    *      exemptMembers: () => false, // The user will not be tracked. (This is a function).
    *      trackMute: true, // It will track users if they are muted aswell.
@@ -190,7 +190,7 @@ class VoiceManager extends EventEmitter {
             data: user.data.data,
           }
       );
-      await this.deleteUser(messageID);
+      await this.deleteUser(userId, guildId);
       resolve();
     });
   }
@@ -201,7 +201,7 @@ class VoiceManager extends EventEmitter {
         return reject("No config found for guild with Id " + guildId + ".");
       }
       this.configs = this.configs.filter((c) => c.guildId !== guildId);
-      await this.deleteConfig(messageID);
+      await this.deleteConfig(guildId);
       resolve();
     });
   }
@@ -260,7 +260,7 @@ class VoiceManager extends EventEmitter {
     return true;
   }
 
-  async editUser(_userID, _guildID, _userData) {
+  async editUser(_userId, _guildId, _userData) {
     await writeFileAsync(
       this.options.userStorage,
       JSON.stringify(this.users.map((user) => user.data)),
@@ -270,7 +270,7 @@ class VoiceManager extends EventEmitter {
     return;
   }
 
-  async editConfig(_guildID, _configData) {
+  async editConfig(_guildId, _configData) {
     await writeFileAsync(
       this.options.storage,
       JSON.stringify(this.configs.map((config) => config.data)),
@@ -364,6 +364,7 @@ class VoiceManager extends EventEmitter {
       if (user.member && user.channel) {
         let config = this.configs.find((g) => g.guildId === user.guildId);
         if (!config) {
+          console.log(config)
           config = await this.createConfig(user.guildId);
         }
         if (
@@ -378,9 +379,9 @@ class VoiceManager extends EventEmitter {
                 channelId: user.channel.id,
                 voiceTime: 0,
               })
-            : (previousVoiceTime = user.voiceTime.channels.find(
+            : (previousVoiceTime = (user.voiceTime.channels.find(
                 (chn) => chn.channelId === user.channel.id
-              ));
+              )));
           let index = user.voiceTime.channels.indexOf(previousVoiceTime);
           previousVoiceTime.voiceTime += await config.voiceTimeToAdd();
           if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
