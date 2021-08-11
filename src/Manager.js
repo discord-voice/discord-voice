@@ -378,9 +378,16 @@ class VoiceManager extends EventEmitter {
                 channelId: user.channel.id,
                 voiceTime: 0,
               })
-            : (previousVoiceTime = user.voiceTime.channels.find(
+            : user.voiceTime.channels.find(
                 (chn) => chn.channelId === user.channel.id
-              ));
+              )
+            ? (previousVoiceTime = user.voiceTime.channels.find(
+                (chn) => chn.channelId === user.channel.id
+              ))
+            : (previousVoiceTime = {
+                channelId: user.channel.id,
+                voiceTime: 0,
+              });
           let index = user.voiceTime.channels.indexOf(previousVoiceTime);
           previousVoiceTime.voiceTime += await config.voiceTimeToAdd();
           if (index === -1) user.voiceTime.channels.push(previousVoiceTime);
