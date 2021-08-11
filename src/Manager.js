@@ -14,6 +14,8 @@ const {
   ConfigOptions,
   UserData,
   ConfigData,
+  UserEditOptions,
+  ConfigEditOptions,
 } = require("./Constants.js");
 const Config = require("./Config.js");
 const User = require("./User.js");
@@ -76,7 +78,7 @@ class VoiceManager extends EventEmitter {
    * Creates a new user in the database
    *
    * @param {Snowflake} userId The id of the user
-   * @param {Snowflake} guildId The guild id of the user
+   * @param {Snowflake} guildId The id of the user's guild
    * @param {UserOptions} options The options for the user
    *
    * @returns {Promise<User>}
@@ -118,7 +120,7 @@ class VoiceManager extends EventEmitter {
   /**
    * Creates a new config in the database
    *
-   * @param {Snowflake} guildId The guild id of the config
+   * @param {Snowflake} guildId The id of the config's guild
    * @param {ConfigOptions} options The options for config
    *
    * @returns {Promise<Config>}
@@ -166,7 +168,17 @@ class VoiceManager extends EventEmitter {
       resolve(config);
     });
   }
-
+  /**
+   * Remove's the user from the database
+   *
+   * @param {Snowflake} userId The id of the user
+   * @param {Snowflake} guildId The id of the user's guild
+   *
+   * @returns {Promise<void>}
+   *
+   * @example
+   * manager.removeUser(message.author.id, message.guild.id);
+   */
   removeUser(userId, guildId) {
     return new Promise(async (resolve, reject) => {
       const user = this.users.find(
@@ -194,6 +206,16 @@ class VoiceManager extends EventEmitter {
       resolve();
     });
   }
+  /**
+   * Remove's the config from the database
+   *
+   * @param {Snowflake} guildId The id of the config's guild
+   *
+   * @returns {Promise<void>}
+   *
+   * @example
+   * manager.removeConfig(message.guild.id);
+   */
   removeConfig(guildId) {
     return new Promise(async (resolve, reject) => {
       const config = this.configs.find((c) => c.guildId === guildId);
@@ -205,6 +227,21 @@ class VoiceManager extends EventEmitter {
       resolve();
     });
   }
+  /**
+   * Edits a user. The modifications will be applicated when the user will be updated.
+   * @param {Snowflake} userId The id of the user
+   * @param {Snowflake} guildId The id of the user's guild
+   * @param {UserEditOptions} options The edit options
+   * @returns {Promise<User>}
+   *
+   * @example
+   * manager.updateUser('122925169588043776','815261972450115585', {
+   *      newVoiceTime: {
+   *      channels: [],
+   *      total: 0,
+   *      }, // The new voice time user will have.
+   * });
+   */
   updateUser(userId, guildId, options = {}) {
     return new Promise(async (resolve, reject) => {
       const user = this.users.find(
@@ -222,6 +259,17 @@ class VoiceManager extends EventEmitter {
       user.edit(options).then(resolve).catch(reject);
     });
   }
+  /**
+   * Edits a config.
+   * @param {Snowflake} guildId The id of the user's guild
+   * @param {ConfigEditOptions} options The edit options
+   * @returns {Promise<Config>}
+   *
+   * @example
+   * manager.updateConfig('815261972450115585', {
+   *      newTrackBots: true, The module will now track bot user's voice time aswell.
+   * });
+   */
   updateConfig(guildId, options = {}) {
     return new Promise(async (resolve, reject) => {
       const config = this.configs.find((c) => c.guildId === guildId);
@@ -231,7 +279,13 @@ class VoiceManager extends EventEmitter {
       config.edit(options).then(resolve).catch(reject);
     });
   }
-
+  /**
+   * Delete a user from the database
+   * @param {Snowflake} userId The id of the user
+   * @param {Snowflake} guildId The id of the user's guild
+   * @returns {Promise<void>}
+   * @ignore
+   */
   async deleteUser(userId, guildId) {
     await writeFileAsync(
       this.options.userStorage,
@@ -241,7 +295,12 @@ class VoiceManager extends EventEmitter {
     this.refreshUserStorage();
     return;
   }
-
+  /**
+   * Delete a config from the database
+   * @param {Snowflake} guildId The id of the config's guild
+   * @returns {Promise<void>}
+   * @ignore
+   */
   async deleteConfig(guildId) {
     await writeFileAsync(
       this.options.configStorage,
@@ -251,15 +310,27 @@ class VoiceManager extends EventEmitter {
     this.refreshConfigStorage();
     return;
   }
-
+  /**
+   * Refresh the user cache to support shards.
+   * @ignore
+   */
   async refreshUserStorage() {
     return true;
   }
-
+  /**
+   * Refresh the config cache to support shards.
+   * @ignore
+   */
   async refreshConfigStorage() {
     return true;
   }
-
+  /**
+   * Edit the user in the database
+   * @ignore
+   * @param {Snowflake} userId The id of the user
+   * @param {Snowflake} guildId The id of the user's guild
+   * @param {UserData} userData The user data to save
+   */
   async editUser(_userId, _guildId, _userData) {
     await writeFileAsync(
       this.options.userStorage,
@@ -269,7 +340,12 @@ class VoiceManager extends EventEmitter {
     this.refreshUserStorage();
     return;
   }
-
+  /**
+   * Edit the config in the database
+   * @ignore
+   * @param {Snowflake} guildId The id of the config's guild
+   * @param {ConfigData} ConfigData The config data to save
+   */
   async editConfig(_guildId, _configData) {
     await writeFileAsync(
       this.options.storage,
@@ -279,7 +355,13 @@ class VoiceManager extends EventEmitter {
     this.refreshConfigStorage();
     return;
   }
-
+  /**
+   * Save the user in the database
+   * @ignore
+   * @param {Snowflake} userId The id of the user
+   * @param {Snowflake} guildId The id of the user's guild
+   * @param {UserData} userData The user data to save
+   */
   async saveUser(userId, guildId, userData) {
     await writeFileAsync(
       this.options.userStorage,
@@ -289,7 +371,12 @@ class VoiceManager extends EventEmitter {
     this.refreshUserStorage();
     return;
   }
-
+  /**
+   * Save the config in the database
+   * @ignore
+   * @param {Snowflake} guildId The id of the config's guild
+   * @param {ConfigData} configData The config data to save
+   */
   async saveConfig(guildId, configData) {
     await writeFileAsync(
       this.options.configStorage,
@@ -299,7 +386,11 @@ class VoiceManager extends EventEmitter {
     this.refreshConfigStorage();
     return;
   }
-
+  /**
+   * Gets the user's from the storage file, or create it
+   * @ignore
+   * @returns {Promise<UserData[]>}
+   */
   async getAllUsers() {
     const storageExists = await existsAsync(this.options.userStorage);
     if (!storageExists) {
@@ -328,7 +419,11 @@ class VoiceManager extends EventEmitter {
       }
     }
   }
-
+  /**
+   * Gets the config's from the storage file, or create it
+   * @ignore
+   * @returns {Promise<ConfigData[]>}
+   */
   async getAllConfigs() {
     const storageExists = await existsAsync(this.options.configStorage);
     if (!storageExists) {
@@ -357,7 +452,11 @@ class VoiceManager extends EventEmitter {
       }
     }
   }
-
+  /**
+   * Checks each user and update it if needed
+   * @ignore
+   * @private
+   */
   _checkUsers() {
     if (this.users.length <= 0) return;
     this.users.forEach(async (user) => {
@@ -418,7 +517,11 @@ class VoiceManager extends EventEmitter {
       }
     });
   }
-
+  /**
+   * Saves the new user to the storage file
+   * @ignore
+   * @private
+   */
   async _handleVoiceStateUpdate(oldState, newState) {
     if (!oldState.channel && newState.channel) {
       if (!this.users.find((u) => u.userId === newState.member.id)) {
@@ -441,7 +544,11 @@ class VoiceManager extends EventEmitter {
       }
     }
   }
-
+  /**
+   * Inits the manager
+   * @ignore
+   * @private
+   */
   async _init() {
     const rawUsers = await this.getAllUsers();
     rawUsers.forEach((user) => {
