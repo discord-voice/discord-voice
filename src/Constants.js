@@ -1,4 +1,4 @@
-const Discord = require("discord.js")
+const Discord = require("discord.js");
 /**
  * The voice manager options
  * @typedef {object} VoiceManagerOptions
@@ -6,6 +6,7 @@ const Discord = require("discord.js")
  * @property {string} [userStorage="./users.json"] The storage path for the user's data.
  * @property {string} [configStorage="./configs.json"] The storage path for the config's data.
  * @property {number} [checkMembersEvery=5000] The user data update interval (in ms).
+ * @property {ConfigOptions} [default] The default config options.
  * @property {boolean} [default.trackBots=false] Whether bots are able to be tracked.
  * @property {boolean} [default.trackAllChannels=true] Whether to track all of the guild's voice channels.
  * @property {function} [default.exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
@@ -32,29 +33,29 @@ exports.VoiceManagerOptions = {};
  * @type {VoiceManagerOptions}
  */
 exports.defaultVoiceManagerOptions = {
-  userStorage: "./users.json",
-  configStorage: "./configs.json",
-  checkMembersEvery: 5000,
-  default: {
-    trackBots: false,
-    trackAllChannels: true,
-    exemptChannels: () => false,
-    channelIds: [],
-    exemptPermissions: [],
-    exemptMembers: () => false,
-    trackMute: true,
-    trackDeaf: true,
-    minUserCountToParticipate: 0,
-    maxUserCountToParticipate: 0,
-    minXPToParticipate: 0,
-    minLevelToParticipate: 0,
-    maxXPToParticipate: 0,
-    maxLevelToParticipate: 0,
-    xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
-    voiceTimeToAdd: () => 1000,
-    voiceTimeTrackingEnabled: true,
-    levelingTrackingEnabled: true,
-  },
+    userStorage: "./users.json",
+    configStorage: "./configs.json",
+    checkMembersEvery: 5000,
+    default: {
+        trackBots: false,
+        trackAllChannels: true,
+        exemptChannels: () => false,
+        channelIds: [],
+        exemptPermissions: [],
+        exemptMembers: () => false,
+        trackMute: true,
+        trackDeaf: true,
+        minUserCountToParticipate: 0,
+        maxUserCountToParticipate: 0,
+        minXPToParticipate: 0,
+        minLevelToParticipate: 0,
+        maxXPToParticipate: 0,
+        maxLevelToParticipate: 0,
+        xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
+        voiceTimeToAdd: () => 1000,
+        voiceTimeTrackingEnabled: true,
+        levelingTrackingEnabled: true
+    }
 };
 
 /**
@@ -87,24 +88,24 @@ exports.ConfigOptions = {};
  * @type {ConfigOptions}
  */
 exports.defaultConfigOptions = {
-  trackBots: false,
-  trackAllChannels: true,
-  exemptChannels: () => false,
-  channelIds: [],
-  exemptPermissions: [],
-  exemptMembers: () => false,
-  trackMute: true,
-  trackDeaf: true,
-  minUserCountToParticipate: 0,
-  maxUserCountToParticipate: 0,
-  minXPToParticipate: 0,
-  minLevelToParticipate: 0,
-  maxXPToParticipate: 0,
-  maxLevelToParticipate: 0,
-  xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
-  voiceTimeToAdd: () => 1000,
-  voiceTimeTrackingEnabled: true,
-  levelingTrackingEnabled: true,
+    trackBots: false,
+    trackAllChannels: true,
+    exemptChannels: () => false,
+    channelIds: [],
+    exemptPermissions: [],
+    exemptMembers: () => false,
+    trackMute: true,
+    trackDeaf: true,
+    minUserCountToParticipate: 0,
+    maxUserCountToParticipate: 0,
+    minXPToParticipate: 0,
+    minLevelToParticipate: 0,
+    maxXPToParticipate: 0,
+    maxLevelToParticipate: 0,
+    xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
+    voiceTimeToAdd: () => 1000,
+    voiceTimeTrackingEnabled: true,
+    levelingTrackingEnabled: true
 };
 
 /**
@@ -161,8 +162,10 @@ exports.ConfigEditOptions = {};
  * The user options
  * @typedef {object} UserOptions
  *
+ * @property {UserVoiceTimeOptions} [voiceTime] The voice time data of the user.
  * @property {Array} [voiceTime.channels=[]] The user's voice time in the channels.
  * @property {Number} [voiceTime.total="0"] The user's total voice time.
+ * @property {UserLevelingOptions} [levelingData] The leveling data of the user.
  * @property {Number} [levelingData.xp="0"] The user's xp.
  * @property {Number} [levelingData.level="0"] The user's level.
  */
@@ -181,8 +184,8 @@ exports.UserVoiceTimeOptions = {};
  * The user voice time options
  * @typedef {object} UserLevelingOptions
  *
- * @property {Number} [levelingData.xp="0"] The user's xp.
- * @property {Number} [levelingData.level="0"] The user's level.
+ * @property {Number} [xp="0"] The user's xp.
+ * @property {Number} [level="0"] The user's level.
  */
 exports.UserLevelingOptions = {};
 
@@ -191,14 +194,14 @@ exports.UserLevelingOptions = {};
  * @type {UserOptions}
  */
 exports.defaultUserOptions = {
-  voiceTime: {
-    channels: [],
-    total: 0,
-  },
-  levelingData: {
-    xp: 0,
-    level: 0,
-  },
+    voiceTime: {
+        channels: [],
+        total: 0
+    },
+    levelingData: {
+        xp: 0,
+        level: 0
+    }
 };
 
 /**
@@ -207,8 +210,10 @@ exports.defaultUserOptions = {
  *
  * @property {Snowflake} userId The ID of the user.
  * @property {Snowflake} guildId The ID of the guild.
+ * @property {UserVoiceTimeOptions} [voiceTime] The voice time data of the user.
  * @property {Array} [voiceTime.channels=[]] The user's voice time in the channels.
  * @property {Number} [voiceTime.total="0"] The user's total voice time.
+ * @property {UserLevelingOptions} [levelingData] The leveling data of the user.
  * @property {Number} [levelingData.xp="0"] The user's xp.
  * @property {Number} [levelingData.level="0"] The user's level.
  */
