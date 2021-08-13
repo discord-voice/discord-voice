@@ -2,11 +2,3 @@
   files:
     - name: Welcome
       path: welcome.md
-- name: Examples
-  files:
-    - name: Simple
-      path: simple.md
-    - name: Sharding
-      path: sharding.md
-    - name: Mongoose
-      path: mongoose.md
