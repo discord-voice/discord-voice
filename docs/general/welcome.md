@@ -227,7 +227,7 @@ client.voiceManager.updateConfig(message.guild.id, {
 ⚠️ Note: If the function should be customizable
 
 ```js
-const channelName = "private";
+const roleName = "Nitro Boost";
 client.voiceManager.updateConfig(message.guild.id, {
     // Only members who have the the role which is assigned to "roleName" are able to be tracked
     exemptMembers: new Function("member", `return !member.roles.cache.some((r) => r.name === \'${roleName}\')`)
