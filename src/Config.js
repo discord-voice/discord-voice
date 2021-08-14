@@ -11,7 +11,7 @@ const VoiceManager = require("./Manager.js");
 class Config extends EventEmitter {
     /**
      * @param {VoiceManager} manager The Voice Manager
-     * @param {ConfigOptions} options The config options
+     * @param {ConfigData} options The config options
      */
     constructor(manager, options) {
         super();
@@ -177,6 +177,14 @@ class Config extends EventEmitter {
     }
 
     /**
+     * The exemptChannels function
+     * @type {Function}
+     */
+    get exemptChannelsFunction() {
+        return this.options.exemptChannels ? (typeof this.options.exemptChannels === "string" && this.options.exemptChannels.includes("function anonymous") ? eval(`(${this.options.exemptChannels})`) : eval(this.options.exemptChannels)) : null;
+    }
+
+    /**
      * The xpAmountToAdd function
      * @type {Function}
      */
@@ -209,6 +217,26 @@ class Config extends EventEmitter {
         }
         if (typeof this.manager.options.default.exemptMembers === "function") {
             return await this.manager.options.default.exemptMembers(member);
+        }
+        return false;
+    }
+
+    /**
+     * Function to filter channels. If true is returned, the channel won't be tracked.
+     * @returns {Promise<number>}
+     */
+    async exemptChannels(channel) {
+        if (typeof this.exemptChannelsFunction === "function") {
+            try {
+                const result = await this.exemptChannelsFunction(channel);
+                return result;
+            } catch (err) {
+                console.error(`Guild Id: ${this.guildId}\nChannel Id: ${channel.id}\n${serialize(this.exemptChannelsFunction)}\n${err}`);
+                return false;
+            }
+        }
+        if (typeof this.manager.options.default.exemptChannels === "function") {
+            return await this.manager.options.default.exemptChannels(channel);
         }
         return false;
     }
@@ -276,34 +304,6 @@ class Config extends EventEmitter {
         if (this.maxXPToParticipate > 0 && member.data.data.levelingData.xp > this.maxXPToParticipate) return false;
         if (this.maxLevelToParticipate > 0 && member.data.data.levelingData.level > this.maxLevelToParticipate) return false;
         return true;
-    }
-
-    /**
-     * The exemptChannels function
-     * @type {Function}
-     */
-    get exemptChannelsFunction() {
-        return this.options.exemptChannels ? (typeof this.options.exemptChannels === "string" && this.options.exemptChannels.includes("function anonymous") ? eval(`(${this.options.exemptChannels})`) : eval(this.options.exemptChannels)) : null;
-    }
-
-    /**
-     * Function to filter channels. If true is returned, the channel won't be tracked.
-     * @returns {Promise<number>}
-     */
-    async exemptChannels(channel) {
-        if (typeof this.exemptChannelsFunction === "function") {
-            try {
-                const result = await this.exemptChannelsFunction(channel);
-                return result;
-            } catch (err) {
-                console.error(`Guild Id: ${this.guildId}\nChannel Id: ${channel.id}\n${serialize(this.exemptChannelsFunction)}\n${err}`);
-                return false;
-            }
-        }
-        if (typeof this.manager.options.default.exemptChannels === "function") {
-            return await this.manager.options.default.exemptChannels(channel);
-        }
-        return false;
     }
 
     /**
