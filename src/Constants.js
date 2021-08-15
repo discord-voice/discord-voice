@@ -17,14 +17,15 @@ const Discord = require("discord.js");
  * @property {boolean} [default.trackDeaf=true] Whether members who are deafened should be tracked.
  * @property {number} [default.minUserCountToParticipate="0"] The min amount of users to be in a channel to be tracked (0 is equal to no limit).
  * @property {number} [default.maxUserCountToParticipate="0"] The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
- * @property {number} [default.minXPToParticipate="0"] The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+ * @property {number} [default.minXpToParticipate="0"] The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
  * @property {number} [default.minLevelToParticipate="0"] The min amount of level the user needs to have to be tracked (0 is equal to no limit).
- * @property {number} [default.maxXPToParticipate="0"] The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+ * @property {number} [default.maxXpToParticipate="0"] The max amount of xp the user can be tracked uptil (0 is equal to no limit).
  * @property {number} [default.maxLevelToParticipate="0"] The max amount of level the user can be tracked uptil (0 is equal to no limit).
  * @property {function} [default.xpAmountToAdd] Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
  * @property {function} [default.voiceTimeToAdd] Function for voiceTimeToAdd. If not provided, the default value is used (1000).
  * @property {boolean} [defaul.voiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
  * @property {boolean} [default.levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
+ * @property {function} [default.levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
  */
 exports.VoiceManagerOptions = {};
 
@@ -47,14 +48,15 @@ exports.defaultVoiceManagerOptions = {
         trackDeaf: true,
         minUserCountToParticipate: 0,
         maxUserCountToParticipate: 0,
-        minXPToParticipate: 0,
+        minXpToParticipate: 0,
         minLevelToParticipate: 0,
-        maxXPToParticipate: 0,
+        maxXpToParticipate: 0,
         maxLevelToParticipate: 0,
         xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
         voiceTimeToAdd: () => 1000,
         voiceTimeTrackingEnabled: true,
-        levelingTrackingEnabled: true
+        levelingTrackingEnabled: true,
+        levelMultiplier: () => 0.1,
     }
 };
 
@@ -72,14 +74,15 @@ exports.defaultVoiceManagerOptions = {
  * @property {Boolean} [trackDeaf=true] Whether members who are deafened should be tracked.
  * @property {number} [minUserCountToParticipate="0"] The min amount of users to be in a channel to be tracked (0 is equal to no limit).
  * @property {number} [maxUserCountToParticipate="0"] The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
- * @property {number} [minXPToParticipate="0"] The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+ * @property {number} [minXpToParticipate="0"] The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
  * @property {number} [minLevelToParticipate="0"] The min amount of level the user needs to have to be tracked (0 is equal to no limit).
- * @property {number} [maxXPToParticipate="0"] The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+ * @property {number} [maxXpToParticipate="0"] The max amount of xp the user can be tracked uptil (0 is equal to no limit).
  * @property {number} [maxLevelToParticipate="0"] The max amount of level the user can be tracked uptil (0 is equal to no limit).
  * @property {Function} [xpAmountToAdd] Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
  * @property {Function} [voiceTimeToAdd] Function for voiceTimeToAdd. If not provided, the default value is used (1000).
  * @property {boolean} [voiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
  * @property {boolean} [levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
+ * @property {function} [levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
  */
 exports.ConfigOptions = {};
 
@@ -98,14 +101,15 @@ exports.defaultConfigOptions = {
     trackDeaf: true,
     minUserCountToParticipate: 0,
     maxUserCountToParticipate: 0,
-    minXPToParticipate: 0,
+    minXpToParticipate: 0,
     minLevelToParticipate: 0,
-    maxXPToParticipate: 0,
+    maxXpToParticipate: 0,
     maxLevelToParticipate: 0,
     xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
     voiceTimeToAdd: () => 1000,
     voiceTimeTrackingEnabled: true,
-    levelingTrackingEnabled: true
+    levelingTrackingEnabled: true,
+    levelMultiplier: () => 0.1,
 };
 
 /**
@@ -123,14 +127,15 @@ exports.defaultConfigOptions = {
  * @property {Boolean} trackDeaf Whether members who are deafened should be tracked.
  * @property {number} minUserCountToParticipate The min amount of users to be in a channel to be tracked (0 is equal to no limit).
  * @property {number} maxUserCountToParticipate The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
- * @property {number} minXPToParticipate The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+ * @property {number} minXpToParticipate The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
  * @property {number} minLevelToParticipate The min amount of level the user needs to have to be tracked (0 is equal to no limit).
- * @property {number} maxXPToParticipate The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+ * @property {number} maxXpToParticipate The max amount of xp the user can be tracked uptil (0 is equal to no limit).
  * @property {number} maxLevelToParticipate The max amount of level the user can be tracked uptil (0 is equal to no limit).
  * @property {Function} xpAmountToAdd Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
  * @property {Function} voiceTimeToAdd Function for voiceTimeToAdd. If not provided, the default value is used (1000).
  * @property {boolean} voiceTimeTrackingEnabled Whether to enable the voice time tracking module.
  * @property {boolean} levelingTrackingEnabled Whether to enable the leveling tracking module.
+ * @property {function} levelMultiplier Function for levelMultiplier. If not provided, the default value is used (0.1).
  */
 exports.ConfigData = {};
 
@@ -147,14 +152,15 @@ exports.ConfigData = {};
  * @property {Boolean} [newTrackDeaf=true] Whether members who are deafened should be tracked.
  * @property {number} [newMinUserCountToParticipate="0"] The min amount of users to be in a channel to be tracked (0 is equal to no limit).
  * @property {number} [newMaxUserCountToParticipate="0"] The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
- * @property {number} [newMinXPToParticipate="0"] The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+ * @property {number} [newMinXpToParticipate="0"] The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
  * @property {number} [newMinLevelToParticipate="0"] The min amount of level the user needs to have to be tracked (0 is equal to no limit).
- * @property {number} [newMaxXPToParticipate="0"] The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+ * @property {number} [newMaxXpToParticipate="0"] The max amount of xp the user can be tracked uptil (0 is equal to no limit).
  * @property {number} [newMaxLevelToParticipate="0"] The max amount of level the user can be tracked uptil (0 is equal to no limit).
- * @property {Function} [newXPAmountToAdd] Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
+ * @property {Function} [newXpAmountToAdd] Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
  * @property {Function} [newVoiceTimeToAdd] Function for voiceTimeToAdd. If not provided, the default value is used (1000).
  * @property {boolean} [newVoiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
  * @property {boolean} [newLevelingTrackingEnabled=true] Whether to enable the leveling tracking module.
+ * @property {function} [newLevelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
  */
 exports.ConfigEditOptions = {};
 

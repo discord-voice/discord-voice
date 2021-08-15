@@ -95,9 +95,9 @@ client.on("messageCreate", (message) => {
             trackDeaf: true, // It will track users if they are deafen aswell.
             minUserCountToParticipate: 0, // The min amount of users to be in a channel to be tracked.
             maxUserCountToParticipate: 0, // The max amount of users to be in a channel to be tracked.
-            minXPToParticipate: 0, // The min amount of xp needed to be tracked.
+            minXpToParticipate: 0, // The min amount of xp needed to be tracked.
             minLevelToParticipate: 0, // The min level needed to be tracked.
-            maxXPToParticipate: 0, // The max amount of xp needed to be tracked.
+            maxXpToParticipate: 0, // The max amount of xp needed to be tracked.
             maxLevelToParticipate: 0, // The max level needed to be tracked.
             xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1, // The amount of xp to add to the user (This is a function).
             voiceTimeToAdd: () => 1000, // The amount of time in ms to add to the user (This is a function).
@@ -244,7 +244,7 @@ client.voiceManager.updateConfig(message.guild.id, {
 
 ⚠️ Note: The returned value should be a number or the default value (`Math.floor(Math.random() * 10) + 1`) will be used.
 
-# XP Amount To Add
+# Xp Amount To Add
 
 ```js
 client.voiceManager.updateConfig(message.guild.id, {
@@ -253,6 +253,16 @@ client.voiceManager.updateConfig(message.guild.id, {
 ```
 
 ⚠️ Note: The returned value should be a number or the default value (`1000`) will be used.
+
+# Level Multiplier
+
+```js
+client.voiceManager.updateConfig(message.guild.id, {
+    levelMultiplier: () => 0.1 // This will set the level multiplier to 0.1 (normally it's 0.1).
+});
+```
+
+⚠️ Note: The returned value should be a number or the default value (`0.1`) will be used.
 
 # Custom Database
 

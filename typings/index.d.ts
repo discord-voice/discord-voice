@@ -21,6 +21,12 @@ declare module "discord-voice" {
         public removeConfig(guildId: Snowflake): Promise<void>;
         public updateUser(userId: Snowflake, guildId: Snowflake, options: UserEditOptions): Promise<User>;
         public updateConfig(guildId: Snowflake, options: ConfigEditOptions): Promise<Config>;
+
+        public on<K extends keyof VoiceManagerEvents>(event: K, listener: (...args: VoiceManagerEvents[K]) => void): this;
+
+        public once<K extends keyof VoiceManagerEvents>(event: K, listener: (...args: VoiceManagerEvents[K]) => void): this;
+
+        public emit<K extends keyof VoiceManagerEvents>(event: K, ...args: VoiceManagerEvents[K]): boolean;
     }
     class User extends EventEmitter {
         constructor(manager: VoiceManager, options: UserData);
@@ -55,9 +61,9 @@ declare module "discord-voice" {
         readonly trackAllChannels: boolean;
         readonly minUserCountToParticipate: number;
         readonly maxUserCountToParticipate: number;
-        readonly minXPToParticipate: number;
+        readonly minXpToParticipate: number;
         readonly minLevelToParticipate: number;
-        readonly maxXPToParticipate: number;
+        readonly maxXpToParticipate: number;
         readonly maxLevelToParticipate: number;
         readonly voiceTimeTrackingEnabled: boolean;
         readonly levelingTrackingEnabled: boolean;
@@ -91,14 +97,15 @@ declare module "discord-voice" {
         trackDeaf?: boolean;
         minUserCountToParticipate?: number;
         maxUserCountToParticipate?: number;
-        minXPToParticipate?: number;
+        minXpToParticipate?: number;
         minLevelToParticipate?: number;
-        maxXPToParticipate?: number;
+        maxXpToParticipate?: number;
         maxLevelToParticipate?: number;
         xpAmountToAdd?: () => number | Promise<number>;
         voiceTimeToAdd?: () => number | Promise<number>;
         voiceTimeTrackingEnabled?: boolean;
         levelingTrackingEnabled?: boolean;
+        levelMultiplier: () => number | Promise<number>;
     }
     interface ConfigData {
         guildId: Snowflake;
@@ -112,14 +119,15 @@ declare module "discord-voice" {
         trackDeaf: boolean;
         minUserCountToParticipate: number;
         maxUserCountToParticipate: number;
-        minXPToParticipate: number;
+        minXpToParticipate: number;
         minLevelToParticipate: number;
-        maxXPToParticipate: number;
+        maxXpToParticipate: number;
         maxLevelToParticipate: number;
         xpAmountToAdd: () => number | Promise<number>;
         voiceTimeToAdd: () => number | Promise<number>;
         voiceTimeTrackingEnabled: boolean;
         levelingTrackingEnabled: boolean;
+        levelMultiplier: () => number | Promise<number>;
     }
     interface ConfigEditOptions {
         newTrackBots?: boolean;
@@ -132,14 +140,15 @@ declare module "discord-voice" {
         newTrackDeaf?: boolean;
         newMinUserCountToParticipate?: number;
         newMaxUserCountToParticipate?: number;
-        newMinXPToParticipate?: number;
+        newMinXpToParticipate?: number;
         newMinLevelToParticipate?: number;
-        newMaxXPToParticipate?: number;
+        newMaxXpToParticipate?: number;
         newMaxLevelToParticipate?: number;
-        newXPAmountToAdd?: () => number | Promise<number>;
+        newXpAmountToAdd?: () => number | Promise<number>;
         newVoiceTimeToAdd?: () => number | Promise<number>;
         newVoiceTimeTrackingEnabled?: boolean;
         newLevelingTrackingEnabled?: boolean;
+        newLevelMultiplier: () => number | Promise<number>;
     }
     interface UserOptions {
         voiceTime: {
@@ -172,5 +181,10 @@ declare module "discord-voice" {
     interface channelAndMemberOptions {
         channel: VoiceChannel;
         member: GuildMember;
+    }
+    interface VoiceManagerEvents {
+        userXpAdd: [User, User];
+        userLevelUp: [User, User];
+        userVoiceTimeAdd: [User, User];
     }
 }

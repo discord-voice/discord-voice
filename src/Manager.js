@@ -5,6 +5,7 @@ const { promisify } = require("util");
 const writeFileAsync = promisify(writeFile);
 const existsAsync = promisify(exists);
 const readFileAsync = promisify(readFile);
+const lodash = require("lodash");
 const { defaultVoiceManagerOptions, defaultUserOptions, defaultConfigOptions, VoiceManagerOptions, UserOptions, ConfigOptions, UserData, ConfigData, UserEditOptions, ConfigEditOptions } = require("./Constants.js");
 const Config = require("./Config.js");
 const User = require("./User.js");
@@ -122,14 +123,15 @@ class VoiceManager extends EventEmitter {
      *      trackDeaf: true, // It will track users if they are deafen aswell.
      *      minUserCountToParticipate: 0, // The min amount of users to be in a channel to be tracked.
      *      maxUserCountToParticipate: 0, // The max amount of users to be in a channel to be tracked.
-     *      minXPToParticipate: 0, // The min amount of xp needed to be tracked.
+     *      minXpToParticipate: 0, // The min amount of xp needed to be tracked.
      *      minLevelToParticipate: 0, // The min level needed to be tracked.
-     *      maxXPToParticipate: 0, // The max amount of xp needed to be tracked.
+     *      maxXpToParticipate: 0, // The max amount of xp needed to be tracked.
      *      maxLevelToParticipate: 0, // The max level needed to be tracked.
      *      xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1, // The amount of xp to add to the user (This is a function).
      *      voiceTimeToAdd: () => 1000, // The amount of time in ms to add to the user (This is a function).
      *      voiceTimeTrackingEnabled: true, // Whether the voiceTimeTracking module is enabled.
      *      levelingTrackingEnabled: true, // Whether the levelingTracking module is enabled.
+     *      levelMultiplier: () => 0.1, // This will set level multiplier to 0.1 (This is a function).
      * });
      */
     createConfig(guildId, options) {
@@ -400,6 +402,7 @@ class VoiceManager extends EventEmitter {
                     config = await this.createConfig(user.guildId);
                 }
                 if (!(await config.checkMember(user.member)) || !(await config.checkChannel(user.channel))) return;
+                const oldUser = lodash._.cloneDeep(user);
                 if (config.voiceTimeTrackingEnabled) {
                     let previousVoiceTime;
                     user.voiceTime.channels.length <= 0
@@ -420,18 +423,39 @@ class VoiceManager extends EventEmitter {
                     user.voiceTime.total = user.voiceTime.channels.reduce(function (sum, data) {
                         return sum + data.voiceTime;
                     }, 0);
-                    if (config.levelingTrackingEnabled) {
-                        user.levelingData.xp += await config.xpAmountToAdd();
-                        user.levelingData.level = Math.floor(0.1 * Math.sqrt(user.levelingData.xp));
-                    }
-                    await this.editUser(user.userId, user.guildId, user.data);
-                    return;
-                } else if (config.levelingTrackingEnabled) {
+                    /**
+                     * Emitted when voice time is added to the user.
+                     * @event VoiceManager#userVoiceTimeAdd
+                     * @param {User} oldUser The user before the update
+                     * @param {User} newUser The user after the update
+                     *
+                     */
+                    this.emit("userVoiceTimeAdd", oldUser, user);
+                } 
+                if (config.levelingTrackingEnabled) {
                     user.levelingData.xp += await config.xpAmountToAdd();
-                    user.levelingData.level = Math.floor(0.1 * Math.sqrt(user.levelingData.xp));
-                    await this.editUser(user.userId, user.guildId, user.data);
-                    return;
-                } else return;
+                    user.levelingData.level = Math.floor((await config.levelMultiplier()) * Math.sqrt(user.levelingData.xp));
+                    /**
+                     * Emitted when xp is added to the user.
+                     * @event VoiceManager#userXpAdd
+                     * @param {User} oldUser The user before the update
+                     * @param {User} newUser The user after the update
+                     *
+                     */
+                    this.emit("userXpAdd", oldUser, user);
+                    if (user.levelingData.level > oldUser.levelingData.level) {
+                        /**
+                         * Emitted when the user levels up.
+                         * @event VoiceManager#userLevelUp
+                         * @param {User} oldUser The user before the update
+                         * @param {User} newUser The user after the update
+                         *
+                         */
+                        this.emit("userLevelUp", oldUser, user);
+                    }
+                } 
+                await this.editUser(user.userId, user.guildId, user.data);
+                return;
             }
         });
     }
@@ -475,3 +499,4 @@ class VoiceManager extends EventEmitter {
 }
 
 module.exports = VoiceManager;
+

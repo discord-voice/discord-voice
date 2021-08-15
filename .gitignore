@@ -3,4 +3,6 @@ test.js
 node_modules/
 .github/
 docs/
-rewrite/
+configs.json
+users.json
+

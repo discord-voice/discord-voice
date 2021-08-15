@@ -52,14 +52,15 @@ const configDataSchema = new mongoose.Schema({
         trackDeaf: Boolean,
         minUserCountToParticipate: Number,
         maxUserCountToParticipate: Number,
-        minXPToParticipate: Number,
+        minXpToParticipate: Number,
         minLevelToParticipate: Number,
-        maxXPToParticipate: Number,
+        maxXpToParticipate: Number,
         maxLevelToParticipate: Number,
         xpAmountToAdd: String,
         voiceTimeToAdd: String,
         voiceTimeTrackingEnabled: Boolean,
-        levelingTrackingEnabled: Boolean
+        levelingTrackingEnabled: Boolean,
+        levelMultiplier: String,
     }
 });
 
