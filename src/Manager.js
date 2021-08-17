@@ -431,7 +431,7 @@ class VoiceManager extends EventEmitter {
                      *
                      */
                     this.emit("userVoiceTimeAdd", oldUser, user);
-                } 
+                }
                 if (config.levelingTrackingEnabled) {
                     user.levelingData.xp += await config.xpAmountToAdd();
                     user.levelingData.level = Math.floor((await config.levelMultiplier()) * Math.sqrt(user.levelingData.xp));
@@ -453,7 +453,7 @@ class VoiceManager extends EventEmitter {
                          */
                         this.emit("userLevelUp", oldUser, user);
                     }
-                } 
+                }
                 await this.editUser(user.userId, user.guildId, user.data);
                 return;
             }
@@ -499,4 +499,3 @@ class VoiceManager extends EventEmitter {
 }
 
 module.exports = VoiceManager;
-

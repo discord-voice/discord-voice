@@ -9,12 +9,16 @@
 		"gpr": "node scripts/gpr.js",
 		"docs": "docgen --source src --custom docs/index.yml --output docs/docs.json"
 	},
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "A complete framework to facilitate the tracking of user voice time using discord.js",
 	"main": "index.js",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Lebyy/discord-voice.git"
+	},
+	"funding": {
+		"type": "individual",
+		"url": "https://ko-fi.com/lebyy"
 	},
 	"keywords": [
 		"discord",

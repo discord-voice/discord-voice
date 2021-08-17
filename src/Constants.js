@@ -56,7 +56,7 @@ exports.defaultVoiceManagerOptions = {
         voiceTimeToAdd: () => 1000,
         voiceTimeTrackingEnabled: true,
         levelingTrackingEnabled: true,
-        levelMultiplier: () => 0.1,
+        levelMultiplier: () => 0.1
     }
 };
 
@@ -109,7 +109,7 @@ exports.defaultConfigOptions = {
     voiceTimeToAdd: () => 1000,
     voiceTimeTrackingEnabled: true,
     levelingTrackingEnabled: true,
-    levelMultiplier: () => 0.1,
+    levelMultiplier: () => 0.1
 };
 
 /**

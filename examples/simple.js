@@ -40,7 +40,7 @@ client.on("messageCreate", (message) => {
                 content: "You don't have any voice time recorded!"
             });
         message.channel.send({
-            content: `Your total voiceTime is ${ms(userData.data.data.voiceTime.total, {
+            content: `Your total voiceTime is ${ms(userData.voiceTime.total, {
                 long: true
             })}!`
         });
@@ -50,7 +50,7 @@ client.on("messageCreate", (message) => {
         const users = client.voiceManager.users
             .filter((u) => u.guildId === message.guild.id)
             .slice(0, 20)
-            .sort((a, b) => b.data.data.voiceTime.total - a.data.data.voiceTime.total);
+            .sort((a, b) => b.voiceTime.total - a.voiceTime.total);
         // We grab top 10 users with most total voice time in the current server.
 
         if (users.length < 1)
@@ -61,7 +61,7 @@ client.on("messageCreate", (message) => {
             (user) =>
                 `${users.findIndex((i) => i.guildId === user.guildId && i.userId === user.userId) + 1}. ${client.users.cache.get(user.userId) ? client.users.cache.get(user.userId).username : "Unknown"}#${
                     client.users.cache.get(user.userId) ? client.users.cache.get(user.userId).discriminator : "0000"
-                }\nVoice Time: ${ms(user.data.data.voiceTime.total, { long: true })}`
+                }\nVoice Time: ${ms(user.voiceTime.total, { long: true })}`
         );
         // Here we map the output.
 

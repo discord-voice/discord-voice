@@ -60,7 +60,7 @@ const configDataSchema = new mongoose.Schema({
         voiceTimeToAdd: String,
         voiceTimeTrackingEnabled: Boolean,
         levelingTrackingEnabled: Boolean,
-        levelMultiplier: String,
+        levelMultiplier: String
     }
 });
 
