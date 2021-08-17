@@ -285,6 +285,10 @@ Other examples:
 
 -   MongoDB
     -   [Mongoose](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/mongoose.js)
+    -   [QuickMongo](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/quickmongo.js) ⚠️ Not recommended for high giveaway usage, use the `mongoose` example instead
+-   [Enmap](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/enmap.js)
+-   Replit Database ⚠️ Only usable if your bot is hosted on [Replit](https://replit.com/)
+    -   [Quick.Replit](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/quickreplit.js)
 
 ```js
 const { Client, Intents } = require("discord.js"), // npm install discord.js
