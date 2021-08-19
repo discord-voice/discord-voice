@@ -1,18 +1,21 @@
 {
-  // Change this to match your project
-  "include": ["./index.js","./events"],
-  "compilerOptions": {
-    // Tells TypeScript to read JS files, as
-    // normally they are ignored as source files
-    "allowJs": true,
-    // Generate d.ts files
-    "declaration": true,
-    // This compiler run should
-    // only output d.ts files
-    "emitDeclarationOnly": true,
-    // Types should go into this directory.
-    // Removing this would place the .d.ts files
-    // next to the .js files
-    "outDir": "./typings"
+    "compilerOptions": {
+      "strict": true,
+      "moduleResolution": "node",
+      "declaration": false,
+      "removeComments": false,
+      "alwaysStrict": true,
+      "pretty": false,
+      "module": "commonjs",
+      "target": "es2019",
+      "lib": [
+        "esnext",
+        "esnext.array",
+        "esnext.asynciterable",
+        "esnext.intl",
+        "esnext.symbol"
+      ],
+      "sourceMap": false,
+      "skipDefaultLibCheck": true
+    }
   }
-}

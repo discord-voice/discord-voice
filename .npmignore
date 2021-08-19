@@ -1,10 +1,10 @@
-.replit
 package-lock.json
 test.js
 node_modules/
 .github/
 docs/
 scripts/
-.jsdoc.json
+jsdoc.json
 tsconfig.json
 .prettierrc
+rewrite/
