@@ -460,12 +460,25 @@ class VoiceManager extends EventEmitter {
         });
     }
     /**
+     * Checks the provided user
+     * @ignore
+     * @private
+     */
+    async _checkUser(member) {
+        let config = this.configs.find((g) => g.guildId === member.guild.id);
+        if (!config) {
+            config = await this.createConfig(member.guild.id);
+        }
+        if (!(await config.checkMember(member)) || !(await config.checkChannel(member.channel))) return false;
+        else return await this.manager.createUser(member.id, member.guild.id);
+    }
+    /**
      * Saves the new user to the storage file
      * @ignore
      * @private
      */
     async _handleVoiceStateUpdate(oldState, newState) {
-        if (!oldState.channel && newState.channel) {
+        if (newState.channel) {
             if (!this.users.find((u) => u.userId === newState.member.id)) {
                 let config = this.configs.find((g) => g.guildId === newState.member.guild.id);
                 if (!config) {
