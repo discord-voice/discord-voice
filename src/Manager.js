@@ -470,7 +470,7 @@ class VoiceManager extends EventEmitter {
             config = await this.createConfig(member.guild.id);
         }
         if (!(await config.checkMember(member)) || !(await config.checkChannel(member.channel))) return false;
-        else return await this.manager.createUser(member.id, member.guild.id);
+        else return await this.createUser(member.id, member.guild.id);
     }
     /**
      * Saves the new user to the storage file
