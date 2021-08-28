@@ -65,6 +65,14 @@ class Config extends EventEmitter {
     }
 
     /**
+     * The channels to track (if trackAllChannels is true this will be ignored).
+     * @type {Snowflake[]}
+     */
+    get channelIds() {
+        return this.options.channelIds || this.manager.options.default.channelIds;
+    }
+
+    /**
      * The min amount of users to be in a channel to be tracked (0 is equal to no limit).
      * @type {Number}
      */
