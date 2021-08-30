@@ -82,7 +82,7 @@ class User extends EventEmitter {
                 return voicechannel.members
                     .map((x) => {
                         if (!this.manager.users.find((u) => u.userId === x.id)) {
-                            this.manager._checkUser(x);
+                            this.manager._checkUser({ channel: voicechannel, member: x });
                         }
                         if (x.id === this.userId) return { channel: voicechannel, member: x };
                     })
