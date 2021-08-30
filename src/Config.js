@@ -354,7 +354,7 @@ class Config extends EventEmitter {
     async checkChannel(channel) {
         const exemptChannel = await this.exemptChannels(channel);
         if (exemptChannel) return false;
-        if (!(this.trackAllChannels && lodash._.includes(this.channelIds, channel.id))) return false;
+        if (!this.trackAllChannels && !lodash._.includes(this.channelIds, channel.id)) return false;
         if (this.minUserCountToParticipate > 0 && channel.members.size < this.minUserCountToParticipate) return false;
         if (this.maxUserCountToParticipate > 0 && channel.members.size > this.maxUserCountToParticipate) return false;
         return true;
