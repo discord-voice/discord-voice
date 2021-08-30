@@ -484,8 +484,8 @@ class VoiceManager extends EventEmitter {
                 if (!config) {
                     config = await this.createConfig(newState.member.guild.id);
                 }
-                await this._checkUser(newState.member);
-                return;
+                if (!((await config.checkMember(newState.member)) && (await config.checkChannel(newState.channel)))) return;
+                else return await this.createUser(newState.member.id, newState.member.guild.id);
             }
         }
     }
