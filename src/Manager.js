@@ -1,10 +1,7 @@
 const { EventEmitter } = require("events");
 const merge = require("deepmerge");
-const { writeFile, readFile, exists } = require("fs");
-const { promisify } = require("util");
-const writeFileAsync = promisify(writeFile);
-const existsAsync = promisify(exists);
-const readFileAsync = promisify(readFile);
+const { writeFile, readFile, access } = require('fs/promises');
+const serialize = require("serialize-javascript");
 const lodash = require("lodash");
 const { defaultVoiceManagerOptions, defaultUserOptions, defaultConfigOptions, VoiceManagerOptions, UserOptions, ConfigOptions, UserData, ConfigData, UserEditOptions, ConfigEditOptions } = require("./Constants.js");
 const Config = require("./Config.js");
@@ -255,7 +252,10 @@ class VoiceManager extends EventEmitter {
      * @ignore
      */
     async deleteUser(userId, guildId) {
-        await writeFileAsync(this.options.userStorage, JSON.stringify(this.users.map((user) => user.data)), "utf-8");
+        await writeFile(this.options.userStorage,
+        JSON.stringify(this.users.map((user) => user.data), (_, v) => typeof v === 'bigint' ? serialize(v) : v), 
+        'utf-8'
+        );
         this.refreshUserStorage();
         return;
     }
@@ -266,7 +266,14 @@ class VoiceManager extends EventEmitter {
      * @ignore
      */
     async deleteConfig(guildId) {
-        await writeFileAsync(this.options.configStorage, JSON.stringify(this.configs.map((config) => config.data)), "utf-8");
+        await writeFile(
+            this.options.configStorage,
+            JSON.stringify(
+                this.configs.map((config) => config.data),
+                (_, v) => (typeof v === "bigint" ? serialize(v) : v)
+            ),
+            'utf-8'
+        );
         this.refreshConfigStorage();
         return;
     }
@@ -292,7 +299,14 @@ class VoiceManager extends EventEmitter {
      * @param {UserData} userData The user data to save
      */
     async editUser(_userId, _guildId, _userData) {
-        await writeFileAsync(this.options.userStorage, JSON.stringify(this.users.map((user) => user.data)), "utf-8");
+        await writeFile(
+            this.options.userStorage,
+            JSON.stringify(
+                this.users.map((user) => user.data),
+                (_, v) => (typeof v === "bigint" ? serialize(v) : v)
+            ),
+            'utf-8'
+        );
         this.refreshUserStorage();
         return;
     }
@@ -303,7 +317,14 @@ class VoiceManager extends EventEmitter {
      * @param {ConfigData} ConfigData The config data to save
      */
     async editConfig(_guildId, _configData) {
-        await writeFileAsync(this.options.storage, JSON.stringify(this.configs.map((config) => config.data)), "utf-8");
+        await writeFile(
+            this.options.storage,
+            JSON.stringify(
+                this.configs.map((config) => config.data),
+                (_, v) => (typeof v === "bigint" ? serialize(v) : v)
+            ),
+            'utf-8'
+        );
         this.refreshConfigStorage();
         return;
     }
@@ -315,7 +336,14 @@ class VoiceManager extends EventEmitter {
      * @param {UserData} userData The user data to save
      */
     async saveUser(userId, guildId, userData) {
-        await writeFileAsync(this.options.userStorage, JSON.stringify(this.users.map((user) => user.data)), "utf-8");
+        await writeFile(
+            this.options.userStorage,
+            JSON.stringify(
+                this.users.map((user) => user.data),
+                (_, v) => (typeof v === "bigint" ? serialize(v) : v)
+            ),
+            'utf-8'
+        );
         this.refreshUserStorage();
         return;
     }
@@ -326,7 +354,14 @@ class VoiceManager extends EventEmitter {
      * @param {ConfigData} configData The config data to save
      */
     async saveConfig(guildId, configData) {
-        await writeFileAsync(this.options.configStorage, JSON.stringify(this.configs.map((config) => config.data)), "utf-8");
+        await writeFile(
+            this.options.configStorage,
+            JSON.stringify(
+                this.configs.map((config) => config.data),
+                (_, v) => (typeof v === "bigint" ? serialize(v) : v)
+            ),
+            'utf-8'
+        );
         this.refreshConfigStorage();
         return;
     }
@@ -336,12 +371,14 @@ class VoiceManager extends EventEmitter {
      * @returns {Promise<UserData[]>}
      */
     async getAllUsers() {
-        const storageExists = await existsAsync(this.options.userStorage);
+        const storageExists = await access(this.options.userStorage)
+            .then(() => true)
+            .catch(() => false);
         if (!storageExists) {
-            await writeFileAsync(this.options.userStorage, "[]", "utf-8");
+            await writeFile(this.options.userStorage, '[]', 'utf-8');
             return [];
         } else {
-            const storageContent = await readFileAsync(this.options.userStorage);
+            const storageContent = await readFile(this.options.userStorage, (_, v) => (typeof v === "string" && /BigInt\("(-?\d+)"\)/.test(v) ? eval(v) : v));
             try {
                 const users = await JSON.parse(storageContent.toString());
                 if (Array.isArray(users)) {
@@ -350,12 +387,10 @@ class VoiceManager extends EventEmitter {
                     console.log(storageContent, users);
                     throw new SyntaxError("The storage file is not properly formatted (users is not an array).");
                 }
-            } catch (e) {
-                if (e.message === "Unexpected end of JSON input") {
+            } catch (err) {
+                if (err.message === "Unexpected end of JSON input") {
                     throw new SyntaxError("The storage file is not properly formatted (Unexpected end of JSON input).");
-                } else {
-                    throw e;
-                }
+                } else throw err;
             }
         }
     }
@@ -365,12 +400,14 @@ class VoiceManager extends EventEmitter {
      * @returns {Promise<ConfigData[]>}
      */
     async getAllConfigs() {
-        const storageExists = await existsAsync(this.options.configStorage);
+        const storageExists = await access(this.options.configStorage)
+            .then(() => true)
+            .catch(() => false);
         if (!storageExists) {
-            await writeFileAsync(this.options.configStorage, "[]", "utf-8");
+            await writeFile(this.options.configStorage, '[]', 'utf-8');
             return [];
         } else {
-            const storageContent = await readFileAsync(this.options.configStorage);
+            const storageContent = await readFile(this.options.configStorage, (_, v) => (typeof v === "string" && /BigInt\("(-?\d+)"\)/.test(v) ? eval(v) : v));
             try {
                 const configs = await JSON.parse(storageContent.toString());
                 if (Array.isArray(configs)) {
@@ -379,12 +416,10 @@ class VoiceManager extends EventEmitter {
                     console.log(storageContent, configs);
                     throw new SyntaxError("The storage file is not properly formatted (configs is not an array).");
                 }
-            } catch (e) {
-                if (e.message === "Unexpected end of JSON input") {
+            } catch (err) {
+                if (err.message === "Unexpected end of JSON input") {
                     throw new SyntaxError("The storage file is not properly formatted (Unexpected end of JSON input).");
-                } else {
-                    throw e;
-                }
+                } else throw err;
             }
         }
     }
@@ -401,7 +436,7 @@ class VoiceManager extends EventEmitter {
                 if (!config) {
                     config = await this.createConfig(user.guildId);
                 }
-                if (!(await config.checkMember(user.member)) || !(await config.checkChannel(user.channel))) return;
+                if (!((await config.checkMember(user.member)) && (await config.checkChannel(user.channel)))) return;
                 const oldUser = lodash._.cloneDeep(user);
                 if (config.voiceTimeTrackingEnabled) {
                     let previousVoiceTime;
@@ -464,13 +499,13 @@ class VoiceManager extends EventEmitter {
      * @ignore
      * @private
      */
-    async _checkUser(member) {
-        let config = this.configs.find((g) => g.guildId === member.guild.id);
+    async _checkUser(memberAndChannel) {
+        let config = this.configs.find((g) => g.guildId === memberAndChannel.member.guild.id);
         if (!config) {
-            config = await this.createConfig(member.guild.id);
+            config = await this.createConfig(memberAndChannel.member.guild.id);
         }
-        if (!(await config.checkMember(member)) || !(await config.checkChannel(member.channel))) return false;
-        else return await this.createUser(member.id, member.guild.id);
+        if (!((await config.checkMember(memberAndChannel.member)) && (await config.checkChannel(memberAndChannel.channel)))) return false;
+        else return await this.createUser(memberAndChannel.member.id, memberAndChannel.member.guild.id);
     }
     /**
      * Saves the new user to the storage file
@@ -484,7 +519,7 @@ class VoiceManager extends EventEmitter {
                 if (!config) {
                     config = await this.createConfig(newState.member.guild.id);
                 }
-                if (!(await config.checkMember(newState.member)) || !(await config.checkChannel(newState.channel))) return;
+                if (!((await config.checkMember(newState.member)) && (await config.checkChannel(newState.channel)))) return;
                 else return await this.createUser(newState.member.id, newState.member.guild.id);
             }
         }

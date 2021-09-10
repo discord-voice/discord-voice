@@ -77,12 +77,12 @@ class User extends EventEmitter {
      */
     get channelAndMember() {
         return this.guild.channels.cache
-            .filter((c) => c.type == "voice" || c.type == "GUILD_VOICE")
+            .filter((c) => c.type === "voice" || c.type === "GUILD_VOICE" || c.type === "GUILD_STAGE_VOICE")
             .map((voicechannel) => {
                 return voicechannel.members
                     .map((x) => {
                         if (!this.manager.users.find((u) => u.userId === x.id)) {
-                            this.manager._checkUser(x);
+                            this.manager._checkUser({ channel: voicechannel, member: x });
                         }
                         if (x.id === this.userId) return { channel: voicechannel, member: x };
                     })
