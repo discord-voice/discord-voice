@@ -318,7 +318,7 @@ class VoiceManager extends EventEmitter {
      */
     async editConfig(_guildId, _configData) {
         await writeFile(
-            this.options.storage,
+            this.options.configStorage,
             JSON.stringify(
                 this.configs.map((config) => config.data),
                 (_, v) => (typeof v === "bigint" ? serialize(v) : v)
