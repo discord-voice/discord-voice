@@ -76,6 +76,7 @@ class User extends EventEmitter {
      * @readonly
      */
     get channelAndMember() {
+        if(!this.guild) return null;
         return this.guild.channels.cache
             .filter((c) => c.type === "voice" || c.type === "GUILD_VOICE" || c.type === "GUILD_STAGE_VOICE")
             .map((voicechannel) => {
