@@ -1,146 +1,65 @@
-const merge = require("deepmerge");
-const Discord = require("discord.js");
-const serialize = require("serialize-javascript");
-const { EventEmitter } = require("events");
-const { UserOptions, UserVoiceTimeOptions, UserLevelingOptions, UserData, UserEditOptions, channelAndMemberOptions } = require("./Constants.js");
-const VoiceManager = require("./Manager.js");
+const { EventEmitter } = require('node:events');
+const Discord = require('discord.js');
+const Channel = require('./Channel.js');
 
-/**
- * Represents a User
- */
 class User extends EventEmitter {
-    /**
-     * @param {VoiceManager} manager The Voice Manager
-     * @param {UserData} options The user options
-     */
-    constructor(manager, options) {
+    constructor(manager, guild, userId, options) {
         super();
-        /**
-         * The Voice Manager
-         * @type {VoiceManager}
-         */
         this.manager = manager;
-        /**
-         * The Discord Client
-         * @type {Client}
-         */
         this.client = manager.client;
-        /**
-         * The id of the user
-         * @type {Snowflake}
-         */
-        this.userId = options.userId;
-        /**
-         * The guild id of the user
-         * @type {Snowflake}
-         */
-        this.guildId = options.guildId;
-        /**
-         * The user voice time options
-         * @type {UserVoiceTimeOptions}
-         */
-        this.voiceTime = options.data.voiceTime;
-        /**
-         * The user leveling options
-         * @type {UserLevelingOptions}
-         */
-        this.levelingData = options.data.levelingData;
-        /**
-         * The user options
-         * @type {UserOptions}
-         */
-        this.options = options.data;
+        this.userId = userId;
+        this.guild = guild;
+        this.guildId = guild.guildId;
+        this.channels = new Discord.Collection(
+            options.channels.map((channel) => [
+                channel.channelId,
+                new Channel(manager, guild, channel.channelId, channel)
+            ])
+        );
+        this.totalVoiceTime = options.totalVoiceTime;
+        this.xp = options.xp;
+        this.level = options.level;
+        this.options = options;
     }
 
-    /**
-     * The guild of the user
-     * @type {Guild}
-     * @readonly
-     */
-    get guild() {
-        return this.client.guilds.cache.get(this.guildId);
-    }
-
-    /**
-     * The user
-     * @type {DiscordUser}
-     * @readonly
-     */
-    get user() {
-        return this.client.users.cache.get(this.userId);
-    }
-
-    /**
-     * Returns the user's voice channel and the member itself and creates a new user if a member is present in the voice channel and dosen't exist in the databse
-     * @type {channelAndMemberOptions}
-     * @readonly
-     */
-    get channelAndMember() {
-        if(!this.guild) return null;
-        return this.guild.channels.cache
-            .filter((c) => c.type === "voice" || c.type === "GUILD_VOICE" || c.type === "GUILD_STAGE_VOICE")
-            .map((voicechannel) => {
-                return voicechannel.members
-                    .map((x) => {
-                        if (!this.manager.users.find((u) => u.userId === x.id)) {
-                            this.manager._checkUser({ channel: voicechannel, member: x });
-                        }
-                        if (x.id === this.userId) return { channel: voicechannel, member: x };
-                    })
-                    .find((val) => val);
-            })
-            .find((val) => val);
-    }
-
-    /**
-     * The user's voice channel if present
-     * @type {VoiceChannel}
-     * @readonly
-     */
-    get channel() {
-        let returnedJSONObject = this.channelAndMember;
-        if (returnedJSONObject) return returnedJSONObject.channel;
-        else return null;
-    }
-
-    /**
-     * The guild member data of the user
-     * @type {Member}
-     * @readonly
-     */
-    get member() {
-        let returnedJSONObject = this.channelAndMember;
-        if (returnedJSONObject) return returnedJSONObject.member;
-        else return null;
-    }
-
-    /**
-     * The raw user data object for this user
-     * @type {UserData}
-     * @readonly
-     */
     get data() {
         const baseData = {
-            userId: this.userId,
             guildId: this.guildId,
-            data: {
-                voiceTime: this.voiceTime,
-                levelingData: this.levelingData
-            }
+            userId: this.userId,
+            channels: this.channels.map((c) => c.data),
+            totalVoiceTime: this.totalVoiceTime,
+            xp: this.xp,
+            level: this.level
         };
         return baseData;
     }
 
-    /**
-     * Edits the user
-     * @param {UserEditOptions} options The edit options
-     * @returns {Promise<User>}
-     */
     edit(options = {}) {
         return new Promise(async (resolve, reject) => {
-            if (typeof options.newVoiceTime === "object" && Array.isArray(options.newVoiceTime.channels) && Number.isInteger(options.newVoiceTime.total)) this.voiceTime = options.newVoiceTime;
-            if (typeof options.newLevelingData === "object" && Number.isInteger(options.newLevelingData.xp) && Number.isInteger(options.newLevelingData.level)) this.levelingData = options.newLevelingData;
-            await this.manager.editUser(this.userId, this.guildId, this.data);
+            if (typeof options !== 'object') return reject(new Error('Options must be an object.'));
+            if (!Array.isArrayoptions(options.channels)) return reject(new Error('Options.channels must be an array.'));
+            if (typeof options.totalVoiceTime !== 'number')
+                return reject(new Error('Options.totalVoiceTime must be a number.'));
+            if (typeof options.xp !== 'number') return reject(new Error('Options.xp must be a number.'));
+            if (typeof options.level !== 'number') return reject(new Error('Options.level must be a number.'));
+
+            // Set the channel array into our channels collection
+            this.channels.clear();
+            options.channels.forEach((channel) => {
+                this.channels.set(channel.id, channel);
+            });
+
+            // Set the total voice time
+            this.totalVoiceTime = options.totalVoiceTime;
+
+            // Set the xp
+            this.xp = options.xp;
+
+            // Set the level
+            this.level = options.level;
+
+            await this.manager.editGuild(this.guild.guildId, this.guild.data);
+
             resolve(this);
         });
     }

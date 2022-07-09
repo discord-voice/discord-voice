@@ -3,6 +3,4 @@ test.js
 node_modules/
 .github/
 docs/
-configs.json
-users.json
-
+guilds.json

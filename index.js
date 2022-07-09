@@ -1,9 +1,12 @@
-module.exports = {
-  /* Info */
-  version: require("./package.json").version,
-  author: require("./package.json").author,
-  license: require("./package.json").license,
+/* Info */
+exports.version = require("./package.json").version;
+exports.author = require("./package.json").author;
+exports.license = require("./package.json").license;
 
-  /* Classes */
-  VoiceManager: require("./src/Manager"),
-};
+/* Classes */
+exports.VoiceManager = require("./src/Manager");
+exports.Guild = require("./src/Guild");
+exports.Config = require("./src/Config");
+exports.User = require("./src/User");
+exports.Channel = require("./src/Channel");
+
