@@ -13,7 +13,7 @@ class Guild extends EventEmitter {
     /**
      *
      * @param {VoiceManager} manager The voice time manager.
-     * @param {Discord.Snowflake} guildId The guild id.
+     * @param {Snowflake} guildId The guild id.
      * @param {GuildOptions} options The guild options.
      */
     constructor(manager, guildId, options) {
@@ -25,17 +25,17 @@ class Guild extends EventEmitter {
         this.manager = manager;
         /**
          * The Discord client.
-         * @type {Discord.Client}
+         * @type {Client}
          */
         this.client = manager.client;
         /**
          * The guild id.
-         * @type {Discord.Snowflake}
+         * @type {Snowflake}
          */
         this.guildId = guildId;
         /**
          * The users stored in this guild.
-         * @type {Discord.Collection<Discord.Snowflake, User>}
+         * @type {Collection<Discord.Snowflake, User>}
          */
         this.users = new Discord.Collection(
             options.users.map((user) => [user.userId, new User(manager, this, user.userId, user)])
@@ -51,7 +51,7 @@ class Guild extends EventEmitter {
          */
         this.options = options;
     }
-    
+
     get guild() {
         return this.client.guilds.cache.get(this.guildId);
     }

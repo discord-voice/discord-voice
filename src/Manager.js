@@ -36,7 +36,7 @@ const {
  */
 class VoiceManager extends EventEmitter {
     /**
-     * @param {Discord.Client} client The Discord Client
+     * @param {Client} client The Discord Client
      * @param {VoiceManagerOptions} options The manager options
      */
     constructor(client, options, init = true) {
@@ -44,7 +44,7 @@ class VoiceManager extends EventEmitter {
         if (!client?.options) throw new Error(`Client is a required option. (val=${client})`);
         /**
          * The Discord Client
-         * @type {Discord.Client}
+         * @type {Client}
          */
         this.client = client;
         /**
@@ -54,7 +54,7 @@ class VoiceManager extends EventEmitter {
         this.ready = false;
         /**
          * The guilds managed by this manager
-         * @type {Discord.Collection<String, Guild>}
+         * @type {Collection<String, Guild>}
          */
         this.guilds = new Discord.Collection();
         /**
@@ -69,7 +69,7 @@ class VoiceManager extends EventEmitter {
     /**
      * Creates a new guild in the database
      *
-     * @param {Discord.Snowflake} guildId The id of the guild to create
+     * @param {Snowflake} guildId The id of the guild to create
      * @param {GuildOptions} options The options for the guild
      *
      * @returns {Promise<Guild>}
@@ -126,7 +126,7 @@ class VoiceManager extends EventEmitter {
 
     /**
      * Edits the given guild's data.
-     * @param {Discord.Snowflake} guildId The id of the guild to edit
+     * @param {Snowflake} guildId The id of the guild to edit
      * @param {GuildEditOptions} [options={}] The edit options
      * @returns {Promise<Guild>} The edited guild
      *
@@ -150,7 +150,7 @@ class VoiceManager extends EventEmitter {
 
     /**
      * Deletes the given guild's data.
-     * @param {Discord.Snowflake} guildId The id of the guild to delete
+     * @param {Snowflake} guildId The id of the guild to delete
      * @returns {Promise<Guild>}
      */
     delete(guildId) {
@@ -170,7 +170,7 @@ class VoiceManager extends EventEmitter {
     /**
      * Saves the guild in the database
      * @ignore
-     * @param {Discord.Snowflake} guildId The id of the guild to save
+     * @param {Snowflake} guildId The id of the guild to save
      * @param {GuildData} guildData The guild data to save
      */
     async saveGuild(guildId, guildData) {
@@ -188,7 +188,7 @@ class VoiceManager extends EventEmitter {
     /**
      * Edits the guild in the database
      * @ignore
-     * @param {Discord.Snowflake} guildId The id of the guild to edit
+     * @param {Snowflake} guildId The id of the guild to edit
      * @param {GuildData} guildData The guild data to save
      */
     async editGuild(guildId, options) {
@@ -206,7 +206,7 @@ class VoiceManager extends EventEmitter {
     /**
      * Deletes the guild from the database
      * @ignore
-     * @param {Discord.Snowflake} guildId The id of the guild to delete
+     * @param {Snowflake} guildId The id of the guild to delete
      * @param {GuildData} guildData The guild data to save
      */
     async deleteGuild(guildId) {
@@ -346,8 +346,8 @@ class VoiceManager extends EventEmitter {
 
     /**
      * @ignore
-     * @param {Discord.VoiceState} oldState
-     * @param {Discord.VoiceState} newState
+     * @param {VoiceState} oldState
+     * @param {VoiceState} newState
      */
     async _handleVoiceStateUpdate(oldState, newState) {
         if (newState.channel) {

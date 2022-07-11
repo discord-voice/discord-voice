@@ -13,8 +13,8 @@ exports.DEFAULT_CHECK_INTERVAL = 5000;
  * @property {Boolean} [default.trackBots=false] Whether bots are able to be tracked.
  * @property {Boolean} [default.trackAllChannels=true] Whether to track all of the guild's voice channels.
  * @property {ExemptChannelsFunction} [default.exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
- * @property {Discord.Snowflake[]} [default.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
- * @property {Discord.PermissionResolvable[]} [default.exemptPermissions=[]] Members with any of these permissions won't be tracked.
+ * @property {Snowflake[]} [default.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {PermissionResolvable[]} [default.exemptPermissions=[]] Members with any of these permissions won't be tracked.
  * @property {ExemptMembersFunction} [default.exemptMembers] Function to filter members. If true is returned, the member won't be tracked.
  * @property {Boolean} [default.trackMute=true] Whether members who are muted should be tracked.
  * @property {Boolean} [default.trackDeaf=true] Whether members who are deafened should be tracked.
@@ -65,8 +65,8 @@ exports.VoiceManagerOptions = {
  * @property {Boolean} [config.trackBots=false] Whether bots are able to be tracked.
  * @property {Boolean} [config.trackAllChannels=true] Whether to track all of the guild's voice channels.
  * @property {ExemptChannelsFunction} [config.exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
- * @property {Discord.Snowflake[]} [config.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
- * @property {Discord.PermissionResolvable[]} [config.exemptPermissions=[]] Members with any of these permissions won't be tracked.
+ * @property {Snowflake[]} [config.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {PermissionResolvable[]} [config.exemptPermissions=[]] Members with any of these permissions won't be tracked.
  * @property {ExemptMembersFunction} [config.exemptMembers] Function to filter members. If true is returned, the member won't be tracked.
  * @property {Boolean} [config.trackMute=true] Whether members who are muted should be tracked.
  * @property {Boolean} [config.trackDeaf=true] Whether members who are deafened should be tracked.
@@ -140,8 +140,8 @@ exports.ChannelOptions = {
  * @property {Boolean} [trackBots=false] Whether bots are able to be tracked.
  * @property {Boolean} [trackAllChannels=true] Whether to track all of the guild's voice channels.
  * @property {ExemptChannelsFunction} [exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
- * @property {Discord.Snowflake[]} [channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
- * @property {Discord.PermissionResolvable[]} [exemptPermissions=[]] Members with any of these permissions won't be tracked.
+ * @property {Snowflake[]} [channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {PermissionResolvable[]} [exemptPermissions=[]] Members with any of these permissions won't be tracked.
  * @property {ExemptMembersFunction} [exemptMembers] Function to filter members. If true is returned, the member won't be tracked.
  * @property {Boolean} [trackMute=true] Whether members who are muted should be tracked.
  * @property {Boolean} [trackDeaf=true] Whether members who are deafened should be tracked.
@@ -188,8 +188,8 @@ exports.ConfigOptions = {
  * @property {Boolean} [config.trackBots=false] Whether bots are able to be tracked.
  * @property {Boolean} [config.trackAllChannels=true] Whether to track all of the guild's voice channels.
  * @property {ExemptChannelsFunction} [config.exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
- * @property {Discord.Snowflake[]} [config.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
- * @property {Discord.PermissionResolvable[]} [config.exemptPermissions=[]] Members with any of these permissions won't be tracked.
+ * @property {Snowflake[]} [config.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {PermissionResolvable[]} [config.exemptPermissions=[]] Members with any of these permissions won't be tracked.
  * @property {ExemptMembersFunction} [config.exemptMembers] Function to filter members. If true is returned, the member won't be tracked.
  * @property {Boolean} [config.trackMute=true] Whether members who are muted should be tracked.
  * @property {Boolean} [config.trackDeaf=true] Whether members who are deafened should be tracked.
@@ -234,7 +234,7 @@ exports.GuildEditOptions = {
  * Raw guild object (used to store guilds in the database).
  * @typedef {object} GuildData
  *
- * @property {Discord.Snowflake} guildId The guild's id.
+ * @property {Snowflake} guildId The guild's id.
  * @property {UserData[]} users The users stored in the guild.
  * @property {ConfigData} config The config of the guild.
  */
@@ -244,8 +244,8 @@ exports.GuildData = {};
  * Raw user object (used to store users in the database).
  * @typedef {object} UserData
  *
- * @property {Discord.Snowflake} guildId The user's guild id.
- * @property {Discord.Snowflake} userId The user's id.
+ * @property {Snowflake} guildId The user's guild id.
+ * @property {Snowflake} userId The user's id.
  * @property {ChannelData[]} channels The channels the user has spent voice time in.
  * @property {Number} totalVoiceTime The total amount of voice time the user has.
  * @property {Number} xp The amount of xp the user has.
@@ -257,8 +257,8 @@ exports.UserData = {};
  * Raw channel object (used to store channels in the database).
  * @typedef {object} ChannelData
  *
- * @property {Discord.Snowflake} guildId The channel's guild id.
- * @property {Discord.Snowflake} channelId The channel's id.
+ * @property {Snowflake} guildId The channel's guild id.
+ * @property {Snowflake} channelId The channel's id.
  * @property {Number} timeInChannel The total amount of voice time the user has spent in this channel.
  */
 exports.ChannelData = {};
@@ -267,12 +267,12 @@ exports.ChannelData = {};
  * Raw config object (used to store config's in the database).
  * @typedef {object} ConfigData
  *
- * @property {Discord.Snowflake} guildId The config's guild id.
+ * @property {Snowflake} guildId The config's guild id.
  * @property {Boolean} trackBots Whether bots are able to be tracked.
  * @property {Boolean} trackAllChannels Whether to track all of the guild's voice channels.
  * @property {ExemptChannelsFunction} exemptChannels Function to filter channels. If true is returned, the channel won't be tracked.
- * @property {Discord.Snowflake[]} channelIds The channels to track (if trackAllChannels is true this will be ignored).
- * @property {Discord.PermissionResolvable[]} exemptPermissions Members with any of these permissions won't be tracked.
+ * @property {Snowflake[]} channelIds The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {PermissionResolvable[]} exemptPermissions Members with any of these permissions won't be tracked.
  * @property {ExemptMembersFunction} exemptMembers Function to filter members. If true is returned, the member won't be tracked.
  * @property {Boolean} trackMute Whether members who are muted should be tracked.
  * @property {Boolean} trackDeaf Whether members who are deafened should be tracked.
@@ -293,7 +293,7 @@ exports.ConfigData = {};
 /**
  * @typedef {Function} ExemptChannelsFunction
  *
- * @param {Discord.GuildChannel} channel
+ * @param {GuildChannel} channel
  * @param {Config} config
  * @returns {Promise<boolean>|boolean}
  */
@@ -301,7 +301,7 @@ exports.ConfigData = {};
 /**
  * @typedef {Function} ExemptMembersFunction
  *
- * @param {Discord.GuildMember} member
+ * @param {GuildMember} member
  * @param {Config} config
  * @returns {Promise<boolean>|boolean}
  */
