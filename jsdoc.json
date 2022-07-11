@@ -1,7 +1,4 @@
 {
-	"source": {
-		"includePattern": ".+\\.js(doc|x)?$"
-	},
 	"plugins": [
 		"plugins/markdown",
 		"node_modules/jsdoc-babel"
