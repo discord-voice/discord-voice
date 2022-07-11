@@ -125,7 +125,7 @@ exports.UserOptions = {
 /**
  * The channel options.
  * @typedef {object} ChannelOptions
- * 
+ *
  * @property {Number} [totalVoiceTime] The total voice time spent in the channel.
  */
 exports.ChannelOptions = {
@@ -135,7 +135,7 @@ exports.ChannelOptions = {
 /**
  * The config options.
  * @typedef {object} ConfigOptions
- * 
+ *
  * @property {boolean} [trackBots=false] Whether bots are able to be tracked.
  * @property {boolean} [trackAllChannels=true] Whether to track all of the guild's voice channels.
  * @property {function} [exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
@@ -181,7 +181,7 @@ exports.ConfigOptions = {
 /**
  * The guild edit method options.
  * @typedef {object} GuildEditOptions
- * 
+ *
  * @property {UserOptions[]} [users] The users stored in the guild.
  * @property {ConfigOptions} [config] The config options.
  * @property {boolean} [config.trackBots=false] Whether bots are able to be tracked.
@@ -203,7 +203,7 @@ exports.ConfigOptions = {
  * @property {boolean} [config.voiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
  * @property {boolean} [config.levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
  * @property {function} [config.levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
- */ 
+ */
 exports.GuildEditOptions = {
     users: [],
     config: {
@@ -232,9 +232,59 @@ exports.GuildEditOptions = {
 /**
  * Raw guild object (used to store guilds in the database).
  * @typedef {object} GuildData
- * 
+ *
  * @property {Discord.Snowflake} guildId The guild's id.
  * @property {UserData[]} users The users stored in the guild.
  * @property {ConfigData} config The config of the guild.
  */
 exports.GuildData = {};
+
+/**
+ * Raw user object (used to store users in the database).
+ * @typedef {object} UserData
+ *
+ * @property {Discord.Snowflake} guildId The user's guild id.
+ * @property {Discord.Snowflake} userId The user's id.
+ * @property {ChannelData[]} channels The channels the user has spent voice time in.
+ * @property {number} totalVoiceTime The total amount of voice time the user has.
+ * @property {number} xp The amount of xp the user has.
+ * @property {number} level The amount of level the user has.
+ */
+exports.UserData = {};
+
+/**
+ * Raw channel object (used to store channels in the database).
+ * @typedef {object} ChannelData
+ *
+ * @property {Discord.Snowflake} guildId The channel's guild id.
+ * @property {Discord.Snowflake} channelId The channel's id.
+ * @property {number} timeInChannel The total amount of voice time the user has spent in this channel.
+ */
+exports.ChannelData = {};
+
+/**
+ * Raw config object (used to store config's in the database).
+ * @typedef {object} ConfigData
+ *
+ * @property {Discord.Snowflake} guildId The config's guild id.
+ * @property {boolean} trackBots Whether bots are able to be tracked.
+ * @property {boolean} trackAllChannels Whether to track all of the guild's voice channels.
+ * @property {function} exemptChannels Function to filter channels. If true is returned, the channel won't be tracked.
+ * @property {Discord.Snowflake[]} channelIds The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {Discord.PermissionResolvable[]} exemptPermissions Members with any of these permissions won't be tracked.
+ * @property {function} exemptMembers Function to filter members. If true is returned, the member won't be tracked.
+ * @property {boolean} trackMute Whether members who are muted should be tracked.
+ * @property {boolean} trackDeaf Whether members who are deafened should be tracked.
+ * @property {number} minUserCountToParticipate The min amount of users to be in a channel to be tracked (0 is equal to no limit).
+ * @property {number} maxUserCountToParticipate The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
+ * @property {number} minXpToParticipate The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+ * @property {number} minLevelToParticipate The min amount of level the user needs to have to be tracked (0 is equal to no limit).
+ * @property {number} maxXpToParticipate The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+ * @property {number} maxLevelToParticipate The max amount of level the user can be tracked uptil (0 is equal to no limit).
+ * @property {function} xpAmountToAdd Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
+ * @property {function} voiceTimeToAdd Function for voiceTimeToAdd. If not provided, the default value is used (1000).
+ * @property {boolean} voiceTimeTrackingEnabled Whether to enable the voice time tracking module.
+ * @property {boolean} levelingTrackingEnabled Whether to enable the leveling tracking module.
+ * @property {function} levelMultiplier Function for levelMultiplier. If not provided, the default value is used (0.1).
+ */
+exports.ConfigData = {};

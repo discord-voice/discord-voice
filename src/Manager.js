@@ -1,12 +1,12 @@
-const { EventEmitter } = require("node:events");
-const { setInterval } = require("node:timers");
-const { writeFile, readFile, access } = require("fs/promises");
-const { deepmerge } = require("deepmerge-ts");
-const serialize = require("serialize-javascript");
-const Guild = require("./Guild.js");
-const User = require("./User.js");
-const Channel = require("./Channel.js");
-const Discord = require("discord.js");
+const { EventEmitter } = require('node:events');
+const { setInterval } = require('node:timers');
+const { writeFile, readFile, access } = require('fs/promises');
+const { deepmerge } = require('deepmerge-ts');
+const serialize = require('serialize-javascript');
+const Guild = require('./Guild.js');
+const User = require('./User.js');
+const Channel = require('./Channel.js');
+const Discord = require('discord.js');
 const {
     DEFAULT_CHECK_INTERVAL,
     VoiceManagerOptions,
@@ -14,7 +14,7 @@ const {
     UserOptions,
     ChannelOptions,
     GuildEditOptions,
-    GuildData,
+    GuildData
 } = require('./Constants.js');
 
 /**
@@ -114,8 +114,7 @@ class VoiceManager extends EventEmitter {
                 return resolve(this.guilds.get(guildId));
             }
 
-            options =
-                options && typeof options === 'object' ? deepmerge(UserOptions, options) : UserOptions;
+            options = options && typeof options === 'object' ? deepmerge(UserOptions, options) : UserOptions;
 
             const guild = new Guild(this, guildId, options);
 
@@ -126,7 +125,7 @@ class VoiceManager extends EventEmitter {
     }
 
     /**
-     * Edits the given guild's data. 
+     * Edits the given guild's data.
      * @param {Discord.Snowflake} guildId The id of the guild to edit
      * @param {GuildEditOptions} [options={}] The edit options
      * @returns {Promise<Guild>} The edited guild
@@ -135,7 +134,7 @@ class VoiceManager extends EventEmitter {
      * client.voiceManager.edit(interaction.guild.id, {
      *  config: {
      *      trackAllChannels: false, // All of the channels in the guild will not be tracked.
-     *  }    
+     *  }
      * });
      */
     edit(guildId, options) {
@@ -168,7 +167,7 @@ class VoiceManager extends EventEmitter {
         });
     }
 
-     /**
+    /**
      * Saves the guild in the database
      * @ignore
      * @param {Discord.Snowflake} guildId The id of the guild to save
@@ -209,7 +208,7 @@ class VoiceManager extends EventEmitter {
      * @ignore
      * @param {Discord.Snowflake} guildId The id of the guild to delete
      * @param {GuildData} guildData The guild data to save
-    */
+     */
     async deleteGuild(guildId) {
         await writeFile(
             this.options.storage,
@@ -285,7 +284,10 @@ class VoiceManager extends EventEmitter {
         this.ready = true;
 
         if (this.options.deleteMissingGuilds) {
-            const missingGuilds = this.guilds.filter(async (guild) => !(this.client.guilds.cache.get(guild.guildId) ?? await this.client.guilds.fetch(guild.guildId)));
+            const missingGuilds = this.guilds.filter(
+                async (guild) =>
+                    !(this.client.guilds.cache.get(guild.guildId) ?? (await this.client.guilds.fetch(guild.guildId)))
+            );
             for (const guild of missingGuilds) {
                 this.guilds.delete(guild.guildId);
                 await this.deleteGuild(guild.guildId);
@@ -322,11 +324,11 @@ class VoiceManager extends EventEmitter {
 
                 if (user.channels.has(voiceChannel.id)) {
                     const channel = user.channels.get(voiceChannel.id);
-                    channel.timeInChannel += (await guild.config.voiceTimeToAdd() + 5000);
+                    channel.timeInChannel += (await guild.config.voiceTimeToAdd()) + 5000;
                 } else {
                     const channel = new Channel(this, guild, voiceChannel.id, ChannelOptions);
                     user.channels.set(voiceChannel.id, channel);
-                    channel.timeInChannel += (await guild.config.voiceTimeToAdd() + 5000);
+                    channel.timeInChannel += (await guild.config.voiceTimeToAdd()) + 5000;
                 }
 
                 user.totalVoiceTime = user.channels.reduce((acc, cur) => acc + cur.timeInChannel, 0);

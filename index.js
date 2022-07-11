@@ -1,12 +1,11 @@
 /* Info */
-exports.version = require("./package.json").version;
-exports.author = require("./package.json").author;
-exports.license = require("./package.json").license;
+exports.version = require('./package.json').version;
+exports.author = require('./package.json').author;
+exports.license = require('./package.json').license;
 
 /* Classes */
-exports.VoiceManager = require("./src/Manager");
-exports.Guild = require("./src/Guild");
-exports.Config = require("./src/Config");
-exports.User = require("./src/User");
-exports.Channel = require("./src/Channel");
-
+exports.VoiceManager = require('./src/Manager');
+exports.Guild = require('./src/Guild');
+exports.Config = require('./src/Config');
+exports.User = require('./src/User');
+exports.Channel = require('./src/Channel');

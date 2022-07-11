@@ -2,7 +2,7 @@ const { EventEmitter } = require('node:events');
 const Discord = require('discord.js');
 const User = require('./User.js');
 const Config = require('./Config.js');
-const { deepmerge } = require('deepmerge-ts/*');
+const { deepmerge } = require('deepmerge-ts');
 const {
     ConfigOptions
 } = require('./Constants.js');

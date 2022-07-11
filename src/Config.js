@@ -48,29 +48,34 @@ class Config extends EventEmitter {
     get levelingTrackingEnabled() {
         return this.options.levelingTrackingEnabled || this.manager.options.default.levelingTrackingEnabled;
     }
+    get exemptPermissions() {
+        return Array.isArray(this.options.exemptPermissions) && this.options.exemptPermissions.length
+            ? this.options.exemptPermissions
+            : this.manager.options.default.exemptPermissions;
+    }
     get data() {
         const baseData = {
             guildId: this.guildId,
-            trackBots: this.options.trackBots,
-            trackAllChannels: this.options.trackAllChannels,
+            trackBots: this.trackBots,
+            trackAllChannels: this.trackAllChannels,
             exemptChannels:
                 !this.options.exemptChannels || typeof this.options.exemptChannels === 'string'
                     ? this.options.exemptChannels
                     : serialize(this.options.exemptChannels),
-            channelIds: this.options.channelIds,
-            exemptPermissions: this.options.exemptPermissions,
+            channelIds: this.channelIds,
+            exemptPermissions: this.exemptPermissions,
             exemptMembers:
                 !this.options.exemptMembers || typeof this.options.exemptMembers === 'string'
                     ? this.options.exemptMembers
                     : serialize(this.options.exemptMembers),
-            trackMute: this.options.trackMute,
-            trackDeaf: this.options.trackDeaf,
-            minUserCountToParticipate: this.options.minUserCountToParticipate,
-            maxUserCountToParticipate: this.options.maxUserCountToParticipate,
-            minXpToParticipate: this.options.minXpToParticipate,
-            minLevelToParticipate: this.options.minLevelToParticipate,
-            maxXpToParticipate: this.options.maxXpToParticipate,
-            maxLevelToParticipate: this.options.maxLevelToParticipate,
+            trackMute: this.trackMute,
+            trackDeaf: this.trackDeaf,
+            minUserCountToParticipate: this.minUserCountToParticipate,
+            maxUserCountToParticipate: this.maxUserCountToParticipate,
+            minXpToParticipate: this.minXpToParticipate,
+            minLevelToParticipate: this.minLevelToParticipate,
+            maxXpToParticipate: this.maxXpToParticipate,
+            maxLevelToParticipate: this.maxLevelToParticipate,
             xpAmountToAdd:
                 !this.options.xpAmountToAdd || typeof this.options.xpAmountToAdd === 'string'
                     ? this.options.xpAmountToAdd
@@ -79,19 +84,14 @@ class Config extends EventEmitter {
                 !this.options.voiceTimeToAdd || typeof this.options.voiceTimeToAdd === 'string'
                     ? this.options.voiceTimeToAdd
                     : serialize(this.options.voiceTimeToAdd),
-            voiceTimeTrackingEnabled: this.options.voiceTimeTrackingEnabled,
-            levelingTrackingEnabled: this.options.levelingTrackingEnabled,
+            voiceTimeTrackingEnabled: this.voiceTimeTrackingEnabled,
+            levelingTrackingEnabled: this.levelingTrackingEnabled,
             levelMultiplier:
                 !this.options.levelMultiplier || typeof this.options.levelMultiplier === 'string'
                     ? this.options.levelMultiplier
                     : serialize(this.options.levelMultiplier)
         };
         return baseData;
-    }
-    get exemptPermissions() {
-        return Array.isArray(this.options.exemptPermissions) && this.options.exemptPermissions.length
-            ? this.options.exemptPermissions
-            : this.manager.options.default.exemptPermissions;
     }
     get exemptMembersFunction() {
         return this.options.exemptMembers
@@ -244,7 +244,7 @@ class Config extends EventEmitter {
     async checkChannel(channel) {
         const exemptChannel = await this.exemptChannels(channel);
         if (exemptChannel) return false;
-        if (!this.trackAllChannels && !lodash._.includes(this.channelIds, channel.id)) return false;
+        if (!this.trackAllChannels && !this.channelIds.includes(channel.id)) return false;
         if (this.minUserCountToParticipate > 0 && channel.members.size < this.minUserCountToParticipate) return false;
         if (this.maxUserCountToParticipate > 0 && channel.members.size > this.maxUserCountToParticipate) return false;
         return true;
