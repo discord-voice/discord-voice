@@ -285,7 +285,7 @@ class VoiceManager extends EventEmitter {
         this.ready = true;
 
         if (this.options.deleteMissingGuilds) {
-            const missingGuilds = this.guilds.filter((guild) => !(this.client.guilds.cache.get(guild.guildId) ?? await this.client.guilds.fetch(guild.guildId)));
+            const missingGuilds = this.guilds.filter(async (guild) => !(this.client.guilds.cache.get(guild.guildId) ?? await this.client.guilds.fetch(guild.guildId)));
             for (const guild of missingGuilds) {
                 this.guilds.delete(guild.guildId);
                 await this.deleteGuild(guild.guildId);

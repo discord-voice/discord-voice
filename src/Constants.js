@@ -1,8 +1,10 @@
+const Discord = require('discord.js');
+
 exports.DEFAULT_CHECK_INTERVAL = 5000;
 
 /**
  * The voice manager options.
- * @typedef VoiceManagerOptions
+ * @typedef {object} VoiceManagerOptions
  *
  * @property {string} [storage="./guilds.json"] The storage path for the guild's data.
  * @property {boolean} [deleteMissingGuilds=false] Whether to delete guilds data that are no longer in the client.
@@ -10,8 +12,8 @@ exports.DEFAULT_CHECK_INTERVAL = 5000;
  * @property {boolean} [default.trackBots=false] Whether bots are able to be tracked.
  * @property {boolean} [default.trackAllChannels=true] Whether to track all of the guild's voice channels.
  * @property {function} [default.exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
- * @property {Snowflake[]} [default.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
- * @property {PermissionResolvable[]} [default.exemptPermissions=[]] Members with any of these permissions won't be tracked.
+ * @property {Discord.Snowflake[]} [default.channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {Discord.PermissionResolvable[]} [default.exemptPermissions=[]] Members with any of these permissions won't be tracked.
  * @property {function} [default.exemptMembers] Function to filter members. If true is returned, the member won't be tracked.
  * @property {boolean} [default.trackMute=true] Whether members who are muted should be tracked.
  * @property {boolean} [default.trackDeaf=true] Whether members who are deafened should be tracked.
@@ -55,7 +57,7 @@ exports.VoiceManagerOptions = {
 
 /**
  * The guild options.
- * @typedef GuildOptions
+ * @typedef {object} GuildOptions
  *
  * @property {UserOptions[]} [users] The users stored in the guild.
  * @property {ConfigOptions} [config] The config options.
@@ -106,7 +108,7 @@ exports.GuildOptions = {
 
 /**
  * The user options.
- * @typedef UserOptions
+ * @typedef {object} UserOptions
  *
  * @property {ChannelOptions[]} [channels] The channels stored in the user.
  * @property {Number} [totalVoiceTime] The total voice time of the user.
@@ -122,7 +124,7 @@ exports.UserOptions = {
 
 /**
  * The channel options.
- * @typedef ChannelOptions
+ * @typedef {object} ChannelOptions
  * 
  * @property {Number} [totalVoiceTime] The total voice time spent in the channel.
  */
@@ -132,7 +134,7 @@ exports.ChannelOptions = {
 
 /**
  * The config options.
- * @typedef ConfigOptions
+ * @typedef {object} ConfigOptions
  * 
  * @property {boolean} [trackBots=false] Whether bots are able to be tracked.
  * @property {boolean} [trackAllChannels=true] Whether to track all of the guild's voice channels.
@@ -178,7 +180,7 @@ exports.ConfigOptions = {
 
 /**
  * The guild edit method options.
- * @typedef GuildEditOptions
+ * @typedef {object} GuildEditOptions
  * 
  * @property {UserOptions[]} [users] The users stored in the guild.
  * @property {ConfigOptions} [config] The config options.
@@ -229,7 +231,7 @@ exports.GuildEditOptions = {
 
 /**
  * Raw guild object (used to store guilds in the database).
- * @typedef GuildData
+ * @typedef {object} GuildData
  * 
  * @property {Discord.Snowflake} guildId The guild's id.
  * @property {UserData[]} users The users stored in the guild.
