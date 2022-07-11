@@ -128,7 +128,7 @@ class VoiceManager extends EventEmitter {
      * Edits the given guild's data.
      * @param {Snowflake} guildId The id of the guild to edit
      * @param {GuildEditOptions} [options={}] The edit options
-     * @returns {Promise<Guild>} The edited guild
+     * @returns {Promise<Guild>}
      *
      * @example
      * client.voiceManager.edit(interaction.guild.id, {

@@ -127,7 +127,7 @@ exports.UserOptions = {
  * The channel options.
  * @typedef {object} ChannelOptions
  *
- * @property {Number} [totalVoiceTime] The total voice time spent in the channel.
+ * @property {Number} [timeInChannel] The voice time spent in the channel.
  */
 exports.ChannelOptions = {
     timeInChannel: 0
@@ -228,6 +228,78 @@ exports.GuildEditOptions = {
         levelingTrackingEnabled: true,
         levelMultiplier: () => 0.1
     }
+};
+
+/**
+ * The user edit method options.
+ * @typedef {object} UserEditOptions
+ *
+ * @property {ChannelOptions[]} [channels] The channels stored in the user.
+ * @property {Number} [totalVoiceTime] The total voice time of the user.
+ * @property {Number} [xp] The xp of the user.
+ * @property {Number} [level] The level of the user.
+ */
+exports.UserEditOptions = {
+    channels: [],
+    totalVoiceTime: 0,
+    xp: 0,
+    level: 0
+};
+
+/**
+ * The channel edit method options.
+ * @typedef {object} ChannelEditOptions
+ *
+ * @property {Number} [timeInChannel] The voice time spent in the channel.
+*/
+exports.ChannelEditOptions = {
+    timeInChannel: 0
+};
+
+/**
+ * The config edit method options.
+ * @typedef {object} ConfigEditOptions
+ *
+ * @property {Boolean} [trackBots=false] Whether bots are able to be tracked.
+ * @property {Boolean} [trackAllChannels=true] Whether to track all of the guild's voice channels.
+ * @property {ExemptChannelsFunction} [exemptChannels] Function to filter channels. If true is returned, the channel won't be tracked.
+ * @property {Snowflake[]} [channelIds=[]] The channels to track (if trackAllChannels is true this will be ignored).
+ * @property {PermissionResolvable[]} [exemptPermissions=[]] Members with any of these permissions won't be tracked.
+ * @property {ExemptMembersFunction} [exemptMembers] Function to filter members. If true is returned, the member won't be tracked.
+ * @property {Boolean} [trackMute=true] Whether members who are muted should be tracked.
+ * @property {Boolean} [trackDeaf=true] Whether members who are deafened should be tracked.
+ * @property {Number} [minUserCountToParticipate="0"] The min amount of users to be in a channel to be tracked (0 is equal to no limit).
+ * @property {Number} [maxUserCountToParticipate="0"] The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
+ * @property {Number} [minXpToParticipate="0"] The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+ * @property {Number} [minLevelToParticipate="0"] The min amount of level the user needs to have to be tracked (0 is equal to no limit).
+ * @property {Number} [maxXpToParticipate="0"] The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+ * @property {Number} [maxLevelToParticipate="0"] The max amount of level the user can be tracked uptil (0 is equal to no limit).
+ * @property {XPAmountToAddFunction} [xpAmountToAdd] Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
+ * @property {VoiceTimeToAddFunction} [voiceTimeToAdd] Function for voiceTimeToAdd. If not provided, the default value is used (1000).
+ * @property {Boolean} [voiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
+ * @property {Boolean} [levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
+ * @property {LevelMultiplierFunction} [levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
+*/
+exports.ConfigEditOptions = {
+    trackBots: false,
+    trackAllChannels: true,
+    exemptChannels: () => false,
+    channelIds: [],
+    exemptPermissions: [],
+    exemptMembers: () => false,
+    trackMute: true,
+    trackDeaf: true,
+    minUserCountToParticipate: 0,
+    maxUserCountToParticipate: 0,
+    minXpToParticipate: 0,
+    minLevelToParticipate: 0,
+    maxXpToParticipate: 0,
+    maxLevelToParticipate: 0,
+    xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
+    voiceTimeToAdd: () => 1000,
+    voiceTimeTrackingEnabled: true,
+    levelingTrackingEnabled: true,
+    levelMultiplier: () => 0.1
 };
 
 /**

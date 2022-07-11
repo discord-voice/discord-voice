@@ -1,58 +1,162 @@
 const { EventEmitter } = require('node:events');
 const serialize = require('serialize-javascript');
+const { ConfigOptions, ConfigEditOptions, ExemptMembersFunction, ExemptChannelsFunction, XPAmountToAddFunction, VoiceTimeToAddFunction, LevelMultiplierFunction } = require('./Constants');
 
+/**
+ * Represents a Config
+ */
 class Config extends EventEmitter {
+    /**
+     * @param {VoiceManager} manager The Voice Manager
+     * @param {ConfigOptions} options The config options
+     */
     constructor(manager, guild, options) {
         super();
+        /**
+         * The voice time manager.
+         * @type {VoiceManager}
+         */
         this.manager = manager;
+        /**
+         * The Discord client.
+         * @type {Client}
+         */
+        this.client = manager.client;
+        /**
+         * The guild class.
+         * @type {Guild}
+         */
         this.guild = guild;
+        /**
+         * The guild id.
+         * @type {Snowflake}
+         */
         this.guildId = guild.guildId;
+        /**
+         * The config options.
+         * @type {ConfigOptions}
+         */
         this.options = options;
     }
+
+    /**
+     * Whether bots are able to be tracked.
+     * @type {Boolean}
+     */
     get trackBots() {
         return this.options.trackBots || this.manager.options.default.trackBots;
     }
+
+    /**
+     * Whether to track all of the guild's voice channels.
+     * @type {Boolean}
+     */
     get trackMute() {
         return this.options.trackMute || this.manager.options.default.trackMute;
     }
+
+    /**
+     * Whether members who are deafened should be tracked.
+     * @type {Boolean}
+     */
     get trackDeaf() {
         return this.options.trackDeaf || this.manager.options.default.trackDeaf;
     }
+
+    /**
+     * Whether all of the guild's voice channels should be tracked.
+     * @type {Boolean}
+     */
     get trackAllChannels() {
         return this.options.trackAllChannels || this.manager.options.default.trackAllChannels;
     }
+
+    /**
+     * The channels to track (if trackAllChannels is true this will be ignored).
+     * @type {Snowflake[]}
+     */
     get channelIds() {
         return this.options.channelIds || this.manager.options.default.channelIds;
     }
+
+    /**
+     * The min amount of users to be in a channel to be tracked (0 is equal to no limit).
+     * @type {Number}
+     */
     get minUserCountToParticipate() {
         return this.options.minUserCountToParticipate || this.manager.options.default.minUserCountToParticipate;
     }
+
+    /**
+     * The max amount of users to be in a channel to be tracked uptil (0 is equal to no limit).
+     * @type {Number}
+     */
     get maxUserCountToParticipate() {
         return this.options.maxUserCountToParticipate || this.manager.options.default.maxUserCountToParticipate;
     }
+
+    /**
+     * The min amount of xp the user needs to have to be tracked (0 is equal to no limit).
+     * @type {Number}
+     */
     get minXpToParticipate() {
         return this.options.minXpToParticipate || this.manager.options.default.minXpToParticipate;
     }
+
+    /**
+     * The min amount of level the user needs to have to be tracked (0 is equal to no limit).
+     * @type {Number}
+     */
     get minLevelToParticipate() {
         return this.options.minLevelToParticipate || this.manager.options.default.minLevelToParticipate;
     }
+
+    /**
+     * The max amount of xp the user can be tracked uptil (0 is equal to no limit).
+     * @type {Number}
+     */
     get maxXpToParticipate() {
         return this.options.maxXpToParticipate || this.manager.options.default.maxXpToParticipate;
     }
+
+    /**
+     * The max amount of level the user can be tracked uptil (0 is equal to no limit).
+     * @type {Number}
+     */
     get maxLevelToParticipate() {
         return this.options.maxLevelToParticipate || this.manager.options.default.maxLevelToParticipate;
     }
+
+    /**
+     * Whether the voice time tracking module is enabled.
+     * @type {Boolean}
+     */
     get voiceTimeTrackingEnabled() {
         return this.options.voiceTimeTrackingEnabled || this.manager.options.default.voiceTimeTrackingEnabled;
     }
+
+    /**
+     * Whether the leveling tracking module is enabled.
+     * @type {Boolean}
+     */
     get levelingTrackingEnabled() {
         return this.options.levelingTrackingEnabled || this.manager.options.default.levelingTrackingEnabled;
     }
+
+    /**
+     * Members with any of these permissions won't be tracked.
+     * @type {PermissionResolvable[]}
+     */
     get exemptPermissions() {
         return Array.isArray(this.options.exemptPermissions) && this.options.exemptPermissions.length
             ? this.options.exemptPermissions
             : this.manager.options.default.exemptPermissions;
     }
+
+    /**
+     * The raw config data object.
+     * @type {ConfigData}
+     */
     get data() {
         const baseData = {
             guildId: this.guildId,
@@ -93,6 +197,11 @@ class Config extends EventEmitter {
         };
         return baseData;
     }
+
+    /**
+     * The exemptMembers function
+     * @type {ExemptMembersFunction}
+     */
     get exemptMembersFunction() {
         return this.options.exemptMembers
             ? typeof this.options.exemptMembers === 'string' &&
@@ -101,6 +210,11 @@ class Config extends EventEmitter {
                 : eval(this.options.exemptMembers)
             : null;
     }
+
+    /**
+     * The exemptChannels function
+     * @type {ExemptChannelsFunction}
+     */
     get exemptChannelsFunction() {
         return this.options.exemptChannels
             ? typeof this.options.exemptChannels === 'string' &&
@@ -109,6 +223,11 @@ class Config extends EventEmitter {
                 : eval(this.options.exemptChannels)
             : null;
     }
+
+    /**
+     * The xpAmountToAdd function
+     * @type {XPAmountToAddFunction}
+     */
     get xpAmountToAddFunction() {
         return this.options.xpAmountToAdd
             ? typeof this.options.xpAmountToAdd === 'string' &&
@@ -117,6 +236,11 @@ class Config extends EventEmitter {
                 : eval(this.options.xpAmountToAdd)
             : null;
     }
+
+    /**
+     * The voiceTimeToAdd function
+     * @type {VoiceTimeToAddFunction}
+     */
     get voiceTimeToAddFunction() {
         return this.options.voiceTimeToAdd
             ? typeof this.options.voiceTimeToAdd === 'string' &&
@@ -125,6 +249,11 @@ class Config extends EventEmitter {
                 : eval(this.options.voiceTimeToAdd)
             : null;
     }
+
+    /**
+     * The levelMultiplier function
+     * @type {LevelMultiplierFunction}
+     */
     get levelMultiplierFunction() {
         return this.options.levelMultiplier
             ? typeof this.options.levelMultiplier === 'string' &&
@@ -133,6 +262,12 @@ class Config extends EventEmitter {
                 : eval(this.options.levelMultiplier)
             : null;
     }
+
+    /**
+     * Function to filter members. If true is returned, the member won't be tracked.
+     * @property {GuildMember} member The member to check
+     * @returns {Promise<Boolean>}
+     */
     async exemptMembers(member) {
         if (typeof this.exemptMembersFunction === 'function') {
             try {
@@ -152,6 +287,11 @@ class Config extends EventEmitter {
         }
         return false;
     }
+
+    /**
+     * Function to filter channels. If true is returned, the channel won't be tracked.
+     * @returns {Promise<Number>}
+     */
     async exemptChannels(channel) {
         if (typeof this.exemptChannelsFunction === 'function') {
             try {
@@ -171,6 +311,11 @@ class Config extends EventEmitter {
         }
         return false;
     }
+
+    /**
+     * Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
+     * @returns {Promise<Number>}
+     */
     async xpAmountToAdd() {
         if (typeof this.xpAmountToAddFunction === 'function') {
             try {
@@ -189,6 +334,11 @@ class Config extends EventEmitter {
         }
         return Math.floor(Math.random() * 10) + 1;
     }
+
+    /**
+     * Function for voiceTimeToAdd. If not provided, the default value is used (1000).
+     * @returns {Promise<Number>}
+     */
     async voiceTimeToAdd() {
         if (typeof this.voiceTimeToAddFunction === 'function') {
             try {
@@ -207,6 +357,11 @@ class Config extends EventEmitter {
         }
         return 1000;
     }
+
+    /**
+     * Function for levelMultiplier. If not provided, the default value is used (0.1).
+     * @returns {Promise<Number>}
+     */
     async levelMultiplier() {
         if (typeof this.levelMultiplierFunction === 'function') {
             try {
@@ -225,6 +380,12 @@ class Config extends EventEmitter {
         }
         return 0.1;
     }
+
+    /**
+     * Function to check if the member is exempt from xp tracking.
+     * @param {Member} member The member to check
+     * @returns {Promise<Boolean>}
+     */
     async checkMember(member) {
         const exemptMember = await this.exemptMembers(member, this);
         if (exemptMember) return false;
@@ -241,6 +402,12 @@ class Config extends EventEmitter {
             return false;
         return true;
     }
+
+    /**
+     * Function to check if the channel is exempt from xp tracking.
+     * @param {VoiceChannel} channel The channel to check
+     * @returns {Promise<Boolean>}
+     */
     async checkChannel(channel) {
         const exemptChannel = await this.exemptChannels(channel, this);
         if (exemptChannel) return false;
@@ -249,6 +416,12 @@ class Config extends EventEmitter {
         if (this.maxUserCountToParticipate > 0 && channel.members.size > this.maxUserCountToParticipate) return false;
         return true;
     }
+
+    /**
+     * Edits the config
+     * @param {ConfigEditOptions} options The edit options
+     * @returns {Promise<Config>}
+     */
     edit(options = {}) {
         return new Promise(async (resolve, reject) => {
             if (typeof options.trackBots === 'boolean') this.options.trackBots = options.trackBots;

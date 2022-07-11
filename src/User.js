@@ -1,27 +1,85 @@
 const { EventEmitter } = require('node:events');
 const Discord = require('discord.js');
 const Channel = require('./Channel.js');
+const { UserOptions, UserEditOptions } = require('./Constants.js');
+const Guild = require('./Guild.js');
+const VoiceManager = require('./Manager.js');
 
+/**
+ * Represents a User.
+ */
 class User extends EventEmitter {
+    /**
+    *
+    * @param {VoiceManager} manager The voice time manager.
+    * @param {Guild} guild The guild class.
+    * @param {Snowflake} userId The user id.
+    * @param {UserOptions} options The user options.
+    */
     constructor(manager, guild, userId, options) {
         super();
+        /**
+         * The voice time manager.
+         * @type {VoiceManager}
+         */
         this.manager = manager;
+        /**
+         * The Discord client.
+         * @type {Client}
+         */
         this.client = manager.client;
-        this.userId = userId;
+        /**
+         * The guild class.
+         * @type {Guild}
+         */
         this.guild = guild;
+        /**
+         * The guild id.
+         * @type {Snowflake}
+         */
         this.guildId = guild.guildId;
+        /**
+         * The user id.
+         * @type {Snowflake}
+         */
+        this.userId = userId;
+        /**
+         * The channels stored in this user.
+         * @type {Collection<Snowflake, Channel>}
+         */
         this.channels = new Discord.Collection(
             options.channels.map((channel) => [
                 channel.channelId,
                 new Channel(manager, guild, channel.channelId, channel)
             ])
         );
+        /**
+         * The total voice time.
+         * @type {number}
+         */
         this.totalVoiceTime = options.totalVoiceTime;
+        /**
+         * The xp.
+         * @type {number}
+         */
         this.xp = options.xp;
+        /**
+         * The level.
+         * @type {number}
+         */
         this.level = options.level;
+        /**
+         * The options for this user.
+         * @type {UserOptions}
+         */
         this.options = options;
     }
 
+    /**
+     * The raw user data object.
+     * @type {UserData}
+     * @readonly
+     */
     get data() {
         const baseData = {
             guildId: this.guildId,
@@ -34,6 +92,12 @@ class User extends EventEmitter {
         return baseData;
     }
 
+    /**
+     * Edits the user.
+     *
+     * @param {UserEditOptions} options The options to edit.
+     * @returns {Promise<User>}
+     */
     edit(options = {}) {
         return new Promise(async (resolve, reject) => {
             if (typeof options !== 'object') return reject(new Error('Options must be an object.'));
