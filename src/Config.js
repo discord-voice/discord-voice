@@ -136,7 +136,7 @@ class Config extends EventEmitter {
     async exemptMembers(member) {
         if (typeof this.exemptMembersFunction === 'function') {
             try {
-                const result = await this.exemptMembersFunction(member);
+                const result = await this.exemptMembersFunction(member, this);
                 return result;
             } catch (err) {
                 console.error(
@@ -148,14 +148,14 @@ class Config extends EventEmitter {
             }
         }
         if (typeof this.manager.options.default.exemptMembers === 'function') {
-            return await this.manager.options.default.exemptMembers(member);
+            return await this.manager.options.default.exemptMembers(member, this);
         }
         return false;
     }
     async exemptChannels(channel) {
         if (typeof this.exemptChannelsFunction === 'function') {
             try {
-                const result = await this.exemptChannelsFunction(channel);
+                const result = await this.exemptChannelsFunction(channel, this);
                 return result;
             } catch (err) {
                 console.error(
@@ -167,14 +167,14 @@ class Config extends EventEmitter {
             }
         }
         if (typeof this.manager.options.default.exemptChannels === 'function') {
-            return await this.manager.options.default.exemptChannels(channel);
+            return await this.manager.options.default.exemptChannels(channel, this);
         }
         return false;
     }
     async xpAmountToAdd() {
         if (typeof this.xpAmountToAddFunction === 'function') {
             try {
-                const result = await this.xpAmountToAddFunction();
+                const result = await this.xpAmountToAddFunction(this);
                 if (typeof result === 'number') return result;
                 else return Math.floor(Math.random() * 10) + 1;
             } catch (err) {
@@ -183,7 +183,7 @@ class Config extends EventEmitter {
             }
         }
         if (typeof this.manager.options.default.xpAmountToAdd === 'function') {
-            const result = await this.manager.options.default.xpAmountToAdd();
+            const result = await this.manager.options.default.xpAmountToAdd(this);
             if (typeof result === 'number') return result;
             else return Math.floor(Math.random() * 10) + 1;
         }
@@ -192,7 +192,7 @@ class Config extends EventEmitter {
     async voiceTimeToAdd() {
         if (typeof this.voiceTimeToAddFunction === 'function') {
             try {
-                const result = await this.voiceTimeToAddFunction();
+                const result = await this.voiceTimeToAddFunction(this);
                 if (typeof result === 'number') return result;
                 else return 1000;
             } catch (err) {
@@ -201,7 +201,7 @@ class Config extends EventEmitter {
             }
         }
         if (typeof this.manager.options.default.voiceTimeToAdd === 'function') {
-            const result = await this.manager.options.default.voiceTimeToAdd();
+            const result = await this.manager.options.default.voiceTimeToAdd(this);
             if (typeof result === 'number') return result;
             else return 1000;
         }
@@ -210,7 +210,7 @@ class Config extends EventEmitter {
     async levelMultiplier() {
         if (typeof this.levelMultiplierFunction === 'function') {
             try {
-                const result = await this.levelMultiplierFunction();
+                const result = await this.levelMultiplierFunction(this);
                 if (typeof result === 'number') return result;
                 else return 0.1;
             } catch (err) {
@@ -219,14 +219,14 @@ class Config extends EventEmitter {
             }
         }
         if (typeof this.manager.options.default.levelMultiplier === 'function') {
-            const result = await this.manager.options.default.levelMultiplier();
+            const result = await this.manager.options.default.levelMultiplier(this);
             if (typeof result === 'number') return result;
             else return 0.1;
         }
         return 0.1;
     }
     async checkMember(member) {
-        const exemptMember = await this.exemptMembers(member);
+        const exemptMember = await this.exemptMembers(member, this);
         if (exemptMember) return false;
         const hasPermission = this.exemptPermissions.some((permission) => member.permissions.has(permission));
         if (hasPermission) return false;
@@ -242,7 +242,7 @@ class Config extends EventEmitter {
         return true;
     }
     async checkChannel(channel) {
-        const exemptChannel = await this.exemptChannels(channel);
+        const exemptChannel = await this.exemptChannels(channel, this);
         if (exemptChannel) return false;
         if (!this.trackAllChannels && !this.channelIds.includes(channel.id)) return false;
         if (this.minUserCountToParticipate > 0 && channel.members.size < this.minUserCountToParticipate) return false;
