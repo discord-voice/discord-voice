@@ -8,24 +8,98 @@ const User = require("./User.js");
 const Channel = require("./Channel.js");
 const Discord = require("discord.js");
 const {
-    defaultVoiceManagerOptions,
-    defaultGuildOptions,
-    defaultUserOptions,
-    defaultChannelOptions,
-    DEFAULT_CHECK_INTERVAL
+    DEFAULT_CHECK_INTERVAL,
+    VoiceManagerOptions,
+    GuildOptions,
+    UserOptions,
+    ChannelOptions,
+    GuildEditOptions,
+    GuildData,
 } = require('./Constants.js');
+
+/**
+ * Voice Manager
+ * @example
+ * // Requires Manager from discord-voice
+ * const { VoiceManager } = require("discord-voice");
+ * // Create a new instance of the manager class
+ * const manager = new VoiceManager(client, {
+ * storage: './guilds.json',
+ * deleteMissingGuilds: false,
+ * default: {
+ *   trackBots: false,
+ *   trackAllChannels: true,
+ * },
+ * });
+ * // We now have a voiceManager property to access the manager everywhere!
+ * client.voiceManager = manager;
+ */
 class VoiceManager extends EventEmitter {
+    /**
+     * @param {Discord.Client} client The Discord Client
+     * @param {VoiceManagerOptions} options The manager options
+     */
     constructor(client, options, init = true) {
         super();
         if (!client?.options) throw new Error(`Client is a required option. (val=${client})`);
+        /**
+         * The Discord Client
+         * @type {Discord.Client}
+         */
         this.client = client;
+        /**
+         * Whether the manager is ready
+         * @type {Boolean}
+         */
         this.ready = false;
-
+        /**
+         * The guilds managed by this manager
+         * @type {Discord.Collection<String, Guild>}
+         */
         this.guilds = new Discord.Collection();
-        this.options = deepmerge(defaultVoiceManagerOptions, options);
+        /**
+         * The manager options
+         * @type {VoiceManagerOptions}
+         */
+        this.options = deepmerge(VoiceManagerOptions, options);
+
         if (init) this._init();
     }
 
+    /**
+     * Creates a new guild in the database
+     *
+     * @param {Discord.Snowflake} guildId The id of the guild to create
+     * @param {GuildOptions} options The options for the guild
+     *
+     * @returns {Promise<Guild>}
+     *
+     * @example
+     * client.voiceManager.create(interaction.guild.id, {
+     *  users: [], // Array of user data's
+     *  config: {
+     *      trackBots: false, // If the user is a bot it will not be tracked.
+     *      trackAllChannels: true, // All of the channels in the guild will be tracked.
+     *      exemptChannels: () => false, // The user will not be tracked in these channels. (This is a function).
+     *      channelIds: [], // The channel ids to track. (If trackAllChannels is true, this is ignored)
+     *      exemptPermissions: [], // The user permissions to not track.
+     *      exemptMembers: () => false, // The user will not be tracked. (This is a function).
+     *      trackMute: true, // It will track users if they are muted aswell.
+     *      trackDeaf: true, // It will track users if they are deafen aswell.
+     *      minUserCountToParticipate: 0, // The min amount of users to be in a channel to be tracked.
+     *      maxUserCountToParticipate: 0, // The max amount of users to be in a channel to be tracked.
+     *      minXpToParticipate: 0, // The min amount of xp needed to be tracked.
+     *      minLevelToParticipate: 0, // The min level needed to be tracked.
+     *      maxXpToParticipate: 0, // The max amount of xp needed to be tracked.
+     *      maxLevelToParticipate: 0, // The max level needed to be tracked.
+     *      xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1, // The amount of xp to add to the user (This is a function).
+     *      voiceTimeToAdd: () => 1000, // The amount of time in ms to add to the user (This is a function).
+     *      voiceTimeTrackingEnabled: true, // Whether the voiceTimeTracking module is enabled.
+     *      levelingTrackingEnabled: true, // Whether the levelingTracking module is enabled.
+     *      levelMultiplier: () => 0.1, // This will set level multiplier to 0.1 (This is a function).
+     *  }
+     * });
+     */
     create(guildId, options) {
         return new Promise(async (resolve, reject) => {
             if (!this.ready) {
@@ -41,7 +115,7 @@ class VoiceManager extends EventEmitter {
             }
 
             options =
-                options && typeof options === 'object' ? deepmerge(defaultUserOptions, options) : defaultUserOptions;
+                options && typeof options === 'object' ? deepmerge(UserOptions, options) : UserOptions;
 
             const guild = new Guild(this, guildId, options);
 
@@ -51,6 +125,19 @@ class VoiceManager extends EventEmitter {
         });
     }
 
+    /**
+     * Edits the given guild's data. 
+     * @param {Discord.Snowflake} guildId The id of the guild to edit
+     * @param {GuildEditOptions} [options={}] The edit options
+     * @returns {Promise<Guild>} The edited guild
+     *
+     * @example
+     * client.voiceManager.edit(interaction.guild.id, {
+     *  config: {
+     *      trackAllChannels: false, // All of the channels in the guild will not be tracked.
+     *  }    
+     * });
+     */
     edit(guildId, options) {
         return new Promise(async (resolve, reject) => {
             const guild = this.guilds.get(guildId);
@@ -62,6 +149,11 @@ class VoiceManager extends EventEmitter {
         });
     }
 
+    /**
+     * Deletes the given guild's data.
+     * @param {Discord.Snowflake} guildId The id of the guild to delete
+     * @returns {Promise<Guild>}
+     */
     delete(guildId) {
         return new Promise(async (resolve, reject) => {
             const guild = this.guilds.get(guildId);
@@ -76,6 +168,12 @@ class VoiceManager extends EventEmitter {
         });
     }
 
+     /**
+     * Saves the guild in the database
+     * @ignore
+     * @param {Discord.Snowflake} guildId The id of the guild to save
+     * @param {GuildData} guildData The guild data to save
+     */
     async saveGuild(guildId, guildData) {
         await writeFile(
             this.options.storage,
@@ -88,6 +186,12 @@ class VoiceManager extends EventEmitter {
         return;
     }
 
+    /**
+     * Edits the guild in the database
+     * @ignore
+     * @param {Discord.Snowflake} guildId The id of the guild to edit
+     * @param {GuildData} guildData The guild data to save
+     */
     async editGuild(guildId, options) {
         await writeFile(
             this.options.storage,
@@ -100,6 +204,12 @@ class VoiceManager extends EventEmitter {
         return;
     }
 
+    /**
+     * Deletes the guild from the database
+     * @ignore
+     * @param {Discord.Snowflake} guildId The id of the guild to delete
+     * @param {GuildData} guildData The guild data to save
+    */
     async deleteGuild(guildId) {
         await writeFile(
             this.options.storage,
@@ -112,6 +222,11 @@ class VoiceManager extends EventEmitter {
         return true;
     }
 
+    /**
+     * Gets the guilds from the storage file, or create it
+     * @ignore
+     * @returns {Promise<GuildData[]>}
+     */
     async getAllGuilds() {
         const storageExists = await access(this.options.storage)
             .then(() => true)
@@ -143,6 +258,10 @@ class VoiceManager extends EventEmitter {
         }
     }
 
+    /**
+     * Inits the manager
+     * @ignore
+     */
     async _init() {
         let rawGuilds = await this.getAllGuilds();
 
@@ -166,7 +285,7 @@ class VoiceManager extends EventEmitter {
         this.ready = true;
 
         if (this.options.deleteMissingGuilds) {
-            const missingGuilds = this.guilds.filter((guild) => !this.client.guilds.cache.has(guild.guildId));
+            const missingGuilds = this.guilds.filter((guild) => !(this.client.guilds.cache.get(guild.guildId) ?? await this.client.guilds.fetch(guild.guildId)));
             for (const guild of missingGuilds) {
                 this.guilds.delete(guild.guildId);
                 await this.deleteGuild(guild.guildId);
@@ -176,6 +295,10 @@ class VoiceManager extends EventEmitter {
         this.client.on('voiceStateUpdate', (oldState, newState) => this._handleVoiceStateUpdate(oldState, newState));
     }
 
+    /**
+     * Checks each guild and updates it if needed
+     * @ignore
+     */
     _checkGuild() {
         if (this.guilds.size <= 0) return;
         this.guilds.forEach((guild) => {
@@ -188,7 +311,7 @@ class VoiceManager extends EventEmitter {
             membersInVoiceChannel.forEach(async (member) => {
                 let user = guild.users.get(member.id);
                 if (!user) {
-                    user = new User(this, guild, member.id, defaultUserOptions);
+                    user = new User(this, guild, member.id, UserOptions);
                     guild.users.set(member.id, user);
                 }
 
@@ -199,11 +322,11 @@ class VoiceManager extends EventEmitter {
 
                 if (user.channels.has(voiceChannel.id)) {
                     const channel = user.channels.get(voiceChannel.id);
-                    channel.timeInChannel += await guild.config.voiceTimeToAdd();
+                    channel.timeInChannel += (await guild.config.voiceTimeToAdd() + 5000);
                 } else {
-                    const channel = new Channel(this, guild, voiceChannel.id, defaultChannelOptions);
+                    const channel = new Channel(this, guild, voiceChannel.id, ChannelOptions);
                     user.channels.set(voiceChannel.id, channel);
-                    channel.timeInChannel += await guild.config.voiceTimeToAdd();
+                    channel.timeInChannel += (await guild.config.voiceTimeToAdd() + 5000);
                 }
 
                 user.totalVoiceTime = user.channels.reduce((acc, cur) => acc + cur.timeInChannel, 0);
@@ -218,11 +341,17 @@ class VoiceManager extends EventEmitter {
             });
         });
     }
+
+    /**
+     * @ignore
+     * @param {Discord.VoiceState} oldState
+     * @param {Discord.VoiceState} newState
+     */
     async _handleVoiceStateUpdate(oldState, newState) {
         if (newState.channel) {
             let guild = this.guilds.get(newState.guild.id);
             if (!guild) {
-                guild = new Guild(this, newState.guild.id, defaultGuildOptions);
+                guild = new Guild(this, newState.guild.id, GuildOptions);
                 this.guilds.set(newState.guild.id, guild);
                 await this.saveGuild(newState.guild.id, guild.data);
             }

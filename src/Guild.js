@@ -2,6 +2,10 @@ const { EventEmitter } = require('node:events');
 const Discord = require('discord.js');
 const User = require('./User.js');
 const Config = require('./Config.js');
+const { deepmerge } = require('deepmerge-ts/*');
+const {
+    ConfigOptions
+} = require('./Constants.js');
 
 class Guild extends EventEmitter {
     constructor(manager, guildId, options) {
@@ -33,8 +37,7 @@ class Guild extends EventEmitter {
         return new Promise(async (resolve, reject) => {
             if (typeof options !== 'object') return reject(new Error('Options must be an object.'));
             if (!Array.isArrayoptions(options.users)) return reject(new Error('Options.users must be an array.'));
-            if (!(options.config instanceof Config))
-                return reject(new Error('Options.config must be an instance of Config.'));
+            if (typeof options.config !== 'object') return reject(new Error('Options.config must be an object.'));
 
             // Set the channel array into our channels collection
             this.users.clear();
@@ -45,7 +48,8 @@ class Guild extends EventEmitter {
             });
 
             // Set the config
-            this.config = options.config;
+            options.config = deepmerge(ConfigOptions, options.config);
+            this.config = new Config(this.manager, this, options.config);
 
             await this.manager.editGuild(this.guildId, this.data);
 
