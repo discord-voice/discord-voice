@@ -7,14 +7,14 @@ const { ConfigOptions, ConfigEditOptions, ExemptMembersFunction, ExemptChannelsF
  */
 class Config extends EventEmitter {
     /**
-     * @param {VoiceManager} manager The Voice Manager
+     * @param {VoiceTimeManager} manager The Voice Manager
      * @param {ConfigOptions} options The config options
      */
     constructor(manager, guild, options) {
         super();
         /**
          * The voice time manager.
-         * @type {VoiceManager}
+         * @type {VoiceTimeManager}
          */
         this.manager = manager;
         /**

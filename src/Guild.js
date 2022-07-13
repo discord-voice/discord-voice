@@ -4,7 +4,7 @@ const User = require('./User.js');
 const Config = require('./Config.js');
 const { deepmerge } = require('deepmerge-ts');
 const { GuildOptions, ConfigOptions, GuildData, GuildEditOptions } = require('./Constants.js');
-const VoiceManager = require('./Manager.js');
+const VoiceTimeManager = require('./Manager.js');
 
 /**
  * Represents a Guild.
@@ -12,7 +12,7 @@ const VoiceManager = require('./Manager.js');
 class Guild extends EventEmitter {
     /**
      *
-     * @param {VoiceManager} manager The voice time manager.
+     * @param {VoiceTimeManager} manager The voice time manager.
      * @param {Snowflake} guildId The guild id.
      * @param {GuildOptions} options The guild options.
      */
@@ -20,7 +20,7 @@ class Guild extends EventEmitter {
         super();
         /**
          * The voice time manager.
-         * @type {VoiceManager}
+         * @type {VoiceTimeManager}
          */
         this.manager = manager;
         /**
@@ -46,6 +46,11 @@ class Guild extends EventEmitter {
          */
         this.config = new Config(manager, this, options.config);
         /**
+         * The extra data for this guild.
+         * @type {any}
+         */
+        this.extraData = options.extraData;
+        /**
          * The options for this guild.
          * @type {GuildOptions}
          */
@@ -70,7 +75,8 @@ class Guild extends EventEmitter {
         const baseData = {
             guildId: this.guildId,
             users: this.users.map((u) => u.data),
-            config: this.config.data
+            config: this.config.data,
+            extraData: this.extraData
         };
         return baseData;
     }
@@ -87,17 +93,26 @@ class Guild extends EventEmitter {
             if (!Array.isArrayoptions(options.users)) return reject(new Error('Options.users must be an array.'));
             if (typeof options.config !== 'object') return reject(new Error('Options.config must be an object.'));
 
+            if(options.users) {
             // Set the channel array into our channels collection
-            this.users.clear();
-            options.users.forEach((user) => {
-                if (user instanceof User) {
-                    this.users.set(user.id, user);
-                }
-            });
+                this.users.clear();
+                options.users.forEach((user) => {
+                    if (user instanceof User) {
+                        this.users.set(user.id, user);
+                    }
+                });
+            }
 
+            if(options.config) {
             // Set the config
-            options.config = deepmerge(ConfigOptions, options.config);
-            this.config = new Config(this.manager, this, options.config);
+                options.config = deepmerge(ConfigOptions, options.config);
+                this.config = new Config(this.manager, this, options.config);
+            }
+
+            if(options.extraData) {
+            // Set the extra data
+                this.extraData = options.extraData;
+            }
 
             await this.manager.editGuild(this.guildId, this.data);
 

@@ -1,6 +1,6 @@
 const { EventEmitter } = require('node:events');
 const { ChannelOptions, ChannelData, ChannelEditOptions } = require('./Constants');
-const VoiceManager = require('./Manager');
+const VoiceTimeManager = require('./Manager');
 
 /**
  * Represents a Channel.
@@ -8,7 +8,7 @@ const VoiceManager = require('./Manager');
 class Channel extends EventEmitter {
     /**
      *
-     * @param {VoiceManager} manager The voice time manager.
+     * @param {VoiceTimeManager} manager The voice time manager.
      * @param {Guild} guild The guild class.
      * @param {Snowflake} channelId The channel id.
      * @param {ChannelOptions} options The channel options.
@@ -17,7 +17,7 @@ class Channel extends EventEmitter {
         super();
         /**
          * The voice time manager.
-         * @type {VoiceManager}
+         * @type {VoiceTimeManager}
          */
         this.manager = manager;
         /**
@@ -78,6 +78,10 @@ class Channel extends EventEmitter {
             if (typeof options.timeInChannel !== 'number')
                 return reject(new Error('Options.timeInChannel must be a number.'));
 
+            if(options.timeInChannel) {
+                this.timeInChannel = options.timeInChannel;
+            }
+            
             await this.manager.editGuild(this.guild.guildId, this.guild.data);
 
             resolve(this);

@@ -81,6 +81,7 @@ exports.VoiceManagerOptions = {
  * @property {Boolean} [config.voiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
  * @property {Boolean} [config.levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
  * @property {LevelMultiplierFunction} [config.levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
+ * @property {any} [extraData] The extra data for this guild.
  */
 exports.GuildOptions = {
     users: [],
@@ -104,7 +105,8 @@ exports.GuildOptions = {
         voiceTimeTrackingEnabled: true,
         levelingTrackingEnabled: true,
         levelMultiplier: () => 0.1
-    }
+    },
+    extraData: {}
 };
 
 /**
@@ -204,6 +206,7 @@ exports.ConfigOptions = {
  * @property {Boolean} [config.voiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
  * @property {Boolean} [config.levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
  * @property {LevelMultiplierFunction} [config.levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
+ * @property {any} [extraData] The extra data for this guild.
  */
 exports.GuildEditOptions = {
     users: [],
@@ -227,7 +230,8 @@ exports.GuildEditOptions = {
         voiceTimeTrackingEnabled: true,
         levelingTrackingEnabled: true,
         levelMultiplier: () => 0.1
-    }
+    },
+    extraData: {}
 };
 
 /**
@@ -309,6 +313,7 @@ exports.ConfigEditOptions = {
  * @property {Snowflake} guildId The guild's id.
  * @property {UserData[]} users The users stored in the guild.
  * @property {ConfigData} config The config of the guild.
+ * @property {any} [extraData] The extra data for this guild.
  */
 exports.GuildData = {};
 

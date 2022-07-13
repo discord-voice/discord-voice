@@ -21,9 +21,9 @@ const {
  * Voice Manager
  * @example
  * // Requires Manager from discord-voice
- * const { VoiceManager } = require("discord-voice");
+ * const { VoiceTimeManager } = require("discord-voice");
  * // Create a new instance of the manager class
- * const manager = new VoiceManager(client, {
+ * const manager = new VoiceTimeManager(client, {
  * storage: './guilds.json',
  * deleteMissingGuilds: false,
  * default: {
@@ -31,10 +31,10 @@ const {
  *   trackAllChannels: true,
  * },
  * });
- * // We now have a voiceManager property to access the manager everywhere!
- * client.voiceManager = manager;
+ * // We now have a voiceTimeManager property to access the manager everywhere!
+ * client.voiceTimeManager = manager;
  */
-class VoiceManager extends EventEmitter {
+class VoiceTimeManager extends EventEmitter {
     /**
      * @param {Client} client The Discord Client
      * @param {VoiceManagerOptions} options The manager options
@@ -75,7 +75,7 @@ class VoiceManager extends EventEmitter {
      * @returns {Promise<Guild>}
      *
      * @example
-     * client.voiceManager.create(interaction.guild.id, {
+     * client.voiceTimeManager.create(interaction.guild.id, {
      *  users: [], // Array of user data's
      *  config: {
      *      trackBots: false, // If the user is a bot it will not be tracked.
@@ -131,7 +131,7 @@ class VoiceManager extends EventEmitter {
      * @returns {Promise<Guild>}
      *
      * @example
-     * client.voiceManager.edit(interaction.guild.id, {
+     * client.voiceTimeManager.edit(interaction.guild.id, {
      *  config: {
      *      trackAllChannels: false, // All of the channels in the guild will not be tracked.
      *  }
@@ -361,4 +361,4 @@ class VoiceManager extends EventEmitter {
     }
 }
 
-module.exports = VoiceManager;
+module.exports = VoiceTimeManager;

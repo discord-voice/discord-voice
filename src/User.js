@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const Channel = require('./Channel.js');
 const { UserOptions, UserEditOptions } = require('./Constants.js');
 const Guild = require('./Guild.js');
-const VoiceManager = require('./Manager.js');
+const VoiceTimeManager = require('./Manager.js');
 
 /**
  * Represents a User.
@@ -11,7 +11,7 @@ const VoiceManager = require('./Manager.js');
 class User extends EventEmitter {
     /**
     *
-    * @param {VoiceManager} manager The voice time manager.
+    * @param {VoiceTimeManager} manager The voice time manager.
     * @param {Guild} guild The guild class.
     * @param {Snowflake} userId The user id.
     * @param {UserOptions} options The user options.
@@ -20,7 +20,7 @@ class User extends EventEmitter {
         super();
         /**
          * The voice time manager.
-         * @type {VoiceManager}
+         * @type {VoiceTimeManager}
          */
         this.manager = manager;
         /**
@@ -107,20 +107,28 @@ class User extends EventEmitter {
             if (typeof options.xp !== 'number') return reject(new Error('Options.xp must be a number.'));
             if (typeof options.level !== 'number') return reject(new Error('Options.level must be a number.'));
 
-            // Set the channel array into our channels collection
-            this.channels.clear();
-            options.channels.forEach((channel) => {
-                this.channels.set(channel.id, channel);
-            });
+            if (options.channels) {
+                // Set the channel array into our channels collection
+                this.channels.clear();
+                options.channels.forEach((channel) => {
+                    this.channels.set(channel.id, channel);
+                });
+            }
 
-            // Set the total voice time
-            this.totalVoiceTime = options.totalVoiceTime;
+            if (options.totalVoiceTime) {
+                // Set the total voice time
+                this.totalVoiceTime = options.totalVoiceTime;
+            }
 
-            // Set the xp
-            this.xp = options.xp;
+            if (options.xp) {
+                // Set the xp
+                this.xp = options.xp;
+            }
 
-            // Set the level
-            this.level = options.level;
+            if (options.level) {
+                // Set the level
+                this.level = options.level;
+            }
 
             await this.manager.editGuild(this.guild.guildId, this.guild.data);
 
