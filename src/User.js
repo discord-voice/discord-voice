@@ -10,12 +10,12 @@ const VoiceTimeManager = require('./Manager.js');
  */
 class User extends EventEmitter {
     /**
-    *
-    * @param {VoiceTimeManager} manager The voice time manager.
-    * @param {Guild} guild The guild class.
-    * @param {Snowflake} userId The user id.
-    * @param {UserOptions} options The user options.
-    */
+     *
+     * @param {VoiceTimeManager} manager The voice time manager.
+     * @param {Guild} guild The guild class.
+     * @param {Snowflake} userId The user id.
+     * @param {UserOptions} options The user options.
+     */
     constructor(manager, guild, userId, options) {
         super();
         /**
@@ -136,4 +136,5 @@ class User extends EventEmitter {
         });
     }
 }
+
 module.exports = User;

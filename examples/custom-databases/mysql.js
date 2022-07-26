@@ -22,7 +22,8 @@ sql.connect((err) => {
 });
 
 // Create guilds table
-sql.query(`
+sql.query(
+    `
 	CREATE TABLE IF NOT EXISTS \`guilds\`
 	(
 		\`id\` INT(1) NOT NULL AUTO_INCREMENT,
@@ -30,10 +31,12 @@ sql.query(`
 		\`data\` JSON NOT NULL,
 		PRIMARY KEY (\`id\`)
 	);
-`, (err) => {
-    if (err) console.error(err);
-    console.log('[SQL] Created table `guilds`');
-});
+`,
+    (err) => {
+        if (err) console.error(err);
+        console.log('[SQL] Created table `guilds`');
+    }
+);
 
 const { VoiceTimeManager } = require('discord-voice');
 const VoiceTimeManagerWithOwnDatabase = class extends VoiceTimeManager {

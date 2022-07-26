@@ -317,6 +317,8 @@ class VoiceTimeManager extends EventEmitter {
                     guild.users.set(member.id, user);
                 }
 
+                const oldUser = new User(this, guild, member.id, user.data);
+
                 const voiceChannel = member.voice.channel;
 
                 if (!((await guild.config.checkMember(member)) && (await guild.config.checkChannel(voiceChannel))))
@@ -332,10 +334,14 @@ class VoiceTimeManager extends EventEmitter {
                 }
 
                 user.totalVoiceTime = user.channels.reduce((acc, cur) => acc + cur.timeInChannel, 0);
+                this.emit('userVoiceTimeAdd', user, oldUser);
 
                 if (guild.config.levelingTrackingEnabled) {
                     user.xp += await guild.config.xpAmountToAdd();
+                    this.emit('userXpAdd', user, oldUser);
+
                     user.level = Math.floor((await guild.config.levelMultiplier()) * Math.sqrt(user.xp));
+                    if (user.level > oldUser.level) this.emit('userLevelUp', user, oldUser);
                 }
 
                 this.editGuild(guild.guildId, guild.data);
@@ -360,5 +366,44 @@ class VoiceTimeManager extends EventEmitter {
         }
     }
 }
+
+/**
+ * Emitted when voice time is added to the user.
+ * @event VoiceTimeManager#userVoiceTimeAdd
+ * @param {User} newUser The user after the update
+ * @param {User} oldUser The user before the update
+ *
+ * @example
+ * // This can be used to add features such as audit logs to see when the user gained voice time.
+ * VoiceTimeManager.on('userVoiceTimeAdd', (newUser, oldUser) => {
+ *    console.log(`${oldUser.user.tag} gained voice time!`);
+ * });
+ */
+
+/**
+ * Emitted when xp is added to the user.
+ * @event VoiceTimeManager#userXpAdd
+ * @param {User} newUser The user after the update
+ * @param {User} oldUser The user before the update
+ *
+ * @example
+ * // This can be used to add features such as audit logs to see when the user gained xp.
+ * VoiceTimeManager.on('userXpAdd', (newUser, oldUser) => {
+ *   console.log(`${oldUser.user.tag} gained xp!`);
+ * });
+ */
+
+/**
+ * Emitted when the user levels up.
+ * @event VoiceTimeManager#userLevelUp
+ * @param {User} newUser The user after the update
+ * @param {User} oldUser The user before the update
+ *
+ * @example
+ * // This can be used to add features such as achievement messages when the user levels up.
+ * VoiceTimeManager.on('userLevelUp', (newUser, oldUser) => {
+ *  console.log(`${oldUser.user.tag} leveled up to ${newUser.level}!`);
+ * });
+ */
 
 module.exports = VoiceTimeManager;

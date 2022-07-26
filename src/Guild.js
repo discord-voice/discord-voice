@@ -93,8 +93,8 @@ class Guild extends EventEmitter {
             if (!Array.isArrayoptions(options.users)) return reject(new Error('Options.users must be an array.'));
             if (typeof options.config !== 'object') return reject(new Error('Options.config must be an object.'));
 
-            if(options.users) {
-            // Set the channel array into our channels collection
+            if (options.users) {
+                // Set the channel array into our channels collection
                 this.users.clear();
                 options.users.forEach((user) => {
                     if (user instanceof User) {
@@ -103,14 +103,14 @@ class Guild extends EventEmitter {
                 });
             }
 
-            if(options.config) {
-            // Set the config
+            if (options.config) {
+                // Set the config
                 options.config = deepmerge(ConfigOptions, options.config);
                 this.config = new Config(this.manager, this, options.config);
             }
 
-            if(options.extraData) {
-            // Set the extra data
+            if (options.extraData) {
+                // Set the extra data
                 this.extraData = options.extraData;
             }
 
@@ -120,4 +120,5 @@ class Guild extends EventEmitter {
         });
     }
 }
+
 module.exports = Guild;

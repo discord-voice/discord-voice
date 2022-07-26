@@ -255,7 +255,7 @@ exports.UserEditOptions = {
  * @typedef {object} ChannelEditOptions
  *
  * @property {Number} [timeInChannel] The voice time spent in the channel.
-*/
+ */
 exports.ChannelEditOptions = {
     timeInChannel: 0
 };
@@ -283,7 +283,7 @@ exports.ChannelEditOptions = {
  * @property {Boolean} [voiceTimeTrackingEnabled=true] Whether to enable the voice time tracking module.
  * @property {Boolean} [levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
  * @property {LevelMultiplierFunction} [levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
-*/
+ */
 exports.ConfigEditOptions = {
     trackBots: false,
     trackAllChannels: true,

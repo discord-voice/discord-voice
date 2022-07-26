@@ -1,6 +1,14 @@
 const { EventEmitter } = require('node:events');
 const serialize = require('serialize-javascript');
-const { ConfigOptions, ConfigEditOptions, ExemptMembersFunction, ExemptChannelsFunction, XPAmountToAddFunction, VoiceTimeToAddFunction, LevelMultiplierFunction } = require('./Constants');
+const {
+    ConfigOptions,
+    ConfigEditOptions,
+    ExemptMembersFunction,
+    ExemptChannelsFunction,
+    XPAmountToAddFunction,
+    VoiceTimeToAddFunction,
+    LevelMultiplierFunction
+} = require('./Constants');
 
 /**
  * Represents a Config
@@ -462,4 +470,5 @@ class Config extends EventEmitter {
         });
     }
 }
+
 module.exports = Config;

@@ -12,7 +12,7 @@ class Channel extends EventEmitter {
      * @param {Guild} guild The guild class.
      * @param {Snowflake} channelId The channel id.
      * @param {ChannelOptions} options The channel options.
-    */
+     */
     constructor(manager, guild, channelId, options) {
         super();
         /**
@@ -48,7 +48,7 @@ class Channel extends EventEmitter {
         /**
          * The options for this channel.
          * @type {ChannelOptions}
-        */
+         */
         this.options = options;
     }
 
@@ -78,14 +78,15 @@ class Channel extends EventEmitter {
             if (typeof options.timeInChannel !== 'number')
                 return reject(new Error('Options.timeInChannel must be a number.'));
 
-            if(options.timeInChannel) {
+            if (options.timeInChannel) {
                 this.timeInChannel = options.timeInChannel;
             }
-            
+
             await this.manager.editGuild(this.guild.guildId, this.guild.data);
 
             resolve(this);
         });
     }
 }
+
 module.exports = Channel;
