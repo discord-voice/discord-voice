@@ -270,10 +270,11 @@ export class User<ExtraData = any> extends EventEmitter {
     readonly data: UserData;
 
     public edit(options: UserEditOptions): Promise<User>;
+    public delete(): Promise<User>;
 }
 
 export class Channel extends EventEmitter {
-    constructor(manager: VoiceTimeManager, guild: Guild, channelId: Snowflake, options: ChannelOptions);
+    constructor(manager: VoiceTimeManager, guild: Guild, user: User, channelId: Snowflake, options: ChannelOptions);
     
     public manager: VoiceTimeManager;
     public client: Client;
@@ -286,6 +287,7 @@ export class Channel extends EventEmitter {
     readonly data: ChannelData;
 
     public edit(options: ChannelEditOptions): Promise<Channel>;
+    public delete(): Promise<Channel>;
 }
 
 export class Config<ExtraData = any> extends EventEmitter {

@@ -328,7 +328,7 @@ class VoiceTimeManager extends EventEmitter {
                     const channel = user.channels.get(voiceChannel.id);
                     channel.timeInChannel += (await guild.config.voiceTimeToAdd()) + 5000;
                 } else {
-                    const channel = new Channel(this, guild, voiceChannel.id, ChannelOptions);
+                    const channel = new Channel(this, guild, user, voiceChannel.id, ChannelOptions);
                     user.channels.set(voiceChannel.id, channel);
                     channel.timeInChannel += (await guild.config.voiceTimeToAdd()) + 5000;
                 }

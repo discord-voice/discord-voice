@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client({
-    intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_VOICE_STATES]
+    intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildVoiceStates]
 });
 
 // Load quickmongo
@@ -15,7 +15,7 @@ const VoiceTimeManagerWithOwnDatabase = class extends VoiceTimeManager {
     // This function is called when the manager needs to get all guilds which are stored in the database.
     async getAllGuilds() {
         // Get all guilds from the database
-        return await guildDB.all();
+        return (await guildDB.all()).map((element) => element.data);
     }
 
     // This function is called when a guild needs to be saved in the database.

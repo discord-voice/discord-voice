@@ -50,7 +50,7 @@ class User extends EventEmitter {
         this.channels = new Discord.Collection(
             options.channels.map((channel) => [
                 channel.channelId,
-                new Channel(manager, guild, channel.channelId, channel)
+                new Channel(manager, guild, this, channel.channelId, channel)
             ])
         );
         /**
@@ -129,6 +129,21 @@ class User extends EventEmitter {
                 // Set the level
                 this.level = options.level;
             }
+
+            await this.manager.editGuild(this.guild.guildId, this.guild.data);
+
+            resolve(this);
+        });
+    }
+
+    /**
+     * Deletes the user.
+     *
+     * @returns {Promise<User>}
+     */
+    delete() {
+        return new Promise(async (resolve, reject) => {
+            this.guild.users.delete(this.userId);
 
             await this.manager.editGuild(this.guild.guildId, this.guild.data);
 

@@ -1,6 +1,8 @@
 const { EventEmitter } = require('node:events');
 const { ChannelOptions, ChannelData, ChannelEditOptions } = require('./Constants');
 const VoiceTimeManager = require('./Manager');
+const User = require('./User.js');
+const Guild = require('./Guild.js');
 
 /**
  * Represents a Channel.
@@ -10,10 +12,11 @@ class Channel extends EventEmitter {
      *
      * @param {VoiceTimeManager} manager The voice time manager.
      * @param {Guild} guild The guild class.
+     * @param {User} user The user class.
      * @param {Snowflake} channelId The channel id.
      * @param {ChannelOptions} options The channel options.
      */
-    constructor(manager, guild, channelId, options) {
+    constructor(manager, guild, user, channelId, options) {
         super();
         /**
          * The voice time manager.
@@ -30,6 +33,11 @@ class Channel extends EventEmitter {
          * @type {Guild}
          */
         this.guild = guild;
+        /**
+         * The user class.
+         * @type {User}
+         */
+        this.user = user;
         /**
          * The guild id.
          * @type {Snowflake}
@@ -84,6 +92,21 @@ class Channel extends EventEmitter {
 
             await this.manager.editGuild(this.guild.guildId, this.guild.data);
 
+            resolve(this);
+        });
+    }
+
+    /**
+     * Deletes the channel.
+     *
+     * @returns {Promise<Channel>}
+     */
+    delete() {
+        return new Promise(async (resolve, reject) => {
+            this.user.channels.delete(this.channelId);
+
+            await this.manager.editGuild(this.guild.guildId, this.guild.data);
+            
             resolve(this);
         });
     }

@@ -27,14 +27,14 @@ npm install --save discord-voice
 You can use this example bot on GitHub: [VoiceTimeTrackerBot](https://github.com/discord-voice/VoiceTimeTrackerBot)
 
 # Launch of the module
-Required Discord Intents: `GUILDS` and `GUILD_VOICE_STATES`.  
+Required Discord Intents: `Guilds` and `GuildVoiceStates`.  
 
 ```js
 const Discord = require('discord.js');
 const client = new Discord.Client({
     intents: [
-        Discord.Intents.FLAGS.GUILDS,
-        Discord.Intents.FLAGS.GUILD_VOICE_STATES
+        Discord.IntentsBitField.Flags.Guilds,
+        Discord.IntentsBitField.Flags.GuildVoiceStates
     ]
 });
 
@@ -69,10 +69,10 @@ You can pass an options object to customize the giveaways. Here is a list of the
 
 ```js
 client.on('interactionCreate', (interaction) => {
-    if (interaction.isCommand() && interaction.commandName === 'create-guild') {
-        const guildId = interaction.getArgument('guildId');
-        const users = interaction.getArgument('users');
-        const options = interaction.getArgument('options');
+    if (interaction.isChatInputCommand() && interaction.commandName === 'create-guild') {
+        const guildId = interaction.options.getString('guildId');
+        const users = interaction.options.getString('users');
+        const options = interaction.options.getString('options');
 
         client.voiceTimeManager.create(guildId, users, options).then(() => {
                 interaction.reply('Success! Guild Created!');
@@ -90,8 +90,8 @@ You can pass an options object to customize the guild's data. For a list of them
 
 ```js
 client.on('interactionCreate', (interaction) => {
-    if (interaction.isCommand() && interaction.commandName === 'edit') {
-        const guildId = interaction.getArgument('guildId');
+    if (interaction.isChatInputCommand() && interaction.commandName === 'edit') {
+        const guildId = interaction.options.getString('guildId');
 
         client.voiceTimeManager.edit(guildId, {
             trackBots: true,
@@ -112,8 +112,8 @@ You need to pass an options object to edit the guild's data. For a list of them 
 
 ```js
 client.on('interactionCreate', (interaction) => {
-    if (interaction.isCommand() && interaction.commandName === 'delete') {
-        const guildId = interaction.getArgument('guildId');
+    if (interaction.isChatInputCommand() && interaction.commandName === 'delete') {
+        const guildId = interaction.options.getString('guildId');
 
         client.voiceTimeManager.delete(guildId).then(() => {
                 interaction.reply('Success! Guild deleted!');

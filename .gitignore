@@ -2,5 +2,4 @@ package-lock.json
 test.js
 node_modules/
 .github/
-docs/
 guilds.json
