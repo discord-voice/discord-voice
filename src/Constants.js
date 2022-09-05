@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const Config = require('./Config');
 
 exports.DEFAULT_CHECK_INTERVAL = 5000;
 

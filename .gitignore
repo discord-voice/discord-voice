@@ -3,3 +3,4 @@ test.js
 node_modules/
 .github/
 guilds.json
+docs/docs.json
