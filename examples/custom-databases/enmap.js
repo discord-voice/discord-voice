@@ -19,7 +19,7 @@ const VoiceTimeManagerWithOwnDatabase = class extends VoiceTimeManager {
 
     // This function is called when a guild needs to be saved in the database.
     async saveGuild(guildId, guildData) {
-        // Add the new guild to the database
+        // Add the new guild data to the database
         guildDB.set(guildId, guildData);
         // Don't forget to return something!
         return true;

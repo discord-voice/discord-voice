@@ -1,6 +1,6 @@
 const { EventEmitter } = require('node:events');
-const { ChannelOptions, ChannelData, ChannelEditOptions } = require('./Constants');
-const VoiceTimeManager = require('./Manager');
+const { ChannelOptions, ChannelData, ChannelEditOptions } = require('./Constants.js');
+const VoiceTimeManager = require('./Manager.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js');
 

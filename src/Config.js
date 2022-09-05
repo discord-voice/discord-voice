@@ -2,13 +2,8 @@ const { EventEmitter } = require('node:events');
 const serialize = require('serialize-javascript');
 const {
     ConfigOptions,
-    ConfigEditOptions,
-    ExemptMembersFunction,
-    ExemptChannelsFunction,
-    XPAmountToAddFunction,
-    VoiceTimeToAddFunction,
-    LevelMultiplierFunction
-} = require('./Constants');
+    ConfigEditOptions
+} = require('./Constants.js');
 
 /**
  * Represents a Config
@@ -208,7 +203,7 @@ class Config extends EventEmitter {
 
     /**
      * The exemptMembers function
-     * @type {ExemptMembersFunction}
+     * @type {?Function}
      */
     get exemptMembersFunction() {
         return this.options.exemptMembers
@@ -221,7 +216,7 @@ class Config extends EventEmitter {
 
     /**
      * The exemptChannels function
-     * @type {ExemptChannelsFunction}
+     * @type {?Function}
      */
     get exemptChannelsFunction() {
         return this.options.exemptChannels
@@ -234,7 +229,7 @@ class Config extends EventEmitter {
 
     /**
      * The xpAmountToAdd function
-     * @type {XPAmountToAddFunction}
+     * @type {?Function}
      */
     get xpAmountToAddFunction() {
         return this.options.xpAmountToAdd
@@ -247,7 +242,7 @@ class Config extends EventEmitter {
 
     /**
      * The voiceTimeToAdd function
-     * @type {VoiceTimeToAddFunction}
+     * @type {?Function}
      */
     get voiceTimeToAddFunction() {
         return this.options.voiceTimeToAdd
@@ -260,7 +255,7 @@ class Config extends EventEmitter {
 
     /**
      * The levelMultiplier function
-     * @type {LevelMultiplierFunction}
+     * @type {?Function}
      */
     get levelMultiplierFunction() {
         return this.options.levelMultiplier
