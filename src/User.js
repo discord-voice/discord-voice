@@ -1,7 +1,7 @@
 const { EventEmitter } = require('node:events');
 const Discord = require('discord.js');
 const Channel = require('./Channel.js');
-const { UserOptions, UserEditOptions } = require('./Constants.js');
+const { UserData, UserEditOptions } = require('./Constants.js');
 const Guild = require('./Guild.js');
 const VoiceTimeManager = require('./Manager.js');
 
@@ -13,10 +13,9 @@ class User extends EventEmitter {
      *
      * @param {VoiceTimeManager} manager The voice time manager.
      * @param {Guild} guild The guild class.
-     * @param {Snowflake} userId The user id.
-     * @param {UserOptions} options The user options.
+     * @param {UserData} options The user data.
      */
-    constructor(manager, guild, userId, options) {
+    constructor(manager, guild, options) {
         super();
         /**
          * The voice time manager.
@@ -37,12 +36,12 @@ class User extends EventEmitter {
          * The guild id.
          * @type {Snowflake}
          */
-        this.guildId = guild.guildId;
+        this.guildId = options.guildId;
         /**
          * The user id.
          * @type {Snowflake}
          */
-        this.userId = userId;
+        this.userId = options.userId;
         /**
          * The channels stored in this user.
          * @type {Collection<Snowflake, Channel>}
@@ -50,7 +49,7 @@ class User extends EventEmitter {
         this.channels = new Discord.Collection(
             options.channels.map((channel) => [
                 channel.channelId,
-                new Channel(manager, guild, this, channel.channelId, channel)
+                new Channel(manager, guild, this, channel)
             ])
         );
         /**
@@ -69,8 +68,8 @@ class User extends EventEmitter {
          */
         this.level = options.level;
         /**
-         * The options for this user.
-         * @type {UserOptions}
+         * The user data.
+         * @type {UserData}
          */
         this.options = options;
     }

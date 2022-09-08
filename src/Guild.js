@@ -2,8 +2,7 @@ const { EventEmitter } = require('node:events');
 const Discord = require('discord.js');
 const User = require('./User.js');
 const Config = require('./Config.js');
-const { deepmerge } = require('deepmerge-ts');
-const { GuildOptions, ConfigOptions, GuildData, GuildEditOptions } = require('./Constants.js');
+const { GuildData, GuildEditOptions } = require('./Constants.js');
 const VoiceTimeManager = require('./Manager.js');
 
 /**
@@ -13,10 +12,9 @@ class Guild extends EventEmitter {
     /**
      *
      * @param {VoiceTimeManager} manager The voice time manager.
-     * @param {Snowflake} guildId The guild id.
-     * @param {GuildOptions} options The guild options.
+     * @param {GuildData} options The guild data.
      */
-    constructor(manager, guildId, options) {
+    constructor(manager, options) {
         super();
         /**
          * The voice time manager.
@@ -32,13 +30,13 @@ class Guild extends EventEmitter {
          * The guild id.
          * @type {Snowflake}
          */
-        this.guildId = guildId;
+        this.guildId = options.guildId;
         /**
          * The users stored in this guild.
          * @type {Collection<Snowflake, User>}
          */
         this.users = new Discord.Collection(
-            options.users.map((user) => [user.userId, new User(manager, this, user.userId, user)])
+            options.users.map((user) => [user.userId, new User(manager, this, user)])
         );
         /**
          * The config for this guild.
@@ -51,8 +49,8 @@ class Guild extends EventEmitter {
          */
         this.extraData = options.extraData;
         /**
-         * The options for this guild.
-         * @type {GuildOptions}
+         * The guild data.
+         * @type {GuildData}
          */
         this.options = options;
     }
@@ -104,8 +102,6 @@ class Guild extends EventEmitter {
             }
 
             if (options.config) {
-                // Set the config
-                options.config = deepmerge(ConfigOptions, options.config);
                 this.config = new Config(this.manager, this, options.config);
             }
 

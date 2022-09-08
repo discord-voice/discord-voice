@@ -1,5 +1,5 @@
 const { EventEmitter } = require('node:events');
-const { ChannelOptions, ChannelData, ChannelEditOptions } = require('./Constants.js');
+const { ChannelData, ChannelEditOptions } = require('./Constants.js');
 const VoiceTimeManager = require('./Manager.js');
 const User = require('./User.js');
 const Guild = require('./Guild.js');
@@ -13,10 +13,9 @@ class Channel extends EventEmitter {
      * @param {VoiceTimeManager} manager The voice time manager.
      * @param {Guild} guild The guild class.
      * @param {User} user The user class.
-     * @param {Snowflake} channelId The channel id.
-     * @param {ChannelOptions} options The channel options.
+     * @param {ChannelData} options The channel data.
      */
-    constructor(manager, guild, user, channelId, options) {
+    constructor(manager, guild, user, options) {
         super();
         /**
          * The voice time manager.
@@ -42,20 +41,20 @@ class Channel extends EventEmitter {
          * The guild id.
          * @type {Snowflake}
          */
-        this.guildId = guild.guildId;
+        this.guildId = options.guildId;
         /**
          * The channel id.
          * @type {Snowflake}
          */
-        this.channelId = channelId;
+        this.channelId = options.channelId;
         /**
          * The time spent in this channel.
          * @type {number}
          */
         this.timeInChannel = options.timeInChannel;
         /**
-         * The options for this channel.
-         * @type {ChannelOptions}
+         * The channel data.
+         * @type {ChannelData}
          */
         this.options = options;
     }

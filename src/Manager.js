@@ -10,11 +10,10 @@ const Discord = require('discord.js');
 const {
     DEFAULT_CHECK_INTERVAL,
     VoiceManagerOptions,
-    GuildOptions,
-    UserOptions,
-    ChannelOptions,
+    GuildCreateOptions,
     GuildEditOptions,
-    GuildData
+    GuildData,
+    DefaultConfigOptions
 } = require('./Constants.js');
 
 /**
@@ -38,6 +37,7 @@ class VoiceTimeManager extends EventEmitter {
     /**
      * @param {Client} client The Discord Client
      * @param {VoiceManagerOptions} options The manager options
+     * @param {boolean} [init=true] If the manager should start automatically. If set to "false", for example to create a delay, the manager can be started manually with "manager._init()".
      */
     constructor(client, options, init = true) {
         super();
@@ -70,7 +70,7 @@ class VoiceTimeManager extends EventEmitter {
      * Creates a new guild in the database
      *
      * @param {Snowflake} guildId The id of the guild to create
-     * @param {GuildOptions} options The options for the guild
+     * @param {GuildCreateOptions} options The options for the guild creation
      *
      * @returns {Promise<Guild>}
      *
@@ -114,9 +114,15 @@ class VoiceTimeManager extends EventEmitter {
                 return resolve(this.guilds.get(guildId));
             }
 
-            options = options && typeof options === 'object' ? deepmerge(UserOptions, options) : UserOptions;
+            if (options?.users && !Array.isArray(options.users)) {
+                return reject(`options.users is not an array. (val=${options.users})`);
+            }
 
-            const guild = new Guild(this, guildId, options);
+            if (options?.config && typeof options.config !== 'object') {
+                return reject(`options.config is not an object. (val=${options.config})`);
+            }
+
+            const guild = new Guild(this, options);
 
             this.guilds.set(guildId, guild);
 
@@ -275,7 +281,7 @@ class VoiceTimeManager extends EventEmitter {
             );
         }
 
-        rawGuilds.forEach((guild) => this.guilds.set(guild.guildId, new Guild(this, guild.guildId, guild)));
+        rawGuilds.forEach((guild) => this.guilds.set(guild.guildId, new Guild(this, guild)));
 
         setInterval(() => {
             if (this.client.readyAt) this._checkGuild.call(this);
@@ -313,11 +319,18 @@ class VoiceTimeManager extends EventEmitter {
             membersInVoiceChannel.forEach(async (member) => {
                 let user = guild.users.get(member.id);
                 if (!user) {
-                    user = new User(this, guild, member.id, UserOptions);
+                    user = new User(this, guild, {
+                        userId: member.id,
+                        guildId: guild.guildId,
+                        channels: [],
+                        totalVoiceTime: 0,
+                        xp: 0,
+                        level: 0
+                    });
                     guild.users.set(member.id, user);
                 }
 
-                const oldUser = new User(this, guild, member.id, user.data);
+                const oldUser = new User(this, guild, user.data);
 
                 const voiceChannel = member.voice.channel;
 
@@ -328,9 +341,12 @@ class VoiceTimeManager extends EventEmitter {
                     const channel = user.channels.get(voiceChannel.id);
                     channel.timeInChannel += (await guild.config.voiceTimeToAdd()) + 5000;
                 } else {
-                    const channel = new Channel(this, guild, user, voiceChannel.id, ChannelOptions);
+                    const channel = new Channel(this, guild, user, {
+                        guildId: guild.guildId,
+                        channelId: voiceChannel.id,
+                        timeInChannel: (await guild.config.voiceTimeToAdd()) + 5000
+                    });
                     user.channels.set(voiceChannel.id, channel);
-                    channel.timeInChannel += (await guild.config.voiceTimeToAdd()) + 5000;
                 }
 
                 user.totalVoiceTime = user.channels.reduce((acc, cur) => acc + cur.timeInChannel, 0);
@@ -359,7 +375,15 @@ class VoiceTimeManager extends EventEmitter {
         if (newState.channel) {
             let guild = this.guilds.get(newState.guild.id);
             if (!guild) {
-                guild = new Guild(this, newState.guild.id, GuildOptions);
+                guild = new Guild(this, {
+                    guildId: newState.guild.id,
+                    users: [],
+                    config: {
+                        guildId: newState.guild.id,
+                        ...DefaultConfigOptions
+                    },
+                    extraData: {}
+                });
                 this.guilds.set(newState.guild.id, guild);
                 await this.saveGuild(newState.guild.id, guild.data);
             }

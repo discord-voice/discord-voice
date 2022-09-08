@@ -1,7 +1,8 @@
+const { Guild } = require('discord.js');
 const { EventEmitter } = require('node:events');
 const serialize = require('serialize-javascript');
 const {
-    ConfigOptions,
+    ConfigData,
     ConfigEditOptions
 } = require('./Constants.js');
 
@@ -11,7 +12,8 @@ const {
 class Config extends EventEmitter {
     /**
      * @param {VoiceTimeManager} manager The Voice Manager
-     * @param {ConfigOptions} options The config options
+     * @param {Guild} guild The guild class
+     * @param {ConfigData} options The config data
      */
     constructor(manager, guild, options) {
         super();
@@ -36,8 +38,8 @@ class Config extends EventEmitter {
          */
         this.guildId = guild.guildId;
         /**
-         * The config options.
-         * @type {ConfigOptions}
+         * The config data.
+         * @type {ConfigData}
          */
         this.options = options;
     }

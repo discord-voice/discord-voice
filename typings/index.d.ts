@@ -39,7 +39,7 @@ export interface VoiceTimeManagerOptions<ExtraData> {
     };
 }
 
-export interface GuildOptions<ExtraData = any> {
+export interface GuildCreateOptions<ExtraData = any> {
     users: UserData[];
     config: {
         trackBots?: boolean;
@@ -62,39 +62,6 @@ export interface GuildOptions<ExtraData = any> {
         levelingTrackingEnabled?: boolean;
         levelMultiplier?: (guild: Guild<ExtraData>) => Awaitable<number>;
     };
-}
-
-export interface UserOptions {
-    channels: ChannelData[];
-    totalVoiceTime: number;
-    xp: number;
-    level: number;
-}
-
-export interface ChannelOptions {
-    timeInChannel: number;
-}
-
-export interface ConfigOptions<ExtraData> {
-    trackBots?: boolean;
-        trackAllChannels?: boolean;
-        exemptChannels?: (channel: GuildChannel, guild: Guild<ExtraData>) => Awaitable<boolean>;
-        channelIds?: Snowflake[];
-        exemptPermissions?: PermissionResolvable[];
-        exemptMembers?: (member: GuildMember, guild: Guild<ExtraData>) => Awaitable<boolean>;
-        trackMute?: boolean;
-        trackDeaf?: boolean;
-        minUserCountToParticipate?: number;
-        maxUserCountToParticipate?: number;
-        minXpToParticipate?: number;
-        minLevelToParticipate?: number;
-        maxXpToParticipate?: number;
-        maxLevelToParticipate?: number;
-        xpAmountToAdd?: (guild: Guild<ExtraData>) => Awaitable<number>;
-        voiceTimeToAdd?: (guild: Guild<ExtraData>) => Awaitable<number>;
-        voiceTimeTrackingEnabled?: boolean;
-        levelingTrackingEnabled?: boolean;
-        levelMultiplier?: (guild: Guild<ExtraData>) => Awaitable<number>;
 }
 
 export interface GuildEditOptions<ExtraData = any> {
@@ -199,6 +166,28 @@ export interface ConfigData<ExtraData> {
     levelMultiplier: (guild: Guild<ExtraData>) => Awaitable<number>;
 }
 
+export interface DefaultConfigOptions<ExtraData>  {
+    trackBots?: boolean;
+    trackAllChannels?: boolean;
+    exemptChannels?: (channel: GuildChannel, guild: Guild<ExtraData>) => Awaitable<boolean>;
+    channelIds?: Snowflake[];
+    exemptPermissions?: PermissionResolvable[];
+    exemptMembers?: (member: GuildMember, guild: Guild<ExtraData>) => Awaitable<boolean>;
+    trackMute?: boolean;
+    trackDeaf?: boolean;
+    minUserCountToParticipate?: number;
+    maxUserCountToParticipate?: number;
+    minXpToParticipate?: number;
+    minLevelToParticipate?: number;
+    maxXpToParticipate?: number;
+    maxLevelToParticipate?: number;
+    xpAmountToAdd?: (guild: Guild<ExtraData>) => Awaitable<number>;
+    voiceTimeToAdd?: (guild: Guild<ExtraData>) => Awaitable<number>;
+    voiceTimeTrackingEnabled?: boolean;
+    levelingTrackingEnabled?: boolean;
+    levelMultiplier?: (guild: Guild<ExtraData>) => Awaitable<number>;
+}
+
 export interface VoiceTimeManagerEvents<ExtraData = any> {
     userXpAdd: [User, User];
     userLevelUp: [User, User];
@@ -213,7 +202,7 @@ export class VoiceTimeManager<ExtraData = any> extends EventEmitter {
     public guilds: Collection<Snowflake, Guild<ExtraData>>;
     public options: VoiceTimeManagerOptions<ExtraData>;
 
-    public create(guildId: Snowflake, options?: GuildOptions<ExtraData>): Promise<Guild<ExtraData>>;
+    public create(guildId: Snowflake, options?: GuildCreateOptions<ExtraData>): Promise<Guild<ExtraData>>;
     public edit(guildId: Snowflake, options: GuildEditOptions<ExtraData>): Promise<Guild<ExtraData>>;
     public delete(guildId: Snowflake): Promise<Guild<ExtraData>>;
 
@@ -245,7 +234,7 @@ export class Guild<ExtraData = any> extends EventEmitter {
     public users: Collection<Snowflake, User>;
     public config: Config<ExtraData>;
     public extraData: ExtraData;
-    public options: GuildOptions<ExtraData>;
+    public options: GuildData<ExtraData>;
 
     readonly guild: DiscordGuild;
     readonly data: GuildData<ExtraData>;
@@ -254,7 +243,7 @@ export class Guild<ExtraData = any> extends EventEmitter {
 }
 
 export class User<ExtraData = any> extends EventEmitter {
-    constructor(manager: VoiceTimeManager<ExtraData>, guild: Guild, userId: Snowflake, options: UserOptions);
+    constructor(manager: VoiceTimeManager<ExtraData>, guild: Guild, options: UserData);
 
     public manager: VoiceTimeManager<ExtraData>;
     public client: Client;
@@ -265,7 +254,7 @@ export class User<ExtraData = any> extends EventEmitter {
     public totalVoiceTime: number;
     public xp: number;
     public level: number;
-    public options: UserOptions;
+    public options: UserData;
 
     readonly data: UserData;
 
@@ -274,7 +263,7 @@ export class User<ExtraData = any> extends EventEmitter {
 }
 
 export class Channel extends EventEmitter {
-    constructor(manager: VoiceTimeManager, guild: Guild, user: User, channelId: Snowflake, options: ChannelOptions);
+    constructor(manager: VoiceTimeManager, guild: Guild, user: User, options: ChannelData);
     
     public manager: VoiceTimeManager;
     public client: Client;
@@ -282,7 +271,7 @@ export class Channel extends EventEmitter {
     public guildId: Snowflake;
     public channelId: Snowflake;
     public timeInChannel: number;
-    public options: ChannelOptions;
+    public options: ChannelData;
 
     readonly data: ChannelData;
 
@@ -291,13 +280,13 @@ export class Channel extends EventEmitter {
 }
 
 export class Config<ExtraData = any> extends EventEmitter {
-    constructor(manager: VoiceTimeManager, guild: Guild, options: ConfigOptions<ExtraData>);
+    constructor(manager: VoiceTimeManager, guild: Guild, options: ConfigData<ExtraData>);
 
     public manager: VoiceTimeManager;
     public client: Client;
     public guild: Guild;
     public guildId: Snowflake;
-    public options: ConfigOptions<ExtraData>;
+    public options: ConfigData<ExtraData>;
 
     readonly trackBots: boolean;
     readonly trackMute: boolean;
