@@ -100,7 +100,7 @@ class User extends EventEmitter {
     edit(options = {}) {
         return new Promise(async (resolve, reject) => {
             if (typeof options !== 'object') return reject(new Error('Options must be an object.'));
-            if (!Array.isArray(options(options.channels))) return reject(new Error('Options.channels must be an array.'));
+            if (!Array.isArray(options.channels)) return reject(new Error('Options.channels must be an array.'));
             if (typeof options.totalVoiceTime !== 'number')
                 return reject(new Error('Options.totalVoiceTime must be a number.'));
             if (typeof options.xp !== 'number') return reject(new Error('Options.xp must be a number.'));
