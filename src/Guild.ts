@@ -1,20 +1,27 @@
-const { EventEmitter } = require('node:events');
-const Discord = require('discord.js');
-const User = require('./User.js');
-const Config = require('./Config.js');
-const { GuildData, GuildEditOptions } = require('./Constants.js');
-const VoiceTimeManager = require('./Manager.js');
+import { EventEmitter } from 'node:events';
+import * as Discord from 'discord.js';
+import User from './User.js';
+import Config from './Config';
+import { GuildData, GuildEditOptions, UserData } from './Constants';
+import VoiceTimeManager from './Manager';
 
 /**
  * Represents a Guild.
  */
-class Guild extends EventEmitter {
+export default class Guild extends EventEmitter {
+    manager: VoiceTimeManager;
+    client: Discord.Client;
+    guildId: string;
+    users: Discord.Collection<string, User>;
+    config: Config;
+    extraData: any;
+    options: GuildData;
     /**
      *
      * @param {VoiceTimeManager} manager The voice time manager.
      * @param {GuildData} options The guild data.
      */
-    constructor(manager, options) {
+    constructor(manager: VoiceTimeManager, options: GuildData) {
         super();
         /**
          * The voice time manager.
@@ -33,10 +40,10 @@ class Guild extends EventEmitter {
         this.guildId = options.guildId;
         /**
          * The users stored in this guild.
-         * @type {Collection<Snowflake, User>}
+         * @type {Collection<Snowflake, UserD>}
          */
         this.users = new Discord.Collection(
-            options.users.map((user) => [user.userId, new User(manager, this, user)])
+            options.users.map((user: UserData) => [user.userId, new User(manager, this, user)])
         );
         /**
          * The config for this guild.
@@ -85,10 +92,10 @@ class Guild extends EventEmitter {
      * @param {GuildEditOptions} options The options to edit the guild with.
      * @returns {Promise<Guild>}
      */
-    edit(options = {}) {
+    edit(options: GuildEditOptions = {}): Promise<Guild> {
         return new Promise(async (resolve, reject) => {
             if (typeof options !== 'object') return reject(new Error('Options must be an object.'));
-            if (!Array.isArrayoptions(options.users)) return reject(new Error('Options.users must be an array.'));
+            if (!Array.isArray(options.users)) return reject(new Error('Options.users must be an array.'));
             if (typeof options.config !== 'object') return reject(new Error('Options.config must be an object.'));
 
             if (options.users) {
@@ -96,7 +103,7 @@ class Guild extends EventEmitter {
                 this.users.clear();
                 options.users.forEach((user) => {
                     if (user instanceof User) {
-                        this.users.set(user.id, user);
+                        this.users.set(user.userId, user);
                     }
                 });
             }
@@ -116,5 +123,3 @@ class Guild extends EventEmitter {
         });
     }
 }
-
-module.exports = Guild;

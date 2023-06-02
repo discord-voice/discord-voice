@@ -1,21 +1,25 @@
-const { Guild } = require('discord.js');
-const { EventEmitter } = require('node:events');
-const serialize = require('serialize-javascript');
-const {
-    ConfigData,
-    ConfigEditOptions
-} = require('./Constants.js');
+import * as Discord from 'discord.js';
+import { EventEmitter } from 'node:events';
+import serialize from 'serialize-javascript';
+import { ConfigData, ConfigEditOptions } from './Constants';
+import VoiceTimeManager from './Manager';
+import Guild from './Guild';
 
 /**
  * Represents a Config
  */
-class Config extends EventEmitter {
+export default class Config extends EventEmitter {
+    manager: VoiceTimeManager;
+    client: Discord.Client;
+    guild: Guild;
+    guildId: string;
+    options: ConfigData;
     /**
      * @param {VoiceTimeManager} manager The Voice Manager
      * @param {Guild} guild The guild class
      * @param {ConfigData} options The config data
      */
-    constructor(manager, guild, options) {
+    constructor(manager: VoiceTimeManager, guild: Guild, options: ConfigData) {
         super();
         /**
          * The voice time manager.
@@ -210,9 +214,9 @@ class Config extends EventEmitter {
     get exemptMembersFunction() {
         return this.options.exemptMembers
             ? typeof this.options.exemptMembers === 'string' &&
-              this.options.exemptMembers.includes('function anonymous')
+              (this.options.exemptMembers as string).includes('function anonymous')
                 ? eval(`(${this.options.exemptMembers})`)
-                : eval(this.options.exemptMembers)
+                : eval(this.options.exemptMembers as string)
             : null;
     }
 
@@ -223,9 +227,9 @@ class Config extends EventEmitter {
     get exemptChannelsFunction() {
         return this.options.exemptChannels
             ? typeof this.options.exemptChannels === 'string' &&
-              this.options.exemptChannels.includes('function anonymous')
+              (this.options.exemptChannels as string).includes('function anonymous')
                 ? eval(`(${this.options.exemptChannels})`)
-                : eval(this.options.exemptChannels)
+                : eval(this.options.exemptChannels as string)
             : null;
     }
 
@@ -236,9 +240,9 @@ class Config extends EventEmitter {
     get xpAmountToAddFunction() {
         return this.options.xpAmountToAdd
             ? typeof this.options.xpAmountToAdd === 'string' &&
-              this.options.xpAmountToAdd.includes('function anonymous')
+              (this.options.xpAmountToAdd as string).includes('function anonymous')
                 ? eval(`(${this.options.xpAmountToAdd})`)
-                : eval(this.options.xpAmountToAdd)
+                : eval(this.options.xpAmountToAdd as string)
             : null;
     }
 
@@ -249,9 +253,9 @@ class Config extends EventEmitter {
     get voiceTimeToAddFunction() {
         return this.options.voiceTimeToAdd
             ? typeof this.options.voiceTimeToAdd === 'string' &&
-              this.options.voiceTimeToAdd.includes('function anonymous')
+              (this.options.voiceTimeToAdd as string).includes('function anonymous')
                 ? eval(`(${this.options.voiceTimeToAdd})`)
-                : eval(this.options.voiceTimeToAdd)
+                : eval(this.options.voiceTimeToAdd as string)
             : null;
     }
 
@@ -262,9 +266,9 @@ class Config extends EventEmitter {
     get levelMultiplierFunction() {
         return this.options.levelMultiplier
             ? typeof this.options.levelMultiplier === 'string' &&
-              this.options.levelMultiplier.includes('function anonymous')
+              (this.options.levelMultiplier as string).includes('function anonymous')
                 ? eval(`(${this.options.levelMultiplier})`)
-                : eval(this.options.levelMultiplier)
+                : eval(this.options.levelMultiplier as string)
             : null;
     }
 
@@ -273,7 +277,7 @@ class Config extends EventEmitter {
      * @property {GuildMember} member The member to check
      * @returns {Promise<Boolean>}
      */
-    async exemptMembers(member) {
+    async exemptMembers(member: Discord.GuildMember): Promise<boolean> {
         if (typeof this.exemptMembersFunction === 'function') {
             try {
                 const result = await this.exemptMembersFunction(member, this);
@@ -281,7 +285,7 @@ class Config extends EventEmitter {
             } catch (err) {
                 console.error(
                     `User Id: ${member.id}\nGuild Id: ${this.guildId}\nChannel Id: ${
-                        member.voice.channel.id
+                        member.voice.channel?.id
                     }\n${serialize(this.exemptMembersFunction)}\n${err}`
                 );
                 return false;
@@ -295,9 +299,9 @@ class Config extends EventEmitter {
 
     /**
      * Function to filter channels. If true is returned, the channel won't be tracked.
-     * @returns {Promise<Number>}
+     * @returns {Promise<boolean>}
      */
-    async exemptChannels(channel) {
+    async exemptChannels(channel: Discord.GuildChannel): Promise<boolean> {
         if (typeof this.exemptChannelsFunction === 'function') {
             try {
                 const result = await this.exemptChannelsFunction(channel, this);
@@ -321,10 +325,10 @@ class Config extends EventEmitter {
      * Function for xpAmountToAdd. If not provided, the default value is used (Math.floor(Math.random() * 10) + 1).
      * @returns {Promise<Number>}
      */
-    async xpAmountToAdd() {
+    async xpAmountToAdd(member: Discord.GuildMember): Promise<number> {
         if (typeof this.xpAmountToAddFunction === 'function') {
             try {
-                const result = await this.xpAmountToAddFunction(this);
+                const result = await this.xpAmountToAddFunction(member, this);
                 if (typeof result === 'number') return result;
                 else return Math.floor(Math.random() * 10) + 1;
             } catch (err) {
@@ -333,7 +337,7 @@ class Config extends EventEmitter {
             }
         }
         if (typeof this.manager.options.default.xpAmountToAdd === 'function') {
-            const result = await this.manager.options.default.xpAmountToAdd(this);
+            const result = await this.manager.options.default.xpAmountToAdd(member, this);
             if (typeof result === 'number') return result;
             else return Math.floor(Math.random() * 10) + 1;
         }
@@ -344,7 +348,7 @@ class Config extends EventEmitter {
      * Function for voiceTimeToAdd. If not provided, the default value is used (1000).
      * @returns {Promise<Number>}
      */
-    async voiceTimeToAdd() {
+    async voiceTimeToAdd(): Promise<number> {
         if (typeof this.voiceTimeToAddFunction === 'function') {
             try {
                 const result = await this.voiceTimeToAddFunction(this);
@@ -367,7 +371,7 @@ class Config extends EventEmitter {
      * Function for levelMultiplier. If not provided, the default value is used (0.1).
      * @returns {Promise<Number>}
      */
-    async levelMultiplier() {
+    async levelMultiplier(): Promise<number> {
         if (typeof this.levelMultiplierFunction === 'function') {
             try {
                 const result = await this.levelMultiplierFunction(this);
@@ -388,23 +392,27 @@ class Config extends EventEmitter {
 
     /**
      * Function to check if the member is exempt from xp tracking.
-     * @param {Member} member The member to check
+     * @property {GuildMember} member The member to check
      * @returns {Promise<Boolean>}
      */
-    async checkMember(member) {
-        const exemptMember = await this.exemptMembers(member, this);
+    async checkMember(member: Discord.GuildMember): Promise<boolean> {
+        const exemptMember = await this.exemptMembers(member);
         if (exemptMember) return false;
         const hasPermission = this.exemptPermissions.some((permission) => member.permissions.has(permission));
         if (hasPermission) return false;
         if (!this.trackBots && member.user.bot) return false;
         if (!this.trackMute && (member.voice.selfMute || member.voice.serverMute)) return false;
         if (!this.trackDeaf && (member.voice.selfDeaf || member.voice.serverDeaf)) return false;
-        if (this.minXpToParticipate && member.data.data.levelingData.xp < this.minXpToParticipate) return false;
-        if (this.minLevelToParticipate > 0 && member.data.data.levelingData.level < this.minLevelToParticipate)
-            return false;
-        if (this.maxXpToParticipate > 0 && member.data.data.levelingData.xp > this.maxXpToParticipate) return false;
-        if (this.maxLevelToParticipate > 0 && member.data.data.levelingData.level > this.maxLevelToParticipate)
-            return false;
+
+        let user = this.guild.users.get(member.id);
+
+        if (user) {
+            if (this.minXpToParticipate && user.xp < this.minXpToParticipate) return false;
+            if (this.minLevelToParticipate > 0 && user.level < this.minLevelToParticipate) return false;
+            if (this.maxXpToParticipate > 0 && user.xp > this.maxXpToParticipate) return false;
+            if (this.maxLevelToParticipate > 0 && user.level > this.maxLevelToParticipate) return false;
+        }
+
         return true;
     }
 
@@ -413,8 +421,8 @@ class Config extends EventEmitter {
      * @param {VoiceChannel} channel The channel to check
      * @returns {Promise<Boolean>}
      */
-    async checkChannel(channel) {
-        const exemptChannel = await this.exemptChannels(channel, this);
+    async checkChannel(channel: Discord.VoiceBasedChannel): Promise<boolean> {
+        const exemptChannel = await this.exemptChannels(channel);
         if (exemptChannel) return false;
         if (!this.trackAllChannels && !this.channelIds.includes(channel.id)) return false;
         if (this.minUserCountToParticipate > 0 && channel.members.size < this.minUserCountToParticipate) return false;
@@ -427,45 +435,58 @@ class Config extends EventEmitter {
      * @param {ConfigEditOptions} options The edit options
      * @returns {Promise<Config>}
      */
-    edit(options = {}) {
-        return new Promise(async (resolve, reject) => {
+    edit(options: ConfigEditOptions = {} as ConfigEditOptions): Promise<Config> {
+        return new Promise(async (resolve, _reject) => {
             if (typeof options.trackBots === 'boolean') this.options.trackBots = options.trackBots;
             if (typeof options.trackAllChannels === 'boolean') this.options.trackAllChannels = options.trackAllChannels;
-            if (typeof options.exemptChannels === 'string' && options.exemptChannels.includes('function anonymous'))
+            if (
+                typeof options.exemptChannels === 'string' &&
+                (options.exemptChannels as string).includes('function anonymous')
+            )
                 this.options.exemptChannels = options.exemptChannels;
             if (Array.isArray(options.channelIds)) this.options.channelIds = options.channelIds;
             if (Array.isArray(options.exemptPermissions)) this.options.exemptPermissions = options.exemptPermissions;
-            if (typeof options.exemptMembers === 'string' && options.exemptMembers.includes('function anonymous'))
+            if (
+                typeof options.exemptMembers === 'string' &&
+                (options.exemptMembers as string).includes('function anonymous')
+            )
                 this.options.exemptMembers = options.exemptMembers;
             if (typeof options.trackMute === 'boolean') this.options.trackMute = options.trackMute;
             if (typeof options.trackDeaf === 'boolean') this.options.trackDeaf = options.trackDeaf;
             if (Number.isInteger(options.minUserCountToParticipate))
-                this.options.minUserCountToParticipate = options.minUserCountToParticipate;
+                this.options.minUserCountToParticipate = options.minUserCountToParticipate as number;
             if (Number.isInteger(options.maxUserCountToParticipate))
-                this.options.maxUserCountToParticipate = options.maxUserCountToParticipate;
+                this.options.maxUserCountToParticipate = options.maxUserCountToParticipate as number;
             if (Number.isInteger(options.minXpToParticipate))
-                this.options.minXpToParticipate = options.minXpToParticipate;
+                this.options.minXpToParticipate = options.minXpToParticipate as number;
             if (Number.isInteger(options.minLevelToParticipate))
-                this.options.minLevelToParticipate = options.minLevelToParticipate;
+                this.options.minLevelToParticipate = options.minLevelToParticipate as number;
             if (Number.isInteger(options.maxXpToParticipate))
-                this.options.maxXpToParticipate = options.maxXpToParticipate;
+                this.options.maxXpToParticipate = options.maxXpToParticipate as number;
             if (Number.isInteger(options.maxLevelToParticipate))
-                this.options.maxLevelToParticipate = options.maxLevelToParticipate;
-            if (typeof options.xpAmountToAdd === 'string' && options.xpAmountToAdd.includes('function anonymous'))
+                this.options.maxLevelToParticipate = options.maxLevelToParticipate as number;
+            if (
+                typeof options.xpAmountToAdd === 'string' &&
+                (options.xpAmountToAdd as string).includes('function anonymous')
+            )
                 this.options.xpAmountToAdd = options.xpAmountToAdd;
-            if (typeof options.voiceTimeToAdd === 'string' && options.voiceTimeToAdd.includes('function anonymous'))
+            if (
+                typeof options.voiceTimeToAdd === 'string' &&
+                (options.voiceTimeToAdd as string).includes('function anonymous')
+            )
                 this.options.voiceTimeToAdd = options.voiceTimeToAdd;
             if (typeof options.voiceTimeTrackingEnabled === 'boolean')
                 this.options.voiceTimeTrackingEnabled = options.voiceTimeTrackingEnabled;
             if (typeof options.levelingTrackingEnabled === 'boolean')
                 this.options.levelingTrackingEnabled = options.levelingTrackingEnabled;
-            if (typeof options.levelMultiplier === 'string' && options.levelMultiplier.includes('function anonymous'))
+            if (
+                typeof options.levelMultiplier === 'string' &&
+                (options.levelMultiplier as string).includes('function anonymous')
+            )
                 this.options.levelMultiplier = options.levelMultiplier;
 
             await this.manager.editGuild(this.guildId, this.guild.data);
             resolve(this);
         });
     }
-}
-
-module.exports = Config;
+};

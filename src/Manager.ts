@@ -1,20 +1,20 @@
-const { EventEmitter } = require('node:events');
-const { setInterval } = require('node:timers');
-const { writeFile, readFile, access } = require('fs/promises');
-const { deepmerge } = require('deepmerge-ts');
-const serialize = require('serialize-javascript');
-const Guild = require('./Guild.js');
-const User = require('./User.js');
-const Channel = require('./Channel.js');
-const Discord = require('discord.js');
-const {
+import { EventEmitter } from 'node:events';
+import { setInterval } from 'node:timers';
+import { writeFile, readFile, access } from 'fs/promises';
+import { deepmerge } from 'deepmerge-ts';
+import serialize from 'serialize-javascript';
+import Guild from './Guild';
+import User from './User';
+import Channel from './Channel';
+import * as Discord from 'discord.js';
+import {
     DEFAULT_CHECK_INTERVAL,
     VoiceManagerOptions,
-    GuildCreateOptions,
     GuildEditOptions,
     GuildData,
     DefaultConfigOptions
-} = require('./Constants.js');
+} from './Constants';
+import { VoiceState } from 'discord.js';
 
 /**
  * Voice Manager
@@ -33,13 +33,17 @@ const {
  * // We now have a voiceTimeManager property to access the manager everywhere!
  * client.voiceTimeManager = manager;
  */
-class VoiceTimeManager extends EventEmitter {
+export default class VoiceTimeManager extends EventEmitter {
+    client: Discord.Client;
+    ready: boolean;
+    guilds: Discord.Collection<string, Guild>;
+    options: typeof VoiceManagerOptions;
     /**
      * @param {Client} client The Discord Client
      * @param {VoiceManagerOptions} options The manager options
      * @param {boolean} [init=true] If the manager should start automatically. If set to "false", for example to create a delay, the manager can be started manually with "manager._init()".
      */
-    constructor(client, options, init = true) {
+    constructor(client: Discord.Client, options: typeof VoiceManagerOptions, init: boolean = true) {
         super();
         if (!client?.options) throw new Error(`Client is a required option. (val=${client})`);
         /**
@@ -70,12 +74,13 @@ class VoiceTimeManager extends EventEmitter {
      * Creates a new guild in the database
      *
      * @param {Snowflake} guildId The id of the guild to create
-     * @param {GuildCreateOptions} options The options for the guild creation
+     * @param {GuildData} options The options for the guild creation
      *
      * @returns {Promise<Guild>}
      *
      * @example
      * client.voiceTimeManager.create(interaction.guild.id, {
+     *  guildId: interaction.guild.id,
      *  users: [], // Array of user data's
      *  config: {
      *      trackBots: false, // If the user is a bot it will not be tracked.
@@ -100,7 +105,7 @@ class VoiceTimeManager extends EventEmitter {
      *  }
      * });
      */
-    create(guildId, options) {
+    create(guildId: string, options: GuildData): Promise<Guild> {
         return new Promise(async (resolve, reject) => {
             if (!this.ready) {
                 return reject('The manager is not ready yet.');
@@ -111,7 +116,7 @@ class VoiceTimeManager extends EventEmitter {
             }
 
             if (this.guilds.has(guildId)) {
-                return resolve(this.guilds.get(guildId));
+                return resolve(this.guilds.get(guildId) as Guild);
             }
 
             if (options?.users && !Array.isArray(options.users)) {
@@ -143,7 +148,7 @@ class VoiceTimeManager extends EventEmitter {
      *  }
      * });
      */
-    edit(guildId, options) {
+    edit(guildId: string, options: GuildEditOptions): Promise<Guild> {
         return new Promise(async (resolve, reject) => {
             const guild = this.guilds.get(guildId);
             if (!guild) {
@@ -159,7 +164,7 @@ class VoiceTimeManager extends EventEmitter {
      * @param {Snowflake} guildId The id of the guild to delete
      * @returns {Promise<Guild>}
      */
-    delete(guildId) {
+    delete(guildId: string): Promise<Guild> {
         return new Promise(async (resolve, reject) => {
             const guild = this.guilds.get(guildId);
             if (!guild) {
@@ -169,17 +174,17 @@ class VoiceTimeManager extends EventEmitter {
             this.guilds.delete(guildId);
             await this.deleteGuild(guildId);
 
-            resolve();
+            resolve(guild);
         });
     }
 
     /**
      * Saves the guild in the database
      * @ignore
-     * @param {Snowflake} guildId The id of the guild to save
-     * @param {GuildData} guildData The guild data to save
+     * @param {Snowflake} _guildId The id of the guild to save
+     * @param {GuildData} _guildData The guild data to save
      */
-    async saveGuild(guildId, guildData) {
+    async saveGuild(_guildId: string, _guildData: GuildData) {
         await writeFile(
             this.options.storage,
             JSON.stringify(
@@ -194,10 +199,10 @@ class VoiceTimeManager extends EventEmitter {
     /**
      * Edits the guild in the database
      * @ignore
-     * @param {Snowflake} guildId The id of the guild to edit
+     * @param {Snowflake} _guildId The id of the guild to edit
      * @param {GuildData} guildData The guild data to save
      */
-    async editGuild(guildId, options) {
+    async editGuild(_guildId: string, _options: GuildData) {
         await writeFile(
             this.options.storage,
             JSON.stringify(
@@ -212,10 +217,10 @@ class VoiceTimeManager extends EventEmitter {
     /**
      * Deletes the guild from the database
      * @ignore
-     * @param {Snowflake} guildId The id of the guild to delete
+     * @param {Snowflake} _guildId The id of the guild to delete
      * @param {GuildData} guildData The guild data to save
      */
-    async deleteGuild(guildId) {
+    async deleteGuild(_guildId: string) {
         await writeFile(
             this.options.storage,
             JSON.stringify(
@@ -232,7 +237,7 @@ class VoiceTimeManager extends EventEmitter {
      * @ignore
      * @returns {Promise<GuildData[]>}
      */
-    async getAllGuilds() {
+    async getAllGuilds(): Promise<GuildData[]> {
         const storageExists = await access(this.options.storage)
             .then(() => true)
             .catch(() => false);
@@ -250,7 +255,7 @@ class VoiceTimeManager extends EventEmitter {
                 return await JSON.parse(storageContent, (_, v) =>
                     typeof v === 'string' && /BigInt\("(-?\d+)"\)/.test(v) ? eval(v) : v
                 );
-            } catch (err) {
+            } catch (err: any) {
                 if (err.message.startsWith('Unexpected token')) {
                     throw new SyntaxError(
                         `${err.message} | LINK: (${require('path').resolve(this.options.storage)}:1:${err.message
@@ -273,11 +278,13 @@ class VoiceTimeManager extends EventEmitter {
         await (this.client.readyAt ? Promise.resolve() : new Promise((resolve) => this.client.once('ready', resolve)));
         if (this.client.shard && this.client.guilds.cache.size) {
             const shardId = Discord.ShardClientUtil.shardIdForGuildId(
-                this.client.guilds.cache.first().id,
+                this?.client?.guilds?.cache?.first()?.id as string,
                 this.client.shard.count
             );
             rawGuilds = rawGuilds.filter(
-                (g) => shardId === Discord.ShardClientUtil.shardIdForGuildId(g.guildId, this.client.shard.count)
+                (g) =>
+                    shardId ===
+                    Discord.ShardClientUtil.shardIdForGuildId(g.guildId, this?.client?.shard?.count as number)
             );
         }
 
@@ -290,13 +297,13 @@ class VoiceTimeManager extends EventEmitter {
         this.ready = true;
 
         if (this.options.deleteMissingGuilds) {
-            const missingGuilds = this.guilds.filter(
-                async (guild) =>
-                    !(this.client.guilds.cache.get(guild.guildId) ?? (await this.client.guilds.fetch(guild.guildId)))
-            );
-            for (const guild of missingGuilds) {
-                this.guilds.delete(guild.guildId);
-                await this.deleteGuild(guild.guildId);
+            const guilds = [...this.guilds.values()];
+
+            for (const guild of guilds) {
+                if (!(this.client.guilds.cache.get(guild.guildId) ?? (await this.client.guilds.fetch(guild.guildId)))) {
+                    this.guilds.delete(guild.guildId);
+                    await this.deleteGuild(guild.guildId);
+                }
             }
         }
 
@@ -312,9 +319,9 @@ class VoiceTimeManager extends EventEmitter {
         this.guilds.forEach((guild) => {
             if (!guild.config.voiceTimeTrackingEnabled) return;
 
-            const membersInVoiceChannel = guild.guild.members.cache.filter((member) => member.voice.channel);
+            const membersInVoiceChannel = guild?.guild?.members.cache.filter((member) => member.voice.channel !== null);
 
-            if (!membersInVoiceChannel.size) return;
+            if (!membersInVoiceChannel?.size) return;
 
             membersInVoiceChannel.forEach(async (member) => {
                 let user = guild.users.get(member.id);
@@ -334,11 +341,13 @@ class VoiceTimeManager extends EventEmitter {
 
                 const voiceChannel = member.voice.channel;
 
+                if (!voiceChannel) return;
+
                 if (!((await guild.config.checkMember(member)) && (await guild.config.checkChannel(voiceChannel))))
                     return;
 
                 if (user.channels.has(voiceChannel.id)) {
-                    const channel = user.channels.get(voiceChannel.id);
+                    const channel = user.channels.get(voiceChannel.id) as Channel;
                     channel.timeInChannel += (await guild.config.voiceTimeToAdd()) + 5000;
                 } else {
                     const channel = new Channel(this, guild, user, {
@@ -353,7 +362,7 @@ class VoiceTimeManager extends EventEmitter {
                 this.emit('userVoiceTimeAdd', user, oldUser);
 
                 if (guild.config.levelingTrackingEnabled) {
-                    user.xp += await guild.config.xpAmountToAdd();
+                    user.xp += await guild.config.xpAmountToAdd(member);
                     this.emit('userXpAdd', user, oldUser);
 
                     user.level = Math.floor((await guild.config.levelMultiplier()) * Math.sqrt(user.xp));
@@ -368,10 +377,10 @@ class VoiceTimeManager extends EventEmitter {
 
     /**
      * @ignore
-     * @param {VoiceState} oldState
+     * @param {VoiceState} _oldState
      * @param {VoiceState} newState
      */
-    async _handleVoiceStateUpdate(oldState, newState) {
+    async _handleVoiceStateUpdate(_oldState: VoiceState | any, newState: VoiceState | any) {
         if (newState.channel) {
             let guild = this.guilds.get(newState.guild.id);
             if (!guild) {
@@ -430,4 +439,3 @@ class VoiceTimeManager extends EventEmitter {
  * });
  */
 
-module.exports = VoiceTimeManager;

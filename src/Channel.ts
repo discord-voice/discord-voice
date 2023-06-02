@@ -1,13 +1,21 @@
-const { EventEmitter } = require('node:events');
-const { ChannelData, ChannelEditOptions } = require('./Constants.js');
-const VoiceTimeManager = require('./Manager.js');
-const User = require('./User.js');
-const Guild = require('./Guild.js');
+import { EventEmitter } from 'node:events';
+import { ChannelData, ChannelEditOptions } from './Constants';
+import VoiceTimeManager from './Manager';
+import User from './User';
+import Guild from './Guild';
 
 /**
  * Represents a Channel.
  */
-class Channel extends EventEmitter {
+export default class Channel extends EventEmitter {
+    manager: VoiceTimeManager;
+    client: any;
+    guild: Guild;
+    user: User;
+    guildId: string;
+    channelId: string;
+    timeInChannel: number;
+    options: ChannelData;
     /**
      *
      * @param {VoiceTimeManager} manager The voice time manager.
@@ -15,7 +23,7 @@ class Channel extends EventEmitter {
      * @param {User} user The user class.
      * @param {ChannelData} options The channel data.
      */
-    constructor(manager, guild, user, options) {
+    constructor(manager: VoiceTimeManager, guild: Guild, user: User, options: ChannelData) {
         super();
         /**
          * The voice time manager.
@@ -79,7 +87,7 @@ class Channel extends EventEmitter {
      * @param {ChannelEditOptions} options The new channel options.
      * @returns {Promise<Channel>}
      */
-    edit(options = {}) {
+    edit(options: ChannelEditOptions = {}): Promise<Channel> {
         return new Promise(async (resolve, reject) => {
             if (typeof options !== 'object') return reject(new Error('Options must be an object.'));
             if (typeof options.timeInChannel !== 'number')
@@ -100,15 +108,13 @@ class Channel extends EventEmitter {
      *
      * @returns {Promise<Channel>}
      */
-    delete() {
-        return new Promise(async (resolve, reject) => {
+    delete(): Promise<Channel> {
+        return new Promise(async (resolve, _reject) => {
             this.user.channels.delete(this.channelId);
 
             await this.manager.editGuild(this.guild.guildId, this.guild.data);
-            
+
             resolve(this);
         });
     }
 }
-
-module.exports = Channel;

@@ -1,25 +1,32 @@
-const Discord = require('discord.js');
+import {
+    PermissionResolvable,
+    GuildMember,
+    GuildChannel
+} from 'discord.js';
+import Config from './Config';
 
-exports.DEFAULT_CHECK_INTERVAL = 5000;
+export const DEFAULT_CHECK_INTERVAL = 5000;
 
 /**
  * The voice manager options.
  * @typedef {object} VoiceManagerOptions
  *
  * @property {string} [storage="./guilds.json"] The storage path for the guild's data.
+ * @property {number} [forceUpdateEvery=null] The interval to force update the guild's data.
  * @property {Boolean} [deleteMissingGuilds=false] Whether to delete guilds data that are no longer in the client.
  * @property {DefaultConfigOptions} [default] The default config options.
  */
-exports.VoiceManagerOptions = {
+export const VoiceManagerOptions = {
     storage: './guilds.json',
+    forceUpdateEvery: null,
     deleteMissingGuilds: false,
     default: {
         trackBots: false,
         trackAllChannels: true,
-        exemptChannels: () => false,
+        exemptChannels: (_channel: GuildChannel, _config: Config) => false,
         channelIds: [],
         exemptPermissions: [],
-        exemptMembers: () => false,
+        exemptMembers: (_member: GuildMember, _config: Config) => false,
         trackMute: true,
         trackDeaf: true,
         minUserCountToParticipate: 0,
@@ -28,23 +35,13 @@ exports.VoiceManagerOptions = {
         minLevelToParticipate: 0,
         maxXpToParticipate: 0,
         maxLevelToParticipate: 0,
-        xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1,
-        voiceTimeToAdd: () => 1000,
+        xpAmountToAdd: (_member: GuildMember, _config: Config) => Math.floor(Math.random() * 10) + 1,
+        voiceTimeToAdd: (_config: Config) => 1000,
         voiceTimeTrackingEnabled: true,
         levelingTrackingEnabled: true,
-        levelMultiplier: () => 0.1
+        levelMultiplier: (_config: Config) => 0.1
     }
 };
-
-/**
- * The guild create options.
- * @typedef {object} GuildCreateOptions
- *
- * @property {UserData[]} [users] The users stored in the guild.
- * @property {ConfigData} [config] The config data.
- * @property {any} [extraData] The extra data for this guild.
- */
-exports.GuildCreateOptions = {};
 
 /**
  * The guild edit method options.
@@ -54,7 +51,11 @@ exports.GuildCreateOptions = {};
  * @property {ConfigData} [config] The config data.
  * @property {any} [extraData] The extra data for this guild.
  */
-exports.GuildEditOptions = {};
+export interface GuildEditOptions {
+    users?: UserData[];
+    config?: ConfigData;
+    extraData?: any;
+};
 
 /**
  * The user edit method options.
@@ -65,7 +66,12 @@ exports.GuildEditOptions = {};
  * @property {Number} [xp] The xp of the user.
  * @property {Number} [level] The level of the user.
  */
-exports.UserEditOptions = {};
+export interface UserEditOptions {
+    channels?: ChannelData[];
+    totalVoiceTime?: number;
+    xp?: number;
+    level?: number;
+};
 
 /**
  * The channel edit method options.
@@ -73,7 +79,9 @@ exports.UserEditOptions = {};
  *
  * @property {Number} [timeInChannel] The voice time spent in the channel.
  */
-exports.ChannelEditOptions = {};
+export interface ChannelEditOptions {
+    timeInChannel?: number;
+};
 
 /**
  * The config edit method options.
@@ -99,7 +107,27 @@ exports.ChannelEditOptions = {};
  * @property {Boolean} [levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
  * @property {LevelMultiplierFunction} [levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
  */
-exports.ConfigEditOptions = {};
+export interface ConfigEditOptions {
+    trackBots?: boolean;
+    trackAllChannels?: boolean;
+    exemptChannels?: (channel: GuildChannel, config: Config) => Promise<boolean> | boolean;
+    channelIds?: string[];
+    exemptPermissions?: PermissionResolvable[];
+    exemptMembers?: (member: GuildMember, config: Config) => Promise<boolean> | boolean;
+    trackMute?: boolean;
+    trackDeaf?: boolean;
+    minUserCountToParticipate?: number;
+    maxUserCountToParticipate?: number;
+    minXpToParticipate?: number;
+    minLevelToParticipate?: number;
+    maxXpToParticipate?: number;
+    maxLevelToParticipate?: number;
+    xpAmountToAdd?: (member: GuildMember, config: Config) => Promise<number> | number;
+    voiceTimeToAdd?: (config: Config) => Promise<number> | number;
+    voiceTimeTrackingEnabled?: boolean;
+    levelingTrackingEnabled?: boolean;
+    levelMultiplier?: (config: Config) => Promise<number> | number;
+};
 
 /**
  * Raw guild object (used to store guilds in the database).
@@ -110,7 +138,12 @@ exports.ConfigEditOptions = {};
  * @property {ConfigData} config The config of the guild.
  * @property {any} [extraData] The extra data for this guild.
  */
-exports.GuildData = {};
+export interface GuildData {
+    guildId: string;
+    users: UserData[];
+    config: ConfigData;
+    extraData?: any;
+};
 
 /**
  * Raw user object (used to store users in the database).
@@ -123,7 +156,14 @@ exports.GuildData = {};
  * @property {Number} xp The amount of xp the user has.
  * @property {Number} level The amount of level the user has.
  */
-exports.UserData = {};
+export interface UserData {
+    guildId: string;
+    userId: string;
+    channels: ChannelData[];
+    totalVoiceTime: number;
+    xp: number;
+    level: number;
+};
 
 /**
  * Raw channel object (used to store channels in the database).
@@ -133,7 +173,11 @@ exports.UserData = {};
  * @property {Snowflake} channelId The channel's id.
  * @property {Number} timeInChannel The total amount of voice time the user has spent in this channel.
  */
-exports.ChannelData = {};
+export interface ChannelData {
+    guildId: string;
+    channelId: string;
+    timeInChannel: number;
+};
 
 /**
  * Raw config object (used to store config's in the database).
@@ -160,7 +204,28 @@ exports.ChannelData = {};
  * @property {Boolean} levelingTrackingEnabled Whether to enable the leveling tracking module.
  * @property {LevelMultiplierFunction} levelMultiplier Function for levelMultiplier. If not provided, the default value is used (0.1).
  */
-exports.ConfigData = {};
+export interface ConfigData {
+    guildId: string;
+    trackBots: boolean;
+    trackAllChannels: boolean;
+    exemptChannels: string | ((channel: GuildChannel, config: Config) => Promise<boolean> | boolean);
+    channelIds: string[];
+    exemptPermissions: PermissionResolvable[];
+    exemptMembers: string | ((member: GuildMember, config: Config) => Promise<boolean> | boolean);
+    trackMute: boolean;
+    trackDeaf: boolean;
+    minUserCountToParticipate: number;
+    maxUserCountToParticipate: number;
+    minXpToParticipate: number;
+    minLevelToParticipate: number;
+    maxXpToParticipate: number;
+    maxLevelToParticipate: number;
+    xpAmountToAdd: string | ((member: GuildMember, config: Config) => Promise<number> | number);
+    voiceTimeToAdd: string | ((config: Config) => Promise<number> | number);
+    voiceTimeTrackingEnabled: boolean;
+    levelingTrackingEnabled: boolean;
+    levelMultiplier: string | ((config: Config) => Promise<number> | number);
+};
 
 /**
  * The default config options.
@@ -186,7 +251,7 @@ exports.ConfigData = {};
  * @property {Boolean} [levelingTrackingEnabled=true] Whether to enable the leveling tracking module.
  * @property {LevelMultiplierFunction} [levelMultiplier] Function for levelMultiplier. If not provided, the default value is used (0.1).
  */
-exports.DefaultConfigOptions = {
+export const DefaultConfigOptions = {
     trackBots: false,
     trackAllChannels: true,
     exemptChannels: () => false,

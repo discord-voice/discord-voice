@@ -12,7 +12,10 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "moduleResolution": "node",
-        "lib": ["es2021"]
+        "lib": ["es2021"],
+        "declaration": true,
+        "outDir": "./dist",
+        "esModuleInterop": true
     },
-    "files": ["./typings/index.d.ts"]
+    "exclude": ["node_modules", "dist", "test"]
 }

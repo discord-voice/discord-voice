@@ -1,21 +1,31 @@
-const { EventEmitter } = require('node:events');
-const Discord = require('discord.js');
-const Channel = require('./Channel.js');
-const { UserData, UserEditOptions } = require('./Constants.js');
-const Guild = require('./Guild.js');
-const VoiceTimeManager = require('./Manager.js');
+import { EventEmitter } from 'node:events';
+import * as Discord from 'discord.js';
+import Channel from './Channel';
+import { UserData, UserEditOptions } from './Constants';
+import Guild from './Guild';
+import VoiceTimeManager from './Manager';
 
 /**
  * Represents a User.
  */
-class User extends EventEmitter {
+export default class User extends EventEmitter {
+    manager: VoiceTimeManager;
+    client: Discord.Client;
+    guild: Guild;
+    guildId: string;
+    userId: string;
+    channels: Discord.Collection<string, Channel>;
+    totalVoiceTime: number;
+    xp: number;
+    level: number;
+    options: UserData;
     /**
      *
      * @param {VoiceTimeManager} manager The voice time manager.
      * @param {Guild} guild The guild class.
      * @param {UserData} options The user data.
      */
-    constructor(manager, guild, options) {
+    constructor(manager: VoiceTimeManager, guild: Guild, options: UserData) {
         super();
         /**
          * The voice time manager.
@@ -47,10 +57,7 @@ class User extends EventEmitter {
          * @type {Collection<Snowflake, Channel>}
          */
         this.channels = new Discord.Collection(
-            options.channels.map((channel) => [
-                channel.channelId,
-                new Channel(manager, guild, this, channel)
-            ])
+            options.channels.map((channel) => [channel.channelId, new Channel(manager, guild, this, channel)])
         );
         /**
          * The total voice time.
@@ -97,7 +104,7 @@ class User extends EventEmitter {
      * @param {UserEditOptions} options The options to edit.
      * @returns {Promise<User>}
      */
-    edit(options = {}) {
+    edit(options: UserEditOptions = {} as UserEditOptions): Promise<User> {
         return new Promise(async (resolve, reject) => {
             if (typeof options !== 'object') return reject(new Error('Options must be an object.'));
             if (!Array.isArray(options.channels)) return reject(new Error('Options.channels must be an array.'));
@@ -110,7 +117,7 @@ class User extends EventEmitter {
                 // Set the channel array into our channels collection
                 this.channels.clear();
                 options.channels.forEach((channel) => {
-                    this.channels.set(channel.id, channel);
+                    this.channels.set(channel.channelId, new Channel(this.manager, this.guild, this, channel));
                 });
             }
 
@@ -140,8 +147,8 @@ class User extends EventEmitter {
      *
      * @returns {Promise<User>}
      */
-    delete() {
-        return new Promise(async (resolve, reject) => {
+    delete(): Promise<User> {
+        return new Promise(async (resolve, _reject) => {
             this.guild.users.delete(this.userId);
 
             await this.manager.editGuild(this.guild.guildId, this.guild.data);
@@ -150,5 +157,3 @@ class User extends EventEmitter {
         });
     }
 }
-
-module.exports = User;
