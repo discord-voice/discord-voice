@@ -6,7 +6,7 @@
 		"gpr": "node scripts/gpr.js",
 		"docs": "docgen --jsdoc jsdoc.json --source src --custom docs/index.yml --output docs/docs.json",
 		"lint": "eslint .",
-		"build": "tsc",
+		"build": "npm i && npm i --only=dev && tsc",
 		"prepare": "npm run build",
 		"prepublish": "tsc",
 		"test": "jest --config=jest.config.json"
