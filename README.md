@@ -11,8 +11,9 @@
 -   **✨ Easy to use!**
 -   **📁 Support for all databases! (default is json)**
 -   **⚙️ Very customizable! (ignored channels, ignored members, ignored permissions, xp amount to add, voice time to add etc...)**
--   **🚀 Super powerful: createUser, createConfig, removeUser, removeConfig, updateUser and updateConfig!**
+-   **🚀 Super powerful: create, edit and delete!**
 -   **🕸️ Support for shards!**
+-   **🔐 Discord.js Collection Based!**
 -   **and much more!**
 
 # Installation
@@ -23,222 +24,205 @@ npm install --save discord-voice
 
 # Examples
 
-You can use this example bot on GitHub: [VoiceTimeTrackerBot](https://github.com/Lebyy/VoiceTimeTrackerBot)
+You can use this example bot on GitHub: [VoiceTimeTrackerBot](https://github.com/discord-voice/VoiceTimeTrackerBot)
 
-# Usage of the modudle
+# Launch of the module
+Required Discord Intents: `Guilds` and `GuildVoiceStates`.  
 
 ```js
-const { Client, Intents } = require("discord.js"),
-    client = new Client({
-        intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] // The GUILD_VOICE_STATES and GUILDS intents are required for discord-voice to function.
-    }),
-    settings = {
-        prefix: "v!",
-        token: "Your Discord Bot Token"
-    };
+const Discord = require('discord.js');
+const client = new Discord.Client({
+    intents: [
+        Discord.IntentsBitField.Flags.Guilds,
+        Discord.IntentsBitField.Flags.GuildVoiceStates
+    ]
+});
 
 // Requires Manager from discord-voice
-const { VoiceManager } = require("discord-voice");
-// Create a new instance of the manager class
-const manager = new VoiceManager(client, {
-    userStorage: "./users.json",
-    configStorage: "./configs.json",
-    checkMembersEvery: 5000,
+const { VoiceTimeManager } = require('discord-voice');
+const manager = new VoiceTimeManager(client, {
+    storage: './guilds.json',
     default: {
         trackBots: false,
         trackAllChannels: true
     }
 });
-// We now have a voiceManager property to access the manager everywhere!
-client.voiceManager = manager;
+// We now have a voiceTimeManager property to access the manager everywhere!
+client.voiceTimeManager = manager;
+
+client.on('ready', () => {
+    console.log('Bot is ready!');
+});
+
+client.login(process.env.DISCORD_BOT_TOKEN);
 ```
 
-After that, user's who are in the voice channel's that the bot has cached will be checked. You can pass an options object to customize the config. For a list of them refer to the [documentation](https://discord-voice.js.org/docs/main/master/typedef/VoiceManagerOptions).
+After that, user's who are in the voice channel's that the bot has cached will be checked. 
+You can pass an options object to customize the giveaways. Here is a list of them:
 
-# Create an user
+-   **client**: the discord client (your discord bot instance).
+-   **[and many other optional parameters to customize the manager - read documentation](https://discord-voice.js.org/docs/main/master/typedef/VoiceManagerOptions)**
+
+#
+
+# Create a guild
 
 ```js
-client.on("messageCreate", (message) => {
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
+client.on('interactionCreate', (interaction) => {
+    if (interaction.isChatInputCommand() && interaction.commandName === 'create-guild') {
+        const guildId = interaction.options.getString('guildId');
+        const users = interaction.options.getString('users');
+        const options = interaction.options.getString('options');
 
-    if (command === "create-user") {
-        client.voiceManager.createUser(message.author.id, message.guild.id, {
-            levelingData: {
-                xp: 0,
-                level: 0
-            }
-            // The user will have 0 xp and 0 level.
+        client.voiceTimeManager.create(guildId, users, options).then(() => {
+                interaction.reply('Success! Guild Created!');
+        }).catch((err) => {
+                interaction.reply(`An error has occurred, please check and try again.\n\`${err}\``);
+        });
+    };
+});
+```
+
+- This allow's you create a guild in the database if the guild is not already present in the database. 
+You can pass an options object to customize the guild's data. For a list of them refer to the [documentation](https://discord-voice.js.org/docs/main/master/typedef/GuildOptions).
+
+# Editing a guild
+
+```js
+client.on('interactionCreate', (interaction) => {
+    if (interaction.isChatInputCommand() && interaction.commandName === 'edit') {
+        const guildId = interaction.options.getString('guildId');
+
+        client.voiceTimeManager.edit(guildId, {
+            trackBots: true,
+            trackAllChannels: false
+        }).then(() => {
+                interaction.reply('Success! Guild updated!');
+        }).catch((err) => {
+                interaction.reply(`An error has occurred, please check and try again.\n\`${err}\``);
         });
     }
 });
 ```
 
-This allow's you create a user in the database if the user is not already present in the database. You can pass an options object to customize the user's data. For a list of them refer to the [documentation](https://discord-voice.js.org/docs/main/master/typedef/UserOptions).
+- This allow's you edit a guild's data. 
+You need to pass an options object to edit the guild's data. For a list of them refer to the [documentation](https://discord-voice.js.org/docs/main/master/typedef/GuildEditOptions).
 
-# Create a config
+# Delete a guild
 
 ```js
-client.on("messageCreate", (message) => {
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
+client.on('interactionCreate', (interaction) => {
+    if (interaction.isChatInputCommand() && interaction.commandName === 'delete') {
+        const guildId = interaction.options.getString('guildId');
 
-    if (command === "create-config") {
-        client.voiceManager.createConfig(message.guild.id, {
-            trackBots: false, // If the user is a bot it will not be tracked.
-            trackAllChannels: true, // All of the channels in the guild will be tracked.
-            exemptChannels: () => false, // The user will not be tracked in these channels. (This is a function).
-            channelIds: [], // The channel ids to track. (If trackAllChannels is true, this is ignored)
-            exemptPermissions: [], // The user permissions to not track.
-            exemptMembers: () => false, // The user will not be tracked. (This is a function).
-            trackMute: true, // It will track users if they are muted aswell.
-            trackDeaf: true, // It will track users if they are deafen aswell.
-            minUserCountToParticipate: 0, // The min amount of users to be in a channel to be tracked.
-            maxUserCountToParticipate: 0, // The max amount of users to be in a channel to be tracked.
-            minXpToParticipate: 0, // The min amount of xp needed to be tracked.
-            minLevelToParticipate: 0, // The min level needed to be tracked.
-            maxXpToParticipate: 0, // The max amount of xp needed to be tracked.
-            maxLevelToParticipate: 0, // The max level needed to be tracked.
-            xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1, // The amount of xp to add to the user (This is a function).
-            voiceTimeToAdd: () => 1000, // The amount of time in ms to add to the user (This is a function).
-            voiceTimeTrackingEnabled: true, // Whether the voiceTimeTracking module is enabled.
-            levelingTrackingEnabled: true // Whether the levelingTracking module is enabled.
+        client.voiceTimeManager.delete(guildId).then(() => {
+                interaction.reply('Success! Guild deleted!');
+        }).catch((err) => {
+                interaction.reply(`An error has occurred, please check and try again.\n\`${err}\``);
         });
     }
 });
 ```
 
-This allow's you create a config in the database if the config is not already present in the database. You can pass an options object to customize the config's data. For a list of them refer to the [documentation](https://discord-voice.js.org/docs/main/master/typedef/ConfigOptions).
+- This allow's you delete a guild from the database if the guild is present in the database.
 
-# Remove an user
 
-```js
-client.on("messageCreate", (message) => {
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if (command === "remove-user") {
-        client.voiceManager.removeUser(message.author.id, message.guild.id); // Removes the user from the database and the cache.
-    }
-});
-```
-
-# Remove a config
+# Fetch guilds
 
 ```js
-client.on("messageCreate", (message) => {
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
+// A list of all the guilds in the database.
+const allGuilds = client.voiceTimeManager.guilds; // Returns a Discord Collection of Guilds (Discord.Collection<guildId, guildData>)
 
-    if (command === "remove-config") {
-        client.voiceManager.removeConfig(message.guild.id); // Removes the config from the database and the cache.
-    }
-});
-```
+// Returns the guild with Id "1909282092"
+const guild = client.voiceTimeManager.guilds.get('1909282092'); // Returns a Guild. (Discord.Collection<guildId, guildData>)
 
-# Updating an user
-
-```js
-client.on("messageCreate", (message) => {
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if (command === "edit-user") {
-        client.voiceManager.updateUser(message.author.id, message.guild.id, {
-            newVoiceTime: {
-                channels: [],
-                total: 0
-            } // The new voice time user will have.
-        });
-    }
-});
-```
-
-This allow's you edit a user's data. You need to pass an options object to edit the user's data. For a list of them refer to the [documentation](https://discord-voice.js.org/docs/main/master/typedef/UserEditOptions).
-
-# Updating a config
-
-```js
-client.on("messageCreate", (message) => {
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if (command === "edit-config") {
-        client.voiceManager.updateConfig(message.guild.id, {
-            newTrackBots: true // The module will now track bot user's voice time aswell.
-        });
-    }
-});
-```
-
-This allow's you edit a config's data. You need to pass an options object to edit the config's data. For a list of them refer to the [documentation](https://discord-voice.js.org/docs/main/master/typedef/ConfigEditOptions).
-
-# Fetch users
-
-```js
-// A list of all the users
-const allUsers = client.voiceManager.users; // [ {User}, {User} ]
-
-// A list of all the users on the server with ID "1909282092"
-const onServer = client.voiceManager.users.filter((u) => u.guildId === "1909282092");
-
-// The user on the server with Id "1909282092" and the user Id "1234567890"
-const user = client.voiceManager.users.filter((u) => u.guildId === "1909282092" && u.userId === "1234567890");
-```
-
-# Fetch configs
-
-```js
-// A list of all the configs
-const allConfigs = client.voiceManager.configs; // [ {Config}, {Config} ]
-
-// The config of the guild with Id "1909282092"
-const config = client.voiceManager.configs.filter((c) => c.guildId === "1909282092");
+// A list of all guilds with atleast 1 user in the database.
+const guildWithUsers = client.voiceTimeManager.guilds.filter((guild) => guild.users.size > 0); // Returns a Discord Collection of Guilds (Discord.Collection<guildId, guildData>)
 ```
 
 # Exempt Channels
 
 ```js
-client.voiceManager.updateConfig(message.guild.id, {
+const guildId = '1909282092';
+const guild = client.voiceTimeManager.guilds.get(guildId);
+guild.config.edit({
     // The channel will not be tracked if it's name is "private"
     exemptChannels: (channel) => channel.name === "private")
 });
 ```
 
-⚠️ Note: If the function should be customizable
+⚠️ **Note (only for proficients) (this applies to all config's which expect a function input)**: if you want to use values of global variables inside of the function without using `guild.extraData`, you can use the [Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) constructor:
 
 ```js
+const guildId = '1909282092';
+const guild = client.voiceTimeManager.guilds.get(guildId);
 const channelName = "private";
-client.voiceManager.updateConfig(message.guild.id, {
+guild.config.edit({
     // The channel won't be tracked if it's name is equal to the value which is assigned to "channelName"
-    exemptChannels: new Function("channel", `return channel.name === \'${channelName}\'`)
+    exemptChannels: new Function(
+        "channel", 
+        "guild",
+        `return channel.name === \'${channelName}\'`)
 });
 ```
+
+<u>**⚠ Note**</u>
+
+-   You can use `this`, instead of the `guild` parameter, inside of the function string to access anything of the giveaway instance.  
+    For example: `this.extraData`, or `this.client`.
+-   Strings have to be "stringified" (wrapped in quotation marks) again like you can see in the example.  
+    Array brackets also have to be stated again.
+-   Global variables which contain numbers with more than 16 digits cannot be used.  
+    => Snoflakes have to be "stringified" correctly to avoid misbehaviour.
+-   If you want to make an asynchronous function in this format, refer to [this](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction) article.
+-   <u>**Because of those various complications it is therefore highly suggested to use `guild.extraData` for storing variables.**</u>  
+    But if you really want to do it in this way and need more information/help, please visit the [Discord Server](https://discord.gg/pndumb6J3t).
 
 # Exempt Members
 
 ```js
-client.voiceManager.updateConfig(message.guild.id, {
+const guildId = '1909282092';
+const guild = client.voiceTimeManager.guilds.get(guildId);
+guild.config.edit({
     // Only members who have the "Nitro Boost" role are able to be tracked
     exemptMembers: (member) => !member.roles.cache.some((r) => r.name === "Nitro Boost")
 });
 ```
 
-⚠️ Note: If the function should be customizable
+⚠️ **Note (only for proficients) (this applies to all config's which expect a function input)**: if you want to use values of global variables inside of the function without using `guild.extraData`, you can use the [Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) constructor:
 
 ```js
+const guildId = '1909282092';
+const guild = client.voiceTimeManager.guilds.get(guildId);
 const roleName = "Nitro Boost";
-client.voiceManager.updateConfig(message.guild.id, {
+guild.config.edit({
     // Only members who have the the role which is assigned to "roleName" are able to be tracked
-    exemptMembers: new Function("member", `return !member.roles.cache.some((r) => r.name === \'${roleName}\')`)
+    exemptMembers: new Function(
+        "member", 
+        "guild",
+        `return !member.roles.cache.some((r) => r.name === \'${roleName}\')`)
 });
 ```
+
+<u>**⚠ Note**</u>
+
+-   You can use `this`, instead of the `guild` parameter, inside of the function string to access anything of the giveaway instance.  
+    For example: `this.extraData`, or `this.client`.
+-   Strings have to be "stringified" (wrapped in quotation marks) again like you can see in the example.  
+    Array brackets also have to be stated again.
+-   Global variables which contain numbers with more than 16 digits cannot be used.  
+    => Snoflakes have to be "stringified" correctly to avoid misbehaviour.
+-   If you want to make an asynchronous function in this format, refer to [this](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction) article.
+-   <u>**Because of those various complications it is therefore highly suggested to use `guild.extraData` for storing variables.**</u>  
+    But if you really want to do it in this way and need more information/help, please visit the [Discord Server](https://discord.gg/pndumb6J3t).
 
 # Voice Time To Add
 
 ```js
-client.voiceManager.updateConfig(message.guild.id, {
-    xpAmountToAdd: () => Math.floor(Math.random() * 10) + 1 // This will add a random amount between 1 and 10 of xp to the user.
+const guildId = '1909282092';
+const guild = client.voiceTimeManager.guilds.get(guildId);
+guild.config.edit({
+    xpAmountToAdd: (guild) => Math.floor(Math.random() * 10) + 1 // This will add a random amount between 1 and 10 of xp to the user.
 });
 ```
 
@@ -247,7 +231,9 @@ client.voiceManager.updateConfig(message.guild.id, {
 # Xp Amount To Add
 
 ```js
-client.voiceManager.updateConfig(message.guild.id, {
+const guildId = '1909282092';
+const guild = client.voiceTimeManager.guilds.get(guildId);
+guild.config.edit({
     voiceTimeToAdd: () => 1000 // This will add 1000 ms of voice time everytime the user is checked.
 });
 ```
@@ -257,7 +243,9 @@ client.voiceManager.updateConfig(message.guild.id, {
 # Level Multiplier
 
 ```js
-client.voiceManager.updateConfig(message.guild.id, {
+const guildId = '1909282092';
+const guild = client.voiceTimeManager.guilds.get(guildId);
+guild.config.edit({
     levelMultiplier: () => 0.1 // This will set the level multiplier to 0.1 (normally it's 0.1).
 });
 ```
@@ -266,192 +254,30 @@ client.voiceManager.updateConfig(message.guild.id, {
 
 # Custom Database
 
-You can use your custom database to save users and configs, instead of the json files (the "database" by default for `discord-voice`). For this, you will need to extend the `VoiceManager` class, and replace some methods with your custom ones. There are 8 methods you will need to replace:
+You can use your custom database to save guilds, instead of the json files (the "database" by default for `discord-voice`). For this, you will need to extend the `VoiceTimeManager` class, and replace some methods with your custom ones. There are 4 methods you will need to replace:
 
--   `getAllUsers`: this method returns an array of stored users.
--   `getAllConfigs`: this method returns an array of stored configs.
--   `saveUser`: this method stores a new user in the database.
--   `saveConfig`: this method stores a new config in the database.
--   `editUser`: this method edits a user already stored in the database.
--   `editConfig`: this method edits a config already stored in the database.
--   `deleteUser`: this method deletes a user from the database (permanently).
--   `deleteConfig`: this method deletes a config from the database (permanently).
+-   `getAllGuilds`: this method returns an array of stored guilds.
+-   `saveGuild`: this method stores a new guild in the database.
+-   `editGuild`: this method edits a guild already stored in the database.
+-   `deleteGuild`: this method deletes a guild from the database (permanently).
 
 **⚠️ All the methods should be asynchronous to return a promise!**
 
-Here is an example, using `quick.db`, a SQLite database. The comments in the code below are very important to understand how it works!
+<u>**SQL examples**</u>
 
-Other examples:
+-   [MySQL](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/mysql.js)
+-   SQLite
+    -   [Quick.db](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/quick.db.js)
+    -   [Enmap](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/enmap.js)
+
+<u>**NoSQL examples**</u>
 
 -   MongoDB
-    -   [Mongoose](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/mongoose.js)
-    -   [QuickMongo](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/quickmongo.js) ⚠️ Not recommended for high giveaway usage, use the `mongoose` example instead
--   [Enmap](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/enmap.js)
+    -   [Mongoose](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/mongoose.js)
+    -   [QuickMongo](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/quickmongo.js) ⚠️ Not recommended for high giveaway usage, use the `mongoose` example instead
+-   [Apache CouchDB - Nano](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/nano.js)
 -   Replit Database ⚠️ Only usable if your bot is hosted on [Replit](https://replit.com/)
-    -   [Quick.Replit](https://github.com/Lebyy/discord-voice/blob/master/examples/custom-databases/quickreplit.js)
-
-```js
-const { Client, Intents } = require("discord.js"), // npm install discord.js
-    client = new Client({
-        intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] // The GUILD_VOICE_STATES and GUILDS intents are required for discord-voice to function.
-    }),
-    settings = {
-        prefix: "v!",
-        token: "Your Discord Bot Token"
-    };
-
-// Load quick.db - it's an example of custom database, you can use MySQL, PostgreSQL, etc...
-const db = require("quick.db");
-if (!Array.isArray(db.get("users"))) db.set("users", []);
-if (!Array.isArray(db.get("configs"))) db.set("configs", []);
-
-const { VoiceManager } = require("discord-voice");
-const VoiceManagerWithOwnDatabase = class extends VoiceManager {
-    // This function is called when the manager needs to get all users which are stored in the database.
-    async getAllUsers() {
-        // Get all users from the database
-        return db.get("users");
-    }
-
-    // This function is called when the manager needs to get all configs which are stored in the database.
-    async getAllConfigs() {
-        // Get all configs from the database
-        return db.get("configs");
-    }
-
-    // This function is called when a user needs to be saved in the database.
-    async saveUser(userId, guildId, userData) {
-        // Add the new user to the database
-        db.push("users", userData);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a user needs to be saved in the database.
-    async saveConfig(guildId, configData) {
-        // Add the new user to the database
-        db.push("configs", configData);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a user needs to be edited in the database.
-    async editUser(userId, guildId, userData) {
-        // Get all users from the database
-        const users = db.get("users");
-        // Find the user to edit
-        const user = users.find((u) => u.guildId === guildId && u.userId === userId);
-        // Remove the unedited user from the array
-        const newUsersArray = users.filter((u) => u !== user);
-        // Push the edited user into the array
-        newUsersArray.push(userData);
-        // Save the updated array
-        db.set("users", newUsersArray);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a config needs to be edited in the database.
-    async editConfig(guildId, configData) {
-        // Get all configs from the database
-        const configs = db.get("configs");
-        // Remove the unedited config from the array
-        const newConfigsArray = configs.filter((config) => config.guildId !== guildId);
-        // Push the edited config into the array
-        newConfigsArray.push(configData);
-        // Save the updated array
-        db.set("configs", newConfigsArray);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a user needs to be deleted from the database.
-    async deleteUser(userId, guildId) {
-        // Get all users from the database
-        const users = db.get("users");
-        // Find the user to edit
-        const user = users.find((u) => u.guildId === guildId && u.userId === userId);
-        // Remove the user from the array
-        const newUsersArray = users.filter((u) => u !== user);
-        // Save the updated array
-        db.set("users", newUsersArray);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a config needs to be deleted from the database.
-    async deleteConfig(guildId) {
-        // Get all configs from the database
-        const configs = db.get("configs");
-        // Remove the config from the array
-        const newConfigsArray = configs.filter((config) => config.guildId !== guildId);
-        // Save the updated array
-        db.set("configs", newConfigsArray);
-        // Don't forget to return something!
-        return true;
-    }
-};
-
-// Create a new instance of your new class
-const manager = new VoiceManagerWithOwnDatabase(client, {
-    checkMembersEvery: 5000,
-    default: {
-        trackBots: false,
-        trackAllChannels: true
-    }
-});
-// We now have a voiceManager property to access the manager everywhere!
-client.voiceManager = manager;
-
-client.on("ready", () => {
-    console.log("I'm ready!");
-});
-
-client.login(settings.token);
-```
-
-# Shards Support
-
-To make `discord-voice` work with shards, you will need to extend the `VoiceManager` class and update the `refreshStorage()` method. This method should call the `getAllUsers()` and `getAllConfigs()` method for every shard, so all `VoiceManager`'s synchronize their cache with the updated database.
-
-```js
-const { Client, Intents } = require("discord.js"), // npm install discord.js
-    client = new Client({
-        intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] // The GUILD_VOICE_STATES and GUILDS intents are required for discord-voice to function.
-    }),
-    settings = {
-        prefix: "v!",
-        token: "Your Discord Bot Token"
-    };
-
-// Extends the VoiceManager class and update the refreshStorage method
-const { VoiceManager } = require("discord-voice");
-const VoiceManagerWithShardSupport = class extends VoiceManager {
-    // The refreshStorage method is called when the database is updated on one of the shards
-    async refreshStorage() {
-        // This should make all shards refresh their cache with the updated database
-        return client.shard.broadcastEval(() => this.voiceManager.getAllUsers() && this.voiceManager.getAllConfigs());
-    }
-};
-
-// Create a new instance of your new class
-const manager = new VoiceManagerWithShardSupport(client, {
-    userStorage: "./users.json",
-    configStorage: "./configs.json",
-    checkMembersEvery: 5000,
-    default: {
-        trackBots: false,
-        trackAllChannels: true
-    }
-});
-// We now have a voiceManager property to access the manager everywhere!
-client.voiceManager = manager;
-
-client.on("ready", () => {
-    console.log("I'm ready!");
-});
-
-client.login(settings.token);
-```
+    -   [@replit/database](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/replit.js)
+    -   [Quick.Replit](https://github.com/discord-voice/discord-voice/blob/master/examples/custom-databases/quick.replit.js)
 
 <div>Icons made by <a href="https://www.flaticon.com/authors/surang" title="surang">surang</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>

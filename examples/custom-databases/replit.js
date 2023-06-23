@@ -3,40 +3,55 @@ const client = new Discord.Client({
     intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildVoiceStates]
 });
 
-// Load Enmap
-const Enmap = require('enmap');
-
-// Create guilds table
-const guildDB = new Enmap({ name: 'guilds' });
+// Load Replit Database
+const Database = require('@replit/database');
+const db = new Database();
+(async () => {
+    if (!Array.isArray(await db.get('guilds'))) await db.set('guilds', []);
+})();
 
 const { VoiceTimeManager } = require('discord-voice');
 const VoiceTimeManagerWithOwnDatabase = class extends VoiceTimeManager {
     // This function is called when the manager needs to get all guilds which are stored in the database.
     async getAllGuilds() {
         // Get all guilds from the database
-        return guildDB.fetchEverything().array();
+        return await db.get('guilds');
     }
 
     // This function is called when a guild needs to be saved in the database.
     async saveGuild(guildId, guildData) {
-        // Add the new guild data to the database
-        guildDB.set(guildId, guildData);
+        // Get all guilds from the database
+        const guildsArray = await db.get('guilds');
+        // Push the new guild into the array
+        guildsArray.push(guildData);
+        // Save the updated array
+        await db.set('guilds', guildsArray);
         // Don't forget to return something!
         return true;
     }
 
     // This function is called when a guild needs to be edited in the database.
     async editGuild(guildId, guildData) {
-        // Replace the unedited guild with the edited guild
-        guildDB.set(guildId, guildData);
+        // Get all guilds from the database
+        const guilds = await db.get('guilds');
+        // Remove the unedited guild from the array
+        const newGuildsArray = guilds.filter((guild) => guild.guildId !== guildId);
+        // Push the edited guild into the array
+        newGuildsArray.push(guildData);
+        // Save the updated array
+        await db.set('guilds', newGuildsArray);
         // Don't forget to return something!
         return true;
     }
 
     // This function is called when a guild needs to be deleted from the database.
     async deleteGuild(guildId) {
-        // Remove the guild from the database
-        guildDB.delete(guildId);
+        // Get all guilds from the database
+        const guilds = await db.get('guilds');
+        // Remove the guild from the array
+        const newGuildsArray = guilds.filter((guild) => guild.guildId !== guildId);
+        // Save the updated array
+        await db.set('guilds', newGuildsArray);
         // Don't forget to return something!
         return true;
     }

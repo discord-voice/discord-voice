@@ -1,128 +1,60 @@
-const { Client, Intents } = require("discord.js"), // npm install discord.js
-    client = new Client({
-        intents: [Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] // The GUILD_VOICE_STATES and GUILDS intents are required for discord-voice to function.
-    }),
-    settings = {
-        prefix: "v!",
-        token: "Your Discord Bot Token"
-    };
+const Discord = require('discord.js');
+const client = new Discord.Client({
+    intents: [Discord.IntentsBitField.Flags.Guilds, Discord.IntentsBitField.Flags.GuildVoiceStates]
+});
 
 // Load quickmongo
-const { Database } = require("quickmongo");
-const db = new Database("mongodb://localhost/voicetimes");
+const { Database } = require('quickmongo');
+const guildDB = new Database('mongodb://localhost/database', { collectionName: 'guilds' });
 
-const { VoiceManager } = require("discord-voice");
-const VoiceManagerWithOwnDatabase = class extends VoiceManager {
-    // This function is called when the manager needs to get all users which are stored in the database.
-    async getAllUsers() {
-        // Get all users from the database
-        return await db.get("users");
+// Start the manager only after the DB turned ready to prevent an error
+guildDB.once('ready', () => client.voiceTimeManager._init());
+
+const { VoiceTimeManager } = require('discord-voice');
+const VoiceTimeManagerWithOwnDatabase = class extends VoiceTimeManager {
+    // This function is called when the manager needs to get all guilds which are stored in the database.
+    async getAllGuilds() {
+        // Get all guilds from the database
+        return (await guildDB.all()).map((element) => element.data);
     }
 
-    // This function is called when the manager needs to get all configs which are stored in the database.
-    async getAllConfigs() {
-        // Get all configs from the database
-        return await db.get("configs");
-    }
-
-    // This function is called when a user needs to be saved in the database.
-    async saveUser(userId, guildId, userData) {
-        // Add the new user to the database
-        await db.push("users", userData);
+    // This function is called when a guild needs to be saved in the database.
+    async saveGuild(guildId, guildData) {
+        // Add the new guild data to the database
+        await guildDB.set(guildId, guildData);
         // Don't forget to return something!
         return true;
     }
 
-    // This function is called when a user needs to be saved in the database.
-    async saveConfig(guildId, configData) {
-        // Add the new user to the database
-        await db.push("configs", configData);
+    // This function is called when a guild needs to be edited in the database.
+    async editGuild(guildId, guildData) {
+        // Replace the unedited guild with the edited guild
+        await guildDB.set(guildId, guildData);
         // Don't forget to return something!
         return true;
     }
 
-    // This function is called when a user needs to be edited in the database.
-    async editUser(userId, guildId, userData) {
-        // Get all users from the database
-        const users = await db.get("users");
-        // Find the user to edit
-        const user = users.find((u) => u.guildId === guildId && u.userId === userId);
-        // Remove the unedited user from the array
-        const newUsersArray = users.filter((u) => u !== user);
-        // Push the edited user into the array
-        newUsersArray.push(userData);
-        // Save the updated array
-        await db.set("users", newUsersArray);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a config needs to be edited in the database.
-    async editConfig(guildId, configData) {
-        // Get all configs from the database
-        const configs = await db.get("configs");
-        // Remove the unedited config from the array
-        const newConfigsArray = configs.filter((config) => config.guildId !== guildId);
-        // Push the edited config into the array
-        newConfigsArray.push(configData);
-        // Save the updated array
-        await db.set("configs", newConfigsArray);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a user needs to be deleted from the database.
-    async deleteUser(userId, guildId) {
-        // Get all users from the database
-        const users = await db.get("users");
-        // Find the user to edit
-        const user = users.find((u) => u.guildId === guildId && u.userId === userId);
-        // Remove the user from the array
-        const newUsersArray = users.filter((u) => u !== user);
-        // Save the updated array
-        await db.set("users", newUsersArray);
-        // Don't forget to return something!
-        return true;
-    }
-
-    // This function is called when a config needs to be deleted from the database.
-    async deleteConfig(guildId) {
-        // Get all configs from the database
-        const configs = await db.get("configs");
-        // Remove the config from the array
-        const newConfigsArray = configs.filter((config) => config.guildId !== guildId);
-        // Save the updated array
-        await db.set("configs", newConfigsArray);
+    // This function is called when a guild needs to be deleted from the database.
+    async deleteGuild(guildId) {
+        // Remove the guild from the database
+        await guildDB.delete(guildId);
         // Don't forget to return something!
         return true;
     }
 };
 
 // Create a new instance of your new class
-const manager = new VoiceManagerWithOwnDatabase(
-    client,
-    {
-        checkMembersEvery: 5000,
-        default: {
-            trackBots: false,
-            trackAllChannels: true
-        }
-    },
-    false
-); // ATTENTION: Add "false" in order to not start the manager until the DB got checked, see below
-// We now have a voiceManager property to access the manager everywhere!
-client.voiceManager = manager;
+const manager = new VoiceTimeManagerWithOwnDatabase(client, {
+    default: {
+        trackBots: false,
+        trackAllChannels: true
+    }
+});
+// We now have a voiceTimeManager property to access the manager everywhere!
+client.voiceTimeManager = manager;
 
-// Check the DB when it is ready
-db.on("ready", async () => {
-    if (!Array.isArray(await db.get("users"))) await db.set("users", []);
-    if (!Array.isArray(await db.get("configs"))) await db.set("configs", []);
-    // Start the manager only after the DB got checked to prevent an error
-    client.voiceManager._init();
+client.on('ready', () => {
+    console.log('Bot is ready!');
 });
 
-client.on("ready", () => {
-    console.log("I'm ready!");
-});
-
-client.login(settings.token);
+client.login(process.env.DISCORD_BOT_TOKEN);

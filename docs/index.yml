@@ -2,3 +2,5 @@
   files:
     - name: Welcome
       path: welcome.md
+    - name: Updating Guide
+      path: updating.md

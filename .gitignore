@@ -1,8 +1,6 @@
 package-lock.json
-test.js
 node_modules/
-.github/
-docs/
-configs.json
-users.json
-
+guilds.json
+docs/docs.json
+dist/
+test/
