@@ -57,7 +57,7 @@ client.on('ready', () => {
 client.login(process.env.DISCORD_BOT_TOKEN);
 ```
 
-After that, user's who are in the voice channel's that the bot has cached will be checked. 
+After that, users who are in the voice channels that the bot has cached will be checked. 
 You can pass an options object to customize the giveaways. Here is a list of them:
 
 -   **client**: the discord client (your discord bot instance).
