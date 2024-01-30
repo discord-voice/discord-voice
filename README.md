@@ -39,8 +39,8 @@ const client = new Discord.Client({
 });
 
 // Requires Manager from discord-voice
-const { VoiceTimeManager } = require('discord-voice');
-const manager = new VoiceTimeManager(client, {
+const { VoiceManager } = require('discord-voice');
+const manager = new VoiceManager(client, {
     storage: './guilds.json',
     default: {
         trackBots: false,
